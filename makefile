@@ -103,3 +103,13 @@ custom-build:
 current-conn:
 	$(KUBECTL_CMD) config current-context
 
+get-deps:
+	$(GO_CMD) get "github.com/cenkalti/backoff"
+	$(GO_CMD) get "github.com/go-sql-driver/mysql"
+	$(GO_CMD) get "github.com/heptiolabs/healthcheck"
+	$(GO_CMD) get "github.com/jmoiron/sqlx"
+	$(GO_CMD) get "github.com/lib/pq"
+	$(GO_CMD) get "gitlab.com/mikrowezel/config"
+	$(GO_CMD) get "gitlab.com/mikrowezel/log"
+	$(GO_CMD) get "gitlab.com/mikrowezel/service"
+	$(GO_CMD) get "google.golang.org/appengine"
