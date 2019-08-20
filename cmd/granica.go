@@ -7,6 +7,7 @@ import (
 	"syscall"
 
 	"gitlab.com/mikrowezel/config"
+	"gitlab.com/mikrowezel/granica/internal/postgres"
 	"gitlab.com/mikrowezel/granica/pkg/auth"
 	"gitlab.com/mikrowezel/log"
 	svc "gitlab.com/mikrowezel/service"
@@ -20,22 +21,34 @@ var (
 )
 
 func main() {
-	cfg := config.Load("granica")
+	cfg := config.Load("grn")
 	log := initLog(cfg)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	go checkSigTerm(cancel, log)
 
+	// Create service
 	s = newService(ctx, cfg, log, cancel)
-	w := auth.NewWorker(ctx, cfg, log, "auth-worker")
-	w.AttachTo(s)
 
-	err := s.Init()
+	// Add service handlers
+	db, err := postgres.InitDb(ctx, cfg, log)
+	if err != nil {
+		log.Error(err, "Cannot create Postgres Db handler")
+	}
+	s.AddHandler(db)
+
+	// Set service worker
+	auth := auth.NewWorker(ctx, cfg, log, "auth-worker")
+	s.SetWorker(auth)
+
+	// Initialize handlers and workers
+	err = s.Init()
 	if err != nil {
 		log.Error(err)
 		cancel()
 	}
 
+	// Start service
 	s.Start()
 
 	log.Error(err, "Service stoped")
@@ -43,17 +56,18 @@ func main() {
 
 // newService creates a service instance.
 func newService(ctx context.Context, cfg *config.Config, log *log.Logger, cancel context.CancelFunc) svc.Service {
-	sn := cfg.ValOrDef("service.name", "granica")
-	sv := cfg.ValOrDef("service.version", "n/a")
-	s := svc.NewService(ctx, cfg, log, cancel, sn, sv)
+	log.Info("%+v", cfg)
+	sn := cfg.ValOrDef("svc.name", "granica")
+	sr := cfg.ValOrDef("svc.revision", "n/a")
+	s := svc.NewService(ctx, cfg, log, cancel, sn, sr)
 	return s
 }
 
 func initLog(cfg *config.Config) *log.Logger {
-	ll := int(cfg.ValAsInt("log.level", 3))
-	sn := cfg.ValOrDef("service.name", "granica")
-	sv := cfg.ValOrDef("service.version", "n/a")
-	return log.NewLogger(ll, sn, sv)
+	ll := int(cfg.ValAsInt("log.level", 1))
+	sn := cfg.ValOrDef("svc.name", "granica")
+	sr := cfg.ValOrDef("svc.revision", "n/a")
+	return log.NewLogger(ll, sn, sr)
 }
 
 // checkSigTerm - Listens to sigterm events.
