@@ -25,7 +25,7 @@ func main() {
 	log := initLog(cfg)
 
 	ctx, cancel := context.WithCancel(context.Background())
-	go checkSigTerm(cancel, log)
+	go checkSigTerm(cancel)
 
 	// Create service
 	s = newService(ctx, cfg, log, cancel)
@@ -56,11 +56,28 @@ func main() {
 
 // newService creates a service instance.
 func newService(ctx context.Context, cfg *config.Config, log *log.Logger, cancel context.CancelFunc) svc.Service {
-	log.Info("%+v", cfg)
 	sn := cfg.ValOrDef("svc.name", "granica")
 	sr := cfg.ValOrDef("svc.revision", "n/a")
 	s := svc.NewService(ctx, cfg, log, cancel, sn, sr)
 	return s
+}
+
+func initPostgres(s svc.Service) chan bool {
+	ok := make(chan bool)
+	go func() {
+		defer close(ok)
+		r, err := postgres.InitDb(s.Ctx(), s.Cfg(), s.Log())
+		if err != nil {
+			s.Log().Error(err, "Init Postgres Db handler error")
+			ok <- false
+			return
+		}
+		s.Lock()
+		s.AddHandler(r)
+		s.Unlock()
+		ok <- true
+	}()
+	return ok
 }
 
 func initLog(cfg *config.Config) *log.Logger {
@@ -71,7 +88,7 @@ func initLog(cfg *config.Config) *log.Logger {
 }
 
 // checkSigTerm - Listens to sigterm events.
-func checkSigTerm(cancel context.CancelFunc, log *log.Logger) {
+func checkSigTerm(cancel context.CancelFunc) {
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
 	<-stop
