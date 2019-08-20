@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"fmt"
 	"time"
 
 	_ "github.com/lib/pq"
@@ -15,13 +16,13 @@ import (
 func (h *DbHandler) RetryConnection() chan *sqlx.DB {
 	result := make(chan *sqlx.DB)
 
-	cbmax := uint64(h.Cfg().ValAsInt("postgres.backoff.maxtries", 1))
+	cbmax := uint64(h.Cfg().ValAsInt("pg.backoff.maxtries", 1))
 	bo := backoff.WithMaxRetries(backoff.NewExponentialBackOff(), cbmax)
 
 	go func() {
 		defer close(result)
 
-		url := h.Cfg().ValOrDef("postgres.conn.url", "")
+		url := h.dbURL()
 
 		for i := 0; i <= int(cbmax); i++ {
 
@@ -56,4 +57,13 @@ func (h *DbHandler) RetryConnection() chan *sqlx.DB {
 	}()
 
 	return result
+}
+
+func (h *DbHandler) dbURL() string {
+	host := h.Cfg().ValOrDef("pg.host", "")
+	port := h.Cfg().ValAsInt("pg.port", 5432)
+	db := h.Cfg().ValOrDef("pg.database", "")
+	user := h.Cfg().ValOrDef("pg.user", "")
+	pass := h.Cfg().ValOrDef("pg.password", "")
+	return fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, pass, db)
 }
