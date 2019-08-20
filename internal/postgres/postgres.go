@@ -23,9 +23,9 @@ type (
 	}
 )
 
-// InitDB creates and return a new DB handler.
+// InitDb creates and return a new DB handler.
 // it also stores it as the package default handler.
-func InitDB(ctx context.Context, cfg *config.Config, log *log.Logger) (*DbHandler, error) {
+func InitDb(ctx context.Context, cfg *config.Config, log *log.Logger) (*DbHandler, error) {
 	var err error
 	Db, err = newHandler(ctx, cfg, log)
 	if err != nil {
@@ -40,20 +40,7 @@ func newHandler(ctx context.Context, cfg *config.Config, log *log.Logger) (*DbHa
 		BaseHandler: svc.NewBaseHandler(ctx, cfg, log, "postgres-db-handler"),
 	}
 
-	//h.Conn <- h.RetryConnection()
+	h.Conn = <-h.RetryConnection()
 
 	return h, nil // TODO: RetryConnection will eventually throw a timeout error.
 }
-
-//// GetConn from MySQL.
-//func GetConn() (*sqlx.DB, error) {
-//if pctx == nil || pcfg == nil || plog == nil {
-//return nil, errors.New("package has no initialized yet")
-//}
-
-//if DB == nil || DB.Conn == nil || DB.Conn.Ping() != nil {
-//InitDB(pctx, pcfg, plog)
-//}
-
-//return DB.Conn, nil
-//}
