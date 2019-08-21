@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
@@ -10,17 +11,22 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-// RetryConnection implements a backoff mechanism for establishing a connection
+type retryResult struct {
+	conn *sqlx.DB
+	err  error
+}
+
+// RetryConnection implments a backoff mechanism for establishing a connection
 // to Postgres; this is especially useful in containerized environments where
 // components can be started out of order.
-func (h *DbHandler) RetryConnection() chan *sqlx.DB {
-	result := make(chan *sqlx.DB)
+func (h *DbHandler) RetryConnection() chan retryResult {
+	res := make(chan retryResult)
 
 	cbmax := uint64(h.Cfg().ValAsInt("pg.backoff.maxtries", 1))
 	bo := backoff.WithMaxRetries(backoff.NewExponentialBackOff(), cbmax)
 
 	go func() {
-		defer close(result)
+		defer close(res)
 
 		url := h.dbURL()
 
@@ -36,7 +42,7 @@ func (h *DbHandler) RetryConnection() chan *sqlx.DB {
 			err = conn.Ping()
 			if err == nil {
 				h.Log().Info("Postgres connection established")
-				result <- conn
+				res <- retryResult{conn, nil}
 				return
 			}
 
@@ -45,8 +51,9 @@ func (h *DbHandler) RetryConnection() chan *sqlx.DB {
 			// Backoff
 			nb := bo.NextBackOff()
 			if nb == backoff.Stop {
-				result <- nil
-				h.Log().Info("Postgres connection failed", "reason", "max number of tries reached")
+				h.Log().Info("Postgres connection failed", "reason", "max number of attempts reached")
+				err := errors.New("Postgres max number of connection attempts reached")
+				res <- retryResult{nil, err}
 				bo.Reset()
 				return
 			}
@@ -56,7 +63,7 @@ func (h *DbHandler) RetryConnection() chan *sqlx.DB {
 		}
 	}()
 
-	return result
+	return res
 }
 
 func (h *DbHandler) dbURL() string {
