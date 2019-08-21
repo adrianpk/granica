@@ -7,11 +7,10 @@ import (
 	"syscall"
 
 	"gitlab.com/mikrowezel/config"
-	"gitlab.com/mikrowezel/granica/internal/postgres"
+	"gitlab.com/mikrowezel/granica/internal/repo"
 	"gitlab.com/mikrowezel/granica/pkg/auth"
 	"gitlab.com/mikrowezel/log"
 	svc "gitlab.com/mikrowezel/service"
-	// "gitlab.com/mikrowezel/internal/cockroach"
 )
 
 type contextKey string
@@ -25,17 +24,14 @@ func main() {
 	log := initLog(cfg)
 
 	ctx, cancel := context.WithCancel(context.Background())
-	go checkSigTerm(cancel, log)
+	go checkSigTerm(cancel)
 
 	// Create service
 	s = newService(ctx, cfg, log, cancel)
 
 	// Add service handlers
-	db, err := postgres.InitDb(ctx, cfg, log)
-	if err != nil {
-		log.Error(err, "Cannot create Postgres Db handler")
-	}
-	s.AddHandler(db)
+	r, err := repo.NewHandler(ctx, cfg, log)
+	s.AddHandler(r)
 
 	// Set service worker
 	auth := auth.NewWorker(ctx, cfg, log, "auth-worker")
@@ -56,7 +52,6 @@ func main() {
 
 // newService creates a service instance.
 func newService(ctx context.Context, cfg *config.Config, log *log.Logger, cancel context.CancelFunc) svc.Service {
-	log.Info("%+v", cfg)
 	sn := cfg.ValOrDef("svc.name", "granica")
 	sr := cfg.ValOrDef("svc.revision", "n/a")
 	s := svc.NewService(ctx, cfg, log, cancel, sn, sr)
@@ -71,7 +66,7 @@ func initLog(cfg *config.Config) *log.Logger {
 }
 
 // checkSigTerm - Listens to sigterm events.
-func checkSigTerm(cancel context.CancelFunc, log *log.Logger) {
+func checkSigTerm(cancel context.CancelFunc) {
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
 	<-stop
