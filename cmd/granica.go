@@ -31,10 +31,7 @@ func main() {
 	s = newService(ctx, cfg, log, cancel)
 
 	// Add service handlers
-	db, err := postgres.InitDb(ctx, cfg, log)
-	if err != nil {
-		log.Error(err, "Cannot create Postgres Db handler")
-	}
+	db, err := postgres.NewHandler(ctx, cfg, log)
 	s.AddHandler(db)
 
 	// Set service worker
@@ -60,24 +57,6 @@ func newService(ctx context.Context, cfg *config.Config, log *log.Logger, cancel
 	sr := cfg.ValOrDef("svc.revision", "n/a")
 	s := svc.NewService(ctx, cfg, log, cancel, sn, sr)
 	return s
-}
-
-func initPostgres(s svc.Service) chan bool {
-	ok := make(chan bool)
-	go func() {
-		defer close(ok)
-		r, err := postgres.InitDb(s.Ctx(), s.Cfg(), s.Log())
-		if err != nil {
-			s.Log().Error(err, "Init Postgres Db handler error")
-			ok <- false
-			return
-		}
-		s.Lock()
-		s.AddHandler(r)
-		s.Unlock()
-		ok <- true
-	}()
-	return ok
 }
 
 func initLog(cfg *config.Config) *log.Logger {
