@@ -29,6 +29,18 @@ github.com/prometheus/common/internal/bitbucket.org/ww/goautoneg
 # github.com/prometheus/procfs v0.0.3
 github.com/prometheus/procfs
 github.com/prometheus/procfs/internal/fs
+# github.com/rs/zerolog v1.14.3
+github.com/rs/zerolog
+github.com/rs/zerolog/internal/cbor
+github.com/rs/zerolog/internal/json
+# gitlab.com/mikrowezel/config v0.0.0 => ../config
+gitlab.com/mikrowezel/config
+# gitlab.com/mikrowezel/db/postgres v0.0.0 => ../db/postgres
+gitlab.com/mikrowezel/db/postgres
+# gitlab.com/mikrowezel/log v0.0.0 => ../log
+gitlab.com/mikrowezel/log
+# gitlab.com/mikrowezel/service v0.0.0 => ../service
+gitlab.com/mikrowezel/service
 # golang.org/x/sys v0.0.0-20190801041406-cbf593c0f2f3
 golang.org/x/sys/windows
 # google.golang.org/appengine v1.6.1
