@@ -6,7 +6,6 @@ import (
 	"hash/fnv"
 	"time"
 
-	_ "github.com/go-sql-driver/mysql" // package init.
 	"gitlab.com/mikrowezel/config"
 	"gitlab.com/mikrowezel/db/postgres"
 	"gitlab.com/mikrowezel/log"
