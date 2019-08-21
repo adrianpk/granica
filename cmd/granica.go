@@ -7,11 +7,10 @@ import (
 	"syscall"
 
 	"gitlab.com/mikrowezel/config"
-	"gitlab.com/mikrowezel/granica/internal/postgres"
+	"gitlab.com/mikrowezel/granica/internal/repo"
 	"gitlab.com/mikrowezel/granica/pkg/auth"
 	"gitlab.com/mikrowezel/log"
 	svc "gitlab.com/mikrowezel/service"
-	// "gitlab.com/mikrowezel/internal/cockroach"
 )
 
 type contextKey string
@@ -31,8 +30,8 @@ func main() {
 	s = newService(ctx, cfg, log, cancel)
 
 	// Add service handlers
-	db, err := postgres.NewHandler(ctx, cfg, log)
-	s.AddHandler(db)
+	r, err := repo.NewHandler(ctx, cfg, log)
+	s.AddHandler(r)
 
 	// Set service worker
 	auth := auth.NewWorker(ctx, cfg, log, "auth-worker")
