@@ -6,6 +6,7 @@ import (
 	"hash/fnv"
 	"time"
 
+	"github.com/jmoiron/sqlx"
 	"gitlab.com/mikrowezel/config"
 	"gitlab.com/mikrowezel/db/postgres"
 	"gitlab.com/mikrowezel/log"
@@ -14,13 +15,14 @@ import (
 
 var (
 	// Repo is a package level repo handler instance.
-	Repo *RepoHandler
+	Handler *RepoHandler
 )
 
 type (
 	// RepoHandler is a repo handler.
 	RepoHandler struct {
 		*postgres.DbHandler
+		tx *sqlx.Tx
 	}
 )
 
@@ -41,13 +43,13 @@ func NewHandler(ctx context.Context, cfg *config.Config, log *log.Logger) (*Repo
 	return h, nil
 }
 
-// In
+// Init a new repo handler.
 // it also stores it as the package default handler.
 func (h *RepoHandler) Init(s svc.Service) chan bool {
 	h.DbHandler.Init(s)
 	// Set package default handler.
 	// TODO: See if this could be avoided.
-	Repo = h
+	Handler = h
 
 	ok := make(chan bool)
 	go func() {
