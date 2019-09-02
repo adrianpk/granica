@@ -2,6 +2,7 @@ package repo
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"hash/fnv"
 	"time"
@@ -22,7 +23,7 @@ type (
 	// RepoHandler is a repo handler.
 	RepoHandler struct {
 		*postgres.DbHandler
-		tx *sqlx.Tx
+		Tx *sqlx.Tx
 	}
 )
 
@@ -68,6 +69,35 @@ func (h *RepoHandler) Init(s svc.Service) chan bool {
 		ok <- true
 	}()
 	return ok
+}
+
+// GetTx returns repo current transaction.
+// Creates a new one if it is nil.
+func (r *RepoHandler) GetTx() (*sqlx.Tx, error) {
+	if r.Tx == nil {
+		return r.InitTx()
+	}
+	return r.Tx, nil
+}
+
+// InitTx initializes a transaction.
+func (r *RepoHandler) InitTx() (*sqlx.Tx, error) {
+	tx, err := r.Conn.Beginx()
+	if err != nil {
+		return nil, err
+	}
+
+	r.Tx = tx
+	return tx, err
+}
+
+// CommitTx commits a transaction.
+func (r *RepoHandler) CommitTx() error {
+	if r.Tx == nil {
+		return errors.New("no current transaction")
+	}
+
+	return r.Tx.Commit()
 }
 
 func nameSufix() string {
