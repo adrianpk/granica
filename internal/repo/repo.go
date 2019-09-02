@@ -2,10 +2,12 @@ package repo
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"hash/fnv"
 	"time"
 
+	"github.com/jmoiron/sqlx"
 	"gitlab.com/mikrowezel/config"
 	"gitlab.com/mikrowezel/db/postgres"
 	"gitlab.com/mikrowezel/log"
@@ -14,13 +16,14 @@ import (
 
 var (
 	// Repo is a package level repo handler instance.
-	Repo *RepoHandler
+	Handler *RepoHandler
 )
 
 type (
 	// RepoHandler is a repo handler.
 	RepoHandler struct {
 		*postgres.DbHandler
+		Tx *sqlx.Tx
 	}
 )
 
@@ -41,13 +44,13 @@ func NewHandler(ctx context.Context, cfg *config.Config, log *log.Logger) (*Repo
 	return h, nil
 }
 
-// In
+// Init a new repo handler.
 // it also stores it as the package default handler.
 func (h *RepoHandler) Init(s svc.Service) chan bool {
 	h.DbHandler.Init(s)
 	// Set package default handler.
 	// TODO: See if this could be avoided.
-	Repo = h
+	Handler = h
 
 	ok := make(chan bool)
 	go func() {
@@ -66,6 +69,35 @@ func (h *RepoHandler) Init(s svc.Service) chan bool {
 		ok <- true
 	}()
 	return ok
+}
+
+// GetTx returns repo current transaction.
+// Creates a new one if it is nil.
+func (r *RepoHandler) GetTx() (*sqlx.Tx, error) {
+	if r.Tx == nil {
+		return r.InitTx()
+	}
+	return r.Tx, nil
+}
+
+// InitTx initializes a transaction.
+func (r *RepoHandler) InitTx() (*sqlx.Tx, error) {
+	tx, err := r.Conn.Beginx()
+	if err != nil {
+		return nil, err
+	}
+
+	r.Tx = tx
+	return tx, err
+}
+
+// CommitTx commits a transaction.
+func (r *RepoHandler) CommitTx() error {
+	if r.Tx == nil {
+		return errors.New("no current transaction")
+	}
+
+	return r.Tx.Commit()
 }
 
 func nameSufix() string {

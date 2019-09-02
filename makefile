@@ -79,6 +79,16 @@ deploy-prod:
 	make install-prod
 
 ## Misc
+migrate:
+	cd resources/repo/migrations
+	goose postgres "user=granica password=granica dbname=granica sslmode=disable" up
+	cd ../../
+
+migration-status:
+	cd resources/repo/migrations
+	goose postgres "user=granica password=granica dbname=granica sslmode=disable" status
+	cd ../../
+
 custom-build:
 	make mod tidy; go mod vendor; go build ./...
 
