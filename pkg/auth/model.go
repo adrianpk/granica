@@ -14,7 +14,8 @@ import (
 type (
 	// User model
 	User struct {
-		ID             sql.NullString `json:"-"`
+		ID             sql.NullString `db:"id" json:"id"`
+		Slug           sql.NullString `db:"slug" json:"slug"`
 		Username       sql.NullString `db:"username" json:"username"`
 		Password       string         `db:"password" json:"password"`
 		PasswordDigest sql.NullString `db:"password_digest" json:"-"`
@@ -30,6 +31,8 @@ type (
 		EndsAt         pq.NullTime    `db:"ends_at" json:"ends_at"`
 		IsActive       sql.NullBool   `db:"is_active" json:"is_active"`
 		IsDeleted      sql.NullBool   `db:"is_deleted" json:"is_deleted"`
+		CreatedByID    sql.NullString `db:"created_by_id" json:"created_by_id"`
+		UpdatedByID    sql.NullString `db:"updated_by_id" json:"updated_by_id"`
 		CreatedAt      pq.NullTime    `db:"created_at" json:"created_at"`
 		UpdatedAt      pq.NullTime    `db:"updated_at" json:"updated_at"`
 	}
