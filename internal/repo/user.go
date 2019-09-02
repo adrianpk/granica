@@ -1,33 +1,40 @@
 package repo
 
-import "gitlab.com/mikrowezel/granica/pkg/auth"
+import (
+	"gitlab.com/mikrowezel/granica/pkg/auth"
+)
 
-// GetAll users from repo.
-func (r *RepoHandler) GetAll() ([]*auth.User, error) {
+// GetAllUsers from repo.
+func (r *RepoHandler) GetAllUsers() ([]*auth.User, error) {
 	return nil, nil
 }
 
-// Create user in repo.
-func (r *RepoHandler) Create(user *auth.User) (*auth.User, error) {
-	st := `INSERT INTO users (user_type, username, password_digest, email, first_name, last_name, created_at, updated_at)
-	VALUES (:user_type, :username, :password_digest, :email, :first_name, :last_name, :created_at, :updated_at)`
+// CreateUser in repo.
+func (r *RepoHandler) CreateUser(user *auth.User) (*auth.User, error) {
+	tx, err := r.GetTx()
+	if err != nil {
+		return nil, err
+	}
 
-	_, err := r.tx.NamedExec(st, user)
+	st := `INSERT INTO users (id, slug, username, password_digest, email, given_name, middle_names, family_name, geolocation, :locale, base_tz, current_tz, starts_at, ends_at, is_active, is_deleted, created_by_id, updated_by_id, created_at, updated_at)
+VALUES (:id, :slug, :username, :password_digest, :email, :given_name, :middle_names :family_name, :geolocation, :locale, :base_tz, :current_tz, :starts_at, :ends_at, :is_active, :is_deleted, created_by_id, updated_by_id, created_at, :updated_at)`
+
+	_, err = tx.NamedExec(st, user)
 
 	return user, err
 }
 
-// Get user data from repo.
+// GetUser data from repo.
 func (r *RepoHandler) GetUser(id interface{}) (*auth.User, error) {
 	return &auth.User{}, nil
 }
 
-// Update user data in repo.
+// UpdatUser data in repo.
 func (r *RepoHandler) UpdateUser(*auth.User) (*auth.User, error) {
 	return &auth.User{}, nil
 }
 
-// Delete user data from repo.
+// DeletiUser data from repo.
 func (r *RepoHandler) DeleteUser(id interface{}) error {
 	return nil
 }
