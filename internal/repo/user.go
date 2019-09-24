@@ -1,16 +1,14 @@
 package repo
 
-import (
-	"gitlab.com/mikrowezel/granica/pkg/auth"
-)
+import "gitlab.com/mikrowezel/granica/internal/model"
 
 // GetAllUsers from repo.
-func (r *RepoHandler) GetAllUsers() ([]*auth.User, error) {
+func (r *RepoHandler) GetAllUsers() ([]*model.User, error) {
 	return nil, nil
 }
 
 // CreateUser in repo.
-func (r *RepoHandler) CreateUser(user *auth.User) (*auth.User, error) {
+func (r *RepoHandler) CreateUser(user *model.User) (*model.User, error) {
 	tx, err := r.GetTx()
 	if err != nil {
 		return nil, err
@@ -25,13 +23,13 @@ VALUES (:id, :slug, :username, :password_digest, :email, :given_name, :middle_na
 }
 
 // GetUser data from repo.
-func (r *RepoHandler) GetUser(id interface{}) (*auth.User, error) {
-	return &auth.User{}, nil
+func (r *RepoHandler) GetUser(id interface{}) (*model.User, error) {
+	return &model.User{}, nil
 }
 
 // UpdatUser data in repo.
-func (r *RepoHandler) UpdateUser(*auth.User) (*auth.User, error) {
-	return &auth.User{}, nil
+func (r *RepoHandler) UpdateUser(*model.User) (*model.User, error) {
+	return &model.User{}, nil
 }
 
 // DeletiUser data from repo.
