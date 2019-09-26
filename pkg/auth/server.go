@@ -9,24 +9,38 @@ import (
 	"github.com/go-chi/chi/middleware"
 )
 
+type textResponse string
+
+func (t textResponse) write(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte(t))
+}
+
 // AddServer to worker.
 func (a *Auth) AddServer() http.Handler {
-	r := chi.NewRouter()
-	r.Use(middleware.RequestID)
-	r.Use(middleware.RealIP)
-	r.Use(middleware.Recoverer)
-	r.Use(middleware.Timeout(60 * time.Second))
+	rt := chi.NewRouter()
+	rt.Use(middleware.RequestID)
+	rt.Use(middleware.RealIP)
+	rt.Use(middleware.Recoverer)
+	rt.Use(middleware.Timeout(60 * time.Second))
 
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Granica is running!"))
+	rt.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		tr := textResponse("Granica is running!")
+		rt.Get("/", tr.write)
 	})
 
-	r.Route("/api/v1", func(r chi.Router) {
-		r.Use(userCtx)
-		r.Get("/", a.getUsers) // POST /routes
+	apiRt := rt.Route("/api/v1", func(apiRt chi.Router) {
+		tr := textResponse("API v1.0")
+		apiRt.Get("/", tr.write)
 	})
 
-	return r
+	apiRt.Route("/users", func(userRt chi.Router) {
+		userRt.Use(userCtx)
+		userRt.Get("/", a.getUsers)
+	})
+
+	a.Server = rt
+
+	return rt
 }
 
 func userCtx(next http.Handler) http.Handler {
