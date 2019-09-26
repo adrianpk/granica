@@ -16,19 +16,19 @@ import (
 
 var (
 	// Repo is a package level repo handler instance.
-	Handler *RepoHandler
+	Handler *Repo
 )
 
 type (
-	// RepoHandler is a repo handler.
-	RepoHandler struct {
+	// Repo is a repo handler.
+	Repo struct {
 		*postgres.DbHandler
 		Tx *sqlx.Tx
 	}
 )
 
-// NewHandler creates and returns a new repo handler.
-func NewHandler(ctx context.Context, cfg *config.Config, log *log.Logger) (*RepoHandler, error) {
+// NewRepo creates and returns a new repo handler.
+func NewHandler(ctx context.Context, cfg *config.Config, log *log.Logger) (*Repo, error) {
 	n := fmt.Sprintf("repo-handler-%s", nameSufix())
 	log.Info("New handler", "name", n)
 
@@ -37,7 +37,7 @@ func NewHandler(ctx context.Context, cfg *config.Config, log *log.Logger) (*Repo
 		return nil, err
 	}
 
-	h := &RepoHandler{
+	h := &Repo{
 		DbHandler: dbh,
 	}
 
@@ -46,7 +46,7 @@ func NewHandler(ctx context.Context, cfg *config.Config, log *log.Logger) (*Repo
 
 // Init a new repo handler.
 // it also stores it as the package default handler.
-func (h *RepoHandler) Init(s svc.Service) chan bool {
+func (h *Repo) Init(s svc.Service) chan bool {
 	h.DbHandler.Init(s)
 	// Set package default handler.
 	// TODO: See if this could be avoided.
@@ -65,7 +65,7 @@ func (h *RepoHandler) Init(s svc.Service) chan bool {
 		s.Lock()
 		s.AddHandler(h)
 		s.Unlock()
-		h.Log().Info("Handler initializated", "name", h.Name())
+		h.Log().Info("Repo initializated", "name", h.Name())
 		ok <- true
 	}()
 	return ok
@@ -73,7 +73,7 @@ func (h *RepoHandler) Init(s svc.Service) chan bool {
 
 // GetTx returns repo current transaction.
 // Creates a new one if it is nil.
-func (r *RepoHandler) GetTx() (*sqlx.Tx, error) {
+func (r *Repo) GetTx() (*sqlx.Tx, error) {
 	if r.Tx == nil {
 		return r.InitTx()
 	}
@@ -81,7 +81,7 @@ func (r *RepoHandler) GetTx() (*sqlx.Tx, error) {
 }
 
 // InitTx initializes a transaction.
-func (r *RepoHandler) InitTx() (*sqlx.Tx, error) {
+func (r *Repo) InitTx() (*sqlx.Tx, error) {
 	tx, err := r.Conn.Beginx()
 	if err != nil {
 		return nil, err
@@ -92,7 +92,7 @@ func (r *RepoHandler) InitTx() (*sqlx.Tx, error) {
 }
 
 // CommitTx commits a transaction.
-func (r *RepoHandler) CommitTx() error {
+func (r *Repo) CommitTx() error {
 	if r.Tx == nil {
 		return errors.New("no current transaction")
 	}
