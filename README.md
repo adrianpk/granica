@@ -12,13 +12,13 @@ Supervisord and Gulp are not not required dependencies but they help to automate
 
 Any change in project source files triggers project compilation and server restart.
 
-You can avoid these steps if you want to perform these tasks manually.
+You can avoid all these steps if you want to perform these tasks manually (`make build` and `make run` after changing something.)
 
-*How to instal supervisord*
-[Official guide](http://supervisord.org/installing.html)
+*Install*
 
-*How to install Gulp*
-[Official guide](https://gulpjs.com/docs/en/getting-started/quick-start)
+[Supervisord official guide](http://supervisord.org/installing.html)
+
+[Gulp official guide](https://gulpjs.com/docs/en/getting-started/quick-start)
 
 ```shell
 $ sudo vim /etc/supervisor/conf.d
@@ -36,7 +36,6 @@ autorestart=true
 redirect_stderr=true
 ```
 
-
 To launch the server
 
 ```shell
@@ -44,7 +43,6 @@ $ cd /path/to/mikrowezel/backend/granica/bin/granica
 $ gulp
 ```
 
-You can avoid all these steps if you want to perform these tasks manually (`make build` and `make run` after changing something.)
 
 If you have problems launching supervisord or running gulpfile tasks with a
 a user other than root this supervisord config excerpt from the top of the file can be helpful as a reference.
