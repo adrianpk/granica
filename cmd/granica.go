@@ -30,7 +30,7 @@ func main() {
 	s = newService(ctx, cfg, log, cancel)
 
 	// Add service handlers
-	r, err := repo.NewHandler(ctx, cfg, log)
+	r, err := repo.NewHandler(ctx, cfg, log, "repo-handler")
 	s.AddHandler(r)
 
 	// Set service worker
