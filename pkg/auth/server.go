@@ -18,13 +18,7 @@ func (t textResponse) write(w http.ResponseWriter, r *http.Request) {
 // AddServer to worker.
 func (a *Auth) AddServer() http.Handler {
 	// Home
-	// Middlewares
-	hr := chi.NewRouter()
-	hr.Use(middleware.RequestID)
-	hr.Use(middleware.RealIP)
-	hr.Use(middleware.Recoverer)
-	hr.Use(middleware.Timeout(60 * time.Second))
-	a.addHomeRoutes(hr)
+	hr := a.makeHomeRouter()
 
 	// API
 	ar := a.makeAPIRouter(hr)
@@ -37,6 +31,16 @@ func (a *Auth) AddServer() http.Handler {
 	return hr
 }
 
+func (a *Auth) makeHomeRouter() chi.Router {
+	hr := chi.NewRouter()
+	hr.Use(middleware.RequestID)
+	hr.Use(middleware.RealIP)
+	hr.Use(middleware.Recoverer)
+	hr.Use(middleware.Timeout(60 * time.Second))
+	a.addHomeRoutes(hr)
+	return hr
+}
+
 func (a *Auth) addHomeRoutes(rt chi.Router) {
 	rt.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		tr := textResponse("Granica is running!")
@@ -45,24 +49,24 @@ func (a *Auth) addHomeRoutes(rt chi.Router) {
 }
 
 func (a *Auth) makeAPIRouter(parent chi.Router) chi.Router {
-	return parent.Route("/api/v1", func(apiRt chi.Router) {
+	return parent.Route("/api/v1", func(ar chi.Router) {
 		tr := textResponse("API v1.0")
-		apiRt.Get("/", tr.write)
+		ar.Get("/", tr.write)
 	})
 }
 
 func (a *Auth) makeUserAPIRouter(parent chi.Router) chi.Router {
-	return parent.Route("/users", func(userAPIRt chi.Router) {
-		userAPIRt.Use(userCtx)
-		userAPIRt.Get("/", a.getUsers)
+	return parent.Route("/users", func(uar chi.Router) {
+		uar.Use(userCtx)
+		uar.Post("/", a.createUser)
+		uar.Get("/", a.getUsers)
 	})
 }
 
 func userCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		someVal := ""
-		ctx := context.WithValue(r.Context(), userCtxKey, someVal)
-
+		//userID := chi.URLParam(r, "userID")
+		ctx := context.WithValue(r.Context(), userCtxKey, "userID")
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
