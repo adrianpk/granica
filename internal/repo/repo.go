@@ -28,11 +28,13 @@ type (
 )
 
 // NewRepo creates and returns a new repo handler.
-func NewHandler(ctx context.Context, cfg *config.Config, log *log.Logger) (*Repo, error) {
-	n := fmt.Sprintf("repo-handler-%s", nameSufix())
-	log.Info("New handler", "name", n)
+func NewHandler(ctx context.Context, cfg *config.Config, log *log.Logger, name string) (*Repo, error) {
+	if name == "" {
+		name = fmt.Sprintf("repo-handler-%s", nameSufix())
+	}
+	log.Info("New handler", "name", name)
 
-	dbh, err := postgres.NewHandler(ctx, cfg, log, n)
+	dbh, err := postgres.NewHandler(ctx, cfg, log, name)
 	if err != nil {
 		return nil, err
 	}

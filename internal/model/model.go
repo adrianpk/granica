@@ -14,27 +14,28 @@ import (
 type (
 	// User model
 	User struct {
-		ID             sql.NullString `db:"id" json:"id"`
-		Slug           sql.NullString `db:"slug" json:"slug"`
-		Username       sql.NullString `db:"username" json:"username"`
-		Password       string         `db:"password" json:"password"`
-		PasswordDigest sql.NullString `db:"password_digest" json:"-"`
-		Email          sql.NullString `db:"email" json:"email"`
-		GivenName      sql.NullString `db:"given_name" json:"given_name"`
-		MiddleNames    sql.NullString `db:"middle_names" json:"middle_names"`
-		FamilyName     sql.NullString `db:"family_name" json:"family_name"`
-		Geolocation    db.NullPoint   `db:"geolocation" json:"geolocation"`
-		Locale         sql.NullString `db:"locale" json:"locale"`
-		BaseTZ         sql.NullString `db:"base_tz" json:"base_tz"`
-		CurrentTZ      sql.NullString `db:"current_tz" json:"current_tz"`
-		StartsAt       pq.NullTime    `db:"starts__at" json:"ends_at"`
-		EndsAt         pq.NullTime    `db:"ends_at" json:"ends_at"`
-		IsActive       sql.NullBool   `db:"is_active" json:"is_active"`
-		IsDeleted      sql.NullBool   `db:"is_deleted" json:"is_deleted"`
-		CreatedByID    sql.NullString `db:"created_by_id" json:"created_by_id"`
-		UpdatedByID    sql.NullString `db:"updated_by_id" json:"updated_by_id"`
-		CreatedAt      pq.NullTime    `db:"created_at" json:"created_at"`
-		UpdatedAt      pq.NullTime    `db:"updated_at" json:"updated_at"`
+		ID                sql.NullString `db:"id" json:"id"`
+		Slug              sql.NullString `db:"slug" json:"slug"`
+		Username          sql.NullString `db:"username" json:"username"`
+		Password          string         `db:"password" json:"password"`
+		PasswordDigest    sql.NullString `db:"password_digest" json:"-"`
+		Email             sql.NullString `db:"email" json:"email"`
+		EmailConfirmation sql.NullString `db:"emailConfirmation" json:"emailConfirmation"`
+		GivenName         sql.NullString `db:"given_name" json:"givenName"`
+		MiddleNames       sql.NullString `db:"middle_names" json:"middleNames"`
+		FamilyName        sql.NullString `db:"family_name" json:"familyName"`
+		Geolocation       db.NullPoint   `db:"geolocation" json:"geolocation"`
+		Locale            sql.NullString `db:"locale" json:"locale"`
+		BaseTZ            sql.NullString `db:"base_tz" json:"baseTZ"`
+		CurrentTZ         sql.NullString `db:"current_tz" json:"currentTZ"`
+		StartsAt          pq.NullTime    `db:"starts_at" json:"startsAt"`
+		EndsAt            pq.NullTime    `db:"ends_at" json:"endsAt"`
+		IsActive          sql.NullBool   `db:"is_active" json:"isActive"`
+		IsDeleted         sql.NullBool   `db:"is_deleted" json:"isDeleted"`
+		CreatedByID       sql.NullString `db:"created_by_id" json:"createdByID"`
+		UpdatedByID       sql.NullString `db:"updated_by_id" json:"updatedByID"`
+		CreatedAt         pq.NullTime    `db:"created_at" json:"createdAt"`
+		UpdatedAt         pq.NullTime    `db:"updated_at" json:"updatedAt"`
 	}
 )
 
