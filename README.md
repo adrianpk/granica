@@ -7,7 +7,22 @@
 * [new/wip at GitLab](https://gitlab.com/mikrowezel/backend/granica/tree/new/wip)
 * [new/wip at GitHub](https://github.com/adrianpk/granica/tree/new/wip)
 
- ## Dev Tools
+## Installation
+### Development
+
+[To be completed]
+
+**Migrations**
+```shell
+$ make migrate
+```
+
+## Deployment
+### Production
+
+[To be completed]
+
+## Notes
 Supervisord and Gulp are not not required dependencies but they help to automate some tasks during development.
 
 Any change in project source files triggers project compilation and server restart.
