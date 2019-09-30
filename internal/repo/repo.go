@@ -49,7 +49,6 @@ func NewHandler(ctx context.Context, cfg *config.Config, log *log.Logger, name s
 // Init a new repo handler.
 // it also stores it as the package default handler.
 func (h *Repo) Init(s svc.Service) chan bool {
-	h.DbHandler.Init(s)
 	// Set package default handler.
 	// TODO: See if this could be avoided.
 	Handler = h
