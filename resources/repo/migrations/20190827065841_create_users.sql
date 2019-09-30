@@ -3,6 +3,7 @@
 CREATE TABLE users
 (
   id UUID PRIMARY KEY,
+  slug VARCHAR(36),
   username VARCHAR(32) UNIQUE,
   password_digest CHAR(128),
   email VARCHAR(255) UNIQUE,
