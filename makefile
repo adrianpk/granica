@@ -26,6 +26,9 @@ clean:
 run:
 	./scripts/run.sh
 
+rest-create-user:
+	./scripts/rest/create_user.zsh
+
 connect-stg:
 	gcloud beta container clusters get-credentials ${GC_STG_CLUSTER} --region ${GC_REGION} --project ${GC_STG_PROJECT}
 
@@ -82,6 +85,11 @@ deploy-prod:
 migrate:
 	cd resources/repo/migrations
 	goose postgres "user=granica password=granica dbname=granica sslmode=disable" up
+	cd ../../
+
+rollback:
+	cd resources/repo/migrations
+	goose postgres "user=granica password=granica dbname=granica sslmode=disable" down
 	cd ../../
 
 migration-status:

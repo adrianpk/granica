@@ -10,7 +10,7 @@ RES_PATH="users"
 
 post () {
   echo "POST $1"
-  /usr/bin/curl -X POST $1 --header 'Content-Type: application/json' -d @script/rest/create_user.json
+  /usr/bin/curl -X POST $1 --header 'Content-Type: application/json' -d @scripts/rest/create_user.json
 }
 
 # Request

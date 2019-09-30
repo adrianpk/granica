@@ -122,6 +122,7 @@ func (s *BaseService) Start() {
 	for _, h := range s.handlers {
 		h.Start()
 	}
+	s.worker.Start()
 }
 
 // Stop service.
