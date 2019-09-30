@@ -23,6 +23,8 @@ $ make migrate
 [To be completed]
 
 ## Notes
+### Supervisord and Gulp
+
 Supervisord and Gulp are not not required dependencies but they help to automate some tasks during development.
 
 Any change in project source files triggers project compilation and server restart.
@@ -88,3 +90,7 @@ You will also need to append your user to supervisor group and restart your syst
 $ sudo groupadd supervisor
 $ sudo usermod -a -G supervisor your-username
 ```
+
+### Spew
+
+Temporary dependency used only to format deep nested structs in debug log  messages.
