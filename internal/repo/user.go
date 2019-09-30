@@ -10,9 +10,6 @@ func (r *Repo) CreateUser(user *model.User) error {
 	if err != nil {
 		return err
 	}
-
-	// r.Log().Info("Repo CreateUser", "val", spew.Sdump(user))
-
 	st := `INSERT INTO users (id, slug, username, password_digest, email, given_name, middle_names, family_name, geolocation, locale, base_tz, current_tz, starts_at, ends_at, is_active, is_deleted, created_by_id, updated_by_id, created_at, updated_at)
 	VALUES (:id, :slug, :username, :password_digest, :email, :given_name, :middle_names, :family_name, :geolocation, :locale, :base_tz, :current_tz, :starts_at, :ends_at, :is_active, :is_deleted, :created_by_id, :updated_by_id, :created_at, :updated_at)`
 
