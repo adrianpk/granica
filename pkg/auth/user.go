@@ -32,17 +32,17 @@ func (a *Auth) createUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Transport to model
+	// Create a model
 	u := ut.toModel()
 
-	// Get repo.
+	// Get repo
 	repo, err := a.repoHandler()
 	if err != nil {
 		a.errorResponse(w, r, err)
 		return
 	}
 
-	// Persist.
+	// Persist
 	err = repo.CreateUser(&u)
 	if err != nil {
 		a.errorResponse(w, r, err)
