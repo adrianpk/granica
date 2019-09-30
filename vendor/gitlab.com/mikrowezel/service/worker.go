@@ -85,6 +85,11 @@ func (w *BaseWorker) Handler(name string) (h Handler, ok bool) {
 	return h, ok
 }
 
+// Handlers returns worker handlers.
+func (w *BaseWorker) Handlers() map[string]Handler {
+	return w.handlers
+}
+
 // Ctx returns service context.
 func (w *BaseWorker) Ctx() context.Context {
 	return w.ctx
