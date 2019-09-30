@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/lib/pq"
+	uuid "github.com/satori/go.uuid"
 	"gitlab.com/mikrowezel/db"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -14,7 +15,7 @@ import (
 type (
 	// User model
 	User struct {
-		ID                sql.NullString `db:"id" json:"id"`
+		ID uuid.UUID `db:"id" json:"id"`
 		Slug              sql.NullString `db:"slug" json:"slug"`
 		Username          sql.NullString `db:"username" json:"username"`
 		Password          string         `db:"password" json:"password"`
@@ -38,6 +39,23 @@ type (
 		UpdatedAt         pq.NullTime    `db:"updated_at" json:"updatedAt"`
 	}
 )
+
+// GetID representation.
+func (user *User) GetID() interface{} {
+	return user.ID.Value
+}
+
+// SetID for user.
+func (user *User) SetID(id uuid.UUID) {
+	user.ID = id
+}
+
+// GenID for user.
+func (user *User) GenID() {
+	if user.ID == uuid.Nil {
+		user.ID = uuid.NewV4()
+	}
+}
 
 // UpdatePasswordDigest if password changed.
 func (user *User) UpdatePasswordDigest() (digest string, err error) {
