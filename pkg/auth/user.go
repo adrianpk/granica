@@ -24,20 +24,13 @@ import (
   "familyName": "family"
 }*/
 func (a *Auth) createUser(w http.ResponseWriter, r *http.Request) {
-	a.Log().Info("handler: auth.createUser")
-	//a.Log().Info("Request", "body", formatRequestBody(r))
-
 	// Unmarshal
 	var ut CreateUserReq
 	err := json.NewDecoder(r.Body).Decode(&ut)
 	if err != nil {
-		a.Log().Error(err)
 		a.errorResponse(w, r, err)
 		return
 	}
-
-	// Temp debug log
-	a.Log().Debug("Handler CreateUser", "val", spew.Sdump(ut))
 
 	// Transport to model
 	u := ut.toModel()
