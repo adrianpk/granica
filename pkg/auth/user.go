@@ -38,7 +38,7 @@ func (a *Auth) createUser(w http.ResponseWriter, r *http.Request) {
 	// Create a model
 	u := ureq.toModel()
 
-	// Repo operations
+	// Repo
 	repo, err := a.userRepo()
 	if err != nil {
 		err = a.createUserResponse(w, r, &u, createErr, err)
