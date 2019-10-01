@@ -2,7 +2,6 @@ package repo
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"hash/fnv"
 	"time"
@@ -23,7 +22,6 @@ type (
 	// Repo is a repo handler.
 	Repo struct {
 		*postgres.DbHandler
-		Tx *sqlx.Tx
 	}
 )
 
@@ -72,33 +70,21 @@ func (h *Repo) Init(s svc.Service) chan bool {
 	return ok
 }
 
-// GetTx returns repo current transaction.
-// Creates a new one if it is nil.
-func (r *Repo) GetTx() (*sqlx.Tx, error) {
-	if r.Tx == nil {
-		return r.InitTx()
-	}
-	return r.Tx, nil
+// NewTx returns a new transcation.
+func (r *Repo) NewTx() (*sqlx.Tx, error) {
+	return r.Conn.Beginx()
 }
 
-// InitTx initializes a transaction.
-func (r *Repo) InitTx() (*sqlx.Tx, error) {
-	tx, err := r.Conn.Beginx()
+func (r *Repo) UserRepo(tx *sqlx.Tx) *UserRepo {
+	return makeUserRepo(context.Background(), r.Cfg(), r.Log(), tx)
+}
+
+func (r *Repo) UserRepoNewTx() (*UserRepo, error) {
+	tx, err := r.NewTx()
 	if err != nil {
 		return nil, err
 	}
-
-	r.Tx = tx
-	return tx, err
-}
-
-// CommitTx commits a transaction.
-func (r *Repo) CommitTx() error {
-	if r.Tx == nil {
-		return errors.New("no current transaction")
-	}
-
-	return r.Tx.Commit()
+	return makeUserRepo(context.Background(), r.Cfg(), r.Log(), tx), nil
 }
 
 func nameSufix() string {
