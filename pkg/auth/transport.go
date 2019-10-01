@@ -1,5 +1,7 @@
 package auth
 
+import "encoding/json"
+
 type (
 	// User request and response data.
 	User struct {
@@ -22,6 +24,11 @@ type (
 	// CreateUserRes output data.
 	CreateUserRes struct {
 		User
+		Msg   string `json: msg,omitempty`
 		Error string `json:"err,omitempty"`
 	}
 )
+
+func toJSON(res interface{}) ([]byte, error) {
+	return json.Marshal(res)
+}

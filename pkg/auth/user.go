@@ -11,6 +11,10 @@ import (
 	"gitlab.com/mikrowezel/granica/internal/repo"
 )
 
+const (
+	createErr = "Cannot create user"
+)
+
 // createUser
 /* using a JSON input like this:
 {
@@ -24,44 +28,40 @@ import (
 }*/
 func (a *Auth) createUser(w http.ResponseWriter, r *http.Request) {
 	// Unmarshal
-	var ut CreateUserReq
-	err := json.NewDecoder(r.Body).Decode(&ut)
+	var ureq CreateUserReq
+	err := json.NewDecoder(r.Body).Decode(&ureq)
 	if err != nil {
-		a.errorResponse(w, r, err)
+		err = a.createUserResponse(w, r, nil, createErr, err)
 		return
 	}
 
 	// Create a model
-	u := ut.toModel()
+	u := ureq.toModel()
 
-	// Persist
+	// Repo operations
 	repo, err := a.userRepo()
 	if err != nil {
-		a.errorResponse(w, r, err)
+		err = a.createUserResponse(w, r, &u, createErr, err)
 		return
 	}
 
 	err = repo.Create(&u)
 	if err != nil {
-		a.errorResponse(w, r, err)
+		err = a.createUserResponse(w, r, &u, createErr, err)
 		return
 	}
 
 	err = repo.Commit()
 	if err != nil {
-		a.errorResponse(w, r, err)
+		err = a.createUserResponse(w, r, &u, createErr, err)
 		return
 	}
 
-	// Output result
-	json, err := a.toJSON(&u)
+	// Output
+	err = a.createUserResponse(w, r, &u, "", nil)
 	if err != nil {
-		a.errorResponse(w, r, err)
-		return
+		a.Log().Error(err)
 	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(json)
 }
 
 func (a *Auth) getUsers(w http.ResponseWriter, r *http.Request) {
@@ -124,10 +124,6 @@ func (a *Auth) deleteUser(w http.ResponseWriter, r *http.Request) {
 	panic("not implemented")
 }
 
-func (a *Auth) toJSON(res interface{}) ([]byte, error) {
-	return json.Marshal(res)
-}
-
 func (a *Auth) errorResponse(w http.ResponseWriter, r *http.Request, err error) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusBadRequest)
@@ -188,4 +184,9 @@ func formatRequest(r *http.Request) string {
 	}
 	// Return the request as a string
 	return strings.Join(request, "\n")
+}
+
+// TODO: Move to response method.
+func (a *Auth) toJSON(res interface{}) ([]byte, error) {
+	return json.Marshal(res)
 }
