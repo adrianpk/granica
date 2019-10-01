@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/davecgh/go-spew/spew"
 	"gitlab.com/mikrowezel/granica/internal/repo"
 )
 
