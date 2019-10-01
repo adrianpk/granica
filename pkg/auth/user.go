@@ -34,34 +34,32 @@ func (a *Auth) createUser(w http.ResponseWriter, r *http.Request) {
 	// Create a model
 	u := ut.toModel()
 
-	// Get repo
-	repo, err := a.repoHandler()
-	if err != nil {
-		a.errorResponse(w, r, err)
-		return
-	}
-
 	// Persist
-	err = repo.CreateUser(&u)
+	repo, err := a.userRepo()
 	if err != nil {
 		a.errorResponse(w, r, err)
 		return
 	}
 
-	err = repo.CommitTx()
+	err = repo.Create(&u)
 	if err != nil {
 		a.errorResponse(w, r, err)
 		return
 	}
 
-	// Transform output.
+	err = repo.Commit()
+	if err != nil {
+		a.errorResponse(w, r, err)
+		return
+	}
+
+	// Output result
 	json, err := a.toJSON(&u)
 	if err != nil {
 		a.errorResponse(w, r, err)
 		return
 	}
 
-	// Output result.
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(json)
 }
@@ -138,15 +136,20 @@ func (a *Auth) errorResponse(w http.ResponseWriter, r *http.Request, err error) 
 	a.Log().Error(err, err.Error())
 }
 
-func (a *Auth) repoHandler() (*repo.Repo, error) {
-	a.Log().Info("Handlers", "all", fmt.Sprintf("%+v", a.Handlers()))
+func (a *Auth) userRepo() (*repo.UserRepo, error) {
+	rh, err := a.repoHandler()
+	if err != nil {
+		return nil, err
+	}
+	return rh.UserRepoNewTx()
+}
 
+func (a *Auth) repoHandler() (*repo.Repo, error) {
 	h, ok := a.Handler("repo-handler")
 	if !ok {
 		return nil, errors.New("repo handler not available")
 	}
 
-	a.Log().Info("Repo", "type", fmt.Sprintf("%+T", h))
 	repo, ok := h.(*repo.Repo)
 	if !ok {
 		return nil, errors.New("invalid repo handler")
