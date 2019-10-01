@@ -54,13 +54,12 @@ func (h *Repo) Init(s svc.Service) chan bool {
 	ok := make(chan bool)
 	go func() {
 		defer close(ok)
-		conn, err := h.Connect()
+		_, err := h.Connect()
 		if err != nil {
 			s.Log().Error(err, "Init Postgres Db handler error")
 			ok <- false
 			return
 		}
-		h.Conn = conn
 		s.Lock()
 		s.AddHandler(h)
 		s.Unlock()
