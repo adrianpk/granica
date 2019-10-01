@@ -12,8 +12,8 @@ type (
 		GivenName         string `json:"givenName"`
 		MiddleNames       string `json:"middleNames"`
 		FamilyName        string `json:"familyName"`
-		Lat               string `json:"geolocation"`
-		Lng               string `json:"geolocation"`
+		Lat               string `json:"lat"`
+		Lng               string `json:"lng"`
 	}
 
 	// CreateUserReq input data.
@@ -24,7 +24,7 @@ type (
 	// CreateUserRes output data.
 	CreateUserRes struct {
 		User
-		Msg   string `json: msg,omitempty`
+		Msg   string `json:"msg,omitempty"`
 		Error string `json:"err,omitempty"`
 	}
 )
