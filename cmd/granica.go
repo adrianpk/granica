@@ -62,7 +62,8 @@ func initLog(cfg *config.Config) *log.Logger {
 	ll := int(cfg.ValAsInt("log.level", 1))
 	sn := cfg.ValOrDef("svc.name", "granica")
 	sr := cfg.ValOrDef("svc.revision", "n/a")
-	return log.NewLogger(ll, sn, sr)
+	//return log.NewLogger(ll, sn, sr)
+	return log.NewDevLogger(ll, sn, sr)
 }
 
 // checkSigTerm - Listens to sigterm events.
