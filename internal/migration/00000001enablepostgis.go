@@ -1,35 +1,32 @@
 package migration
 
-import (
-	"database/sql"
-	"fmt"
-)
-
 func init() {
 }
 
 // Up00000001 migration
-func Up00000001(tx *sql.Tx) error {
-	st := fmt.Sprintf(`
-		CREATE DATABASE %s;
-	`, testDb)
+func (t *transaction) Up00000001() error {
+	tx := t.getTx()
+
+	st := `CREATE EXTENSION IF NOT EXISTS postgis;`
 
 	_, err := tx.Exec(st)
 	if err != nil {
 		return err
 	}
-	return nil
+
+	return tx.Commit()
 }
 
-// 00000002 migration
-func Down00000001(tx *sql.Tx) error {
-	st := fmt.Sprintf(`
-		DROP DATABASE %s;
-	`, testDb)
+// Down00000001 rollback
+func (t *transaction) Down00000001() error {
+	tx := t.getTx()
+
+	st := `DROP EXTENSION IF NOT EXISTS postgis;`
 
 	_, err := tx.Exec(st)
 	if err != nil {
 		return err
 	}
-	return nil
+
+	return tx.Commit()
 }
