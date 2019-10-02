@@ -18,7 +18,7 @@ type (
 
 	transaction struct {
 		conn     *sqlx.DB
-		function func() error
+		function func() procResult
 	}
 
 	migration struct {
@@ -27,5 +27,11 @@ type (
 
 	rollback struct {
 		proc
+	}
+
+	procResult struct {
+		tx   *sqlx.Tx
+		name string
+		err  error
 	}
 )

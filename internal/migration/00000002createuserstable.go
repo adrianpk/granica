@@ -1,11 +1,11 @@
 package migration
 
-import (
-	"fmt"
+const (
+	name2 = "create_users_table"
 )
 
 // Up00000002 migration
-func (m *migrator) Up00000002() error {
+func (m *migrator) Up00000002() procResult {
 	tx := m.getTx()
 
 	st := `CREATE TABLE users
@@ -22,7 +22,7 @@ func (m *migrator) Up00000002() error {
 
 	_, err := tx.Exec(st)
 	if err != nil {
-		return err
+		return m.makeProcResult(tx, name2, err)
 	}
 
 	st = `
@@ -42,24 +42,22 @@ func (m *migrator) Up00000002() error {
 
 	_, err = tx.Exec(st)
 	if err != nil {
-		return err
+		return m.makeProcResult(tx, name2, err)
 	}
 
-	return tx.Commit()
+	return m.makeProcResult(tx, name2, tx.Commit())
 }
 
 // Down00000002 migration
-func (m *migrator) Down00000002() error {
+func (m *migrator) Down00000002() procResult {
 	tx := m.getTx()
 
-	st := fmt.Sprintf(`
-		DROP DATABASE %s;
-	`, testDb)
+	st := `DROP TABLE users;`
 
 	_, err := tx.Exec(st)
 	if err != nil {
-		return err
+		return m.makeProcResult(tx, name2, err)
 	}
 
-	return tx.Commit()
+	return m.makeProcResult(tx, name2, tx.Commit())
 }

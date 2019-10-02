@@ -17,7 +17,7 @@ import (
 func TestCreateUser(t *testing.T) {
 	// TODO: move to test setup and teardown function.
 	migration.Init()
-	m := migration.Mig
+	m := migration.Migrator()
 	m.MigrateAll()
 
 	// Valid user data

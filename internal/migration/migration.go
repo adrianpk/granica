@@ -14,6 +14,12 @@ import (
 // TODO: Move to its own module (mikrowezel/migration)
 // NOTE: This is a work in progress, not ready for production.
 
+const (
+	devDb  = "granica"
+	testDb = "granica_test"
+	prodDb = "granica_prod"
+)
+
 var (
 	mig *migrator
 )
@@ -28,21 +34,28 @@ func Init() {
 
 	// Migrations
 	// TODO: build a helper to create :Migration struct
-	// 00000001
 	mig.makeMigration(mig.Up00000001)
 	mig.makeMigration(mig.Up00000002)
 
 	// Rollbacks
+	mig.makeRollback(mig.Down00000001)
+	mig.makeRollback(mig.Down00000002)
 }
 
 func Migrator() *migrator {
 	return mig
 }
 
-func (m *migrator) makeMigration(f func() error) {
+func (m *migrator) makeMigration(f func() procResult) {
 	tx := transaction{conn: m.conn}
 	tx.function = f
 	m.AddUp(&migration{proc{tx: tx}})
+}
+
+func (m *migrator) makeRollback(f func() procResult) {
+	tx := transaction{conn: m.conn}
+	tx.function = f
+	m.AddDown(&rollback{proc{tx: tx}})
 }
 
 func (m *migrator) getTx() *sqlx.Tx {
@@ -101,20 +114,25 @@ func (m *migrator) AddUp(mg *migration) {
 }
 
 func (m *migrator) AddDown(rb *rollback) {
-
+	m.down = append(m.down, rb)
 }
 
 func (m *migrator) MigrateAll() error {
 	for i, _ := range m.up {
-		// FIX: quick and dirty formatter just fot testing.
-		// Does properly work only for i < 10.
-		fn := fmt.Sprintf("Up0000000%d", i+1)
+		fn := fmt.Sprintf("Up%08d", i+1)
 		reflect.ValueOf(m).MethodByName(fn).Call([]reflect.Value{})
 	}
+
 	return nil
 }
 
 func (m *migrator) RollbackAll() error {
+	top := len(m.down) - 1
+	for i := top; i >= 0; i-- {
+		fn := fmt.Sprintf("Down%08d", i+1)
+		reflect.ValueOf(m).MethodByName(fn).Call([]reflect.Value{})
+	}
+
 	return nil
 }
 
@@ -124,6 +142,14 @@ func (m *migrator) MigrateThis(mg migration) error {
 
 func (m *migrator) RollbackThis(r rollback) error {
 	return nil
+}
+
+func (m *migrator) makeProcResult(tx *sqlx.Tx, name string, err error) procResult {
+	return procResult{
+		tx:   tx,
+		name: name,
+		err:  err,
+	}
 }
 
 func (m *migrator) dbURL() string {
