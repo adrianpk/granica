@@ -33,7 +33,7 @@ func Init() {
 	}
 
 	// Migrations
-	// TODO: build a helper to create :Migration struct
+	// TODO: build a helper to create Migration struct
 	mig.makeMigration(mig.Up00000001)
 	mig.makeMigration(mig.Up00000002)
 
