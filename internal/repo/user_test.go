@@ -5,15 +5,21 @@ import (
 	"testing"
 
 	"gitlab.com/mikrowezel/db"
+	"gitlab.com/mikrowezel/granica/internal/migration"
+	"gitlab.com/mikrowezel/granica/internal/model"
 	"gitlab.com/mikrowezel/granica/internal/repo"
 
 	"gitlab.com/mikrowezel/config"
-	"gitlab.com/mikrowezel/granica/internal/model"
 	"gitlab.com/mikrowezel/log"
 )
 
 // TestCreateUser tests user repo creation.
 func TestCreateUser(t *testing.T) {
+	// TODO: move to test setup and teardown function.
+	migration.Init()
+	m := migration.Mig
+	m.MigrateAll()
+
 	// Valid user data
 	user := &model.User{
 		Username:          db.ToNullString("username"),
