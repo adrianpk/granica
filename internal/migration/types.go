@@ -3,10 +3,10 @@ package migration
 import "github.com/jmoiron/sqlx"
 
 type (
-	Migrator struct {
+	migrator struct {
 		conn *sqlx.DB
-		up   []*Migration
-		down []*Rollback
+		up   []*migration
+		down []*rollback
 	}
 
 	proc struct {
@@ -21,11 +21,11 @@ type (
 		function func() error
 	}
 
-	Migration struct {
+	migration struct {
 		proc
 	}
 
-	Rollback struct {
+	rollback struct {
 		proc
 	}
 )

@@ -15,12 +15,13 @@ import (
 // NOTE: This is a work in progress, not ready for production.
 
 var (
-	Mig *Migrator
+	mig *migrator
 )
 
+// Init to explicitly start the migrator.
 func Init() {
-	Mig = &Migrator{}
-	err := Mig.Connect()
+	mig = &migrator{}
+	err := mig.Connect()
 	if err != nil {
 		os.Exit(1)
 	}
@@ -28,22 +29,27 @@ func Init() {
 	// Migrations
 	// TODO: build a helper to create :Migration struct
 	// 00000001
-	tx1 := transaction{conn: Mig.conn}
-	tx1.function = tx1.Up00000001
-	Mig.AddUp(&Migration{proc{tx: tx1}})
-	// 00000002
-	tx2 := transaction{conn: Mig.conn}
-	tx2.function = tx2.Up00000002
-	Mig.AddUp(&Migration{proc{tx: tx2}})
+	mig.makeMigration(mig.Up00000001)
+	mig.makeMigration(mig.Up00000002)
 
 	// Rollbacks
 }
 
-func (t *transaction) getTx() *sqlx.Tx {
-	return t.conn.MustBegin()
+func Migrator() *migrator {
+	return mig
 }
 
-func (m *Migrator) Connect() error {
+func (m *migrator) makeMigration(f func() error) {
+	tx := transaction{conn: m.conn}
+	tx.function = f
+	m.AddUp(&migration{proc{tx: tx}})
+}
+
+func (m *migrator) getTx() *sqlx.Tx {
+	return m.conn.MustBegin()
+}
+
+func (m *migrator) Connect() error {
 	conn, err := sqlx.Open("postgres", m.dbURL())
 	if err != nil {
 		log.Printf("Connection error: %s\n", err.Error())
@@ -60,15 +66,15 @@ func (m *Migrator) Connect() error {
 	return nil
 }
 
-func (m *Migrator) CreateDb() error {
+func (m *migrator) CreateDb() error {
 	return nil
 }
 
-func (m *Migrator) DropDb() error {
+func (m *migrator) DropDb() error {
 	return nil
 }
 
-func (m *Migrator) Reset() error {
+func (m *migrator) Reset() error {
 	err := m.DropDb()
 	if err != nil {
 		log.Printf("Drop database error: %s", err.Error())
@@ -90,38 +96,37 @@ func (m *Migrator) Reset() error {
 	return nil
 }
 
-func (m *Migrator) AddUp(mg *Migration) {
+func (m *migrator) AddUp(mg *migration) {
 	m.up = append(m.up, mg)
 }
 
-func (m *Migrator) AddDown(rb *Rollback) {
+func (m *migrator) AddDown(rb *rollback) {
 
 }
 
-func (m *Migrator) MigrateAll() error {
-	log.Printf("Migration: %+v\n", m.up)
-	for i, mg := range m.up {
+func (m *migrator) MigrateAll() error {
+	for i, _ := range m.up {
 		// FIX: quick and dirty formatter just fot testing.
 		// Does properly work only for i < 10.
 		fn := fmt.Sprintf("Up0000000%d", i+1)
-		reflect.ValueOf(&mg.tx).MethodByName(fn).Call([]reflect.Value{})
+		reflect.ValueOf(m).MethodByName(fn).Call([]reflect.Value{})
 	}
 	return nil
 }
 
-func (m *Migrator) RollbackAll() error {
+func (m *migrator) RollbackAll() error {
 	return nil
 }
 
-func (m *Migrator) MigrateThis(mg Migration) error {
+func (m *migrator) MigrateThis(mg migration) error {
 	return nil
 }
 
-func (m *Migrator) RollbackThis(r Rollback) error {
+func (m *migrator) RollbackThis(r rollback) error {
 	return nil
 }
 
-func (m *Migrator) dbURL() string {
+func (m *migrator) dbURL() string {
 	// TODO: make these values configurable
 	host := "localhost"
 	port := "5432"

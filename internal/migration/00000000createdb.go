@@ -8,8 +8,8 @@ func init() {
 }
 
 // Up00000000 migration
-func (t transaction) Up00000000() error {
-	tx := t.getTx()
+func (m *migrator) Up00000000() error {
+	tx := m.getTx()
 
 	st := fmt.Sprintf(`
 		CREATE DATABASE %s;
@@ -24,8 +24,8 @@ func (t transaction) Up00000000() error {
 }
 
 // Down00000000 rollback
-func (t transaction) Down00000000() error {
-	tx := t.getTx()
+func (m *migrator) Down00000000() error {
+	tx := m.getTx()
 
 	st := fmt.Sprintf(`
 		DROP DATABASE %s;

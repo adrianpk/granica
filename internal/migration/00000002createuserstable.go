@@ -5,8 +5,8 @@ import (
 )
 
 // Up00000002 migration
-func (t *transaction) Up00000002() error {
-	tx := t.getTx()
+func (m *migrator) Up00000002() error {
+	tx := m.getTx()
 
 	st := `CREATE TABLE users
 	(
@@ -49,8 +49,8 @@ func (t *transaction) Up00000002() error {
 }
 
 // Down00000002 migration
-func (t *transaction) Down00000002() error {
-	tx := t.getTx()
+func (m *migrator) Down00000002() error {
+	tx := m.getTx()
 
 	st := fmt.Sprintf(`
 		DROP DATABASE %s;

@@ -4,8 +4,8 @@ func init() {
 }
 
 // Up00000001 migration
-func (t *transaction) Up00000001() error {
-	tx := t.getTx()
+func (m *migrator) Up00000001() error {
+	tx := m.getTx()
 
 	st := `CREATE EXTENSION IF NOT EXISTS postgis;`
 
@@ -18,8 +18,8 @@ func (t *transaction) Up00000001() error {
 }
 
 // Down00000001 rollback
-func (t *transaction) Down00000001() error {
-	tx := t.getTx()
+func (m *migrator) Down00000001() error {
+	tx := m.getTx()
 
 	st := `DROP EXTENSION IF NOT EXISTS postgis;`
 
