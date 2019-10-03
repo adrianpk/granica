@@ -5,29 +5,29 @@ const (
 )
 
 // Up00000001 migration
-func (m *migrator) Up00000001() procResult {
-	tx := m.getTx()
+func (m *mig) Up00000001() (string, error) {
+	tx := m.GetTx()
 
 	st := `CREATE EXTENSION IF NOT EXISTS postgis;`
 
 	_, err := tx.Exec(st)
 	if err != nil {
-		return m.makeProcResult(tx, name1, err)
+		return name1, err
 	}
 
-	return m.makeProcResult(tx, name1, tx.Commit())
+	return name1, tx.Commit()
 }
 
 // Down00000001 rollback
-func (m *migrator) Down00000001() procResult {
-	tx := m.getTx()
+func (m *mig) Down00000001() (string, error) {
+	tx := m.GetTx()
 
 	st := `DROP EXTENSION IF EXISTS postgis;`
 
 	_, err := tx.Exec(st)
 	if err != nil {
-		return m.makeProcResult(tx, name1, err)
+		return name1, err
 	}
 
-	return m.makeProcResult(tx, name1, tx.Commit())
+	return name1, tx.Commit()
 }

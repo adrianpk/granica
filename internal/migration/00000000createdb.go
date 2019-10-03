@@ -9,8 +9,8 @@ const (
 )
 
 // Up00000000 migration
-func (m *migrator) Up00000000() procResult {
-	tx := m.getTx()
+func (m *mig) Up00000000() (string, error) {
+	tx := m.GetTx()
 
 	st := fmt.Sprintf(`
 		CREATE DATABASE %s;
@@ -18,7 +18,7 @@ func (m *migrator) Up00000000() procResult {
 
 	_, err := tx.Exec(st)
 	if err != nil {
-		return m.makeProcResult(tx, name0, err)
+		return name0, err
 	}
 
 	st = `CREATE TABLE migrations
@@ -30,15 +30,15 @@ func (m *migrator) Up00000000() procResult {
 
 	_, err = tx.Exec(st)
 	if err != nil {
-		return m.makeProcResult(tx, name0, err)
+		return name0, err
 	}
 
-	return m.makeProcResult(tx, name0, tx.Commit())
+	return name0, tx.Commit()
 }
 
 // Down00000000 rollback
-func (m *migrator) Down00000000() procResult {
-	tx := m.getTx()
+func (m *mig) Down00000000() (string, error) {
+	tx := m.GetTx()
 
 	st := fmt.Sprintf(`
 		DROP DATABASE %s;
@@ -46,8 +46,8 @@ func (m *migrator) Down00000000() procResult {
 
 	_, err := tx.Exec(st)
 	if err != nil {
-		return m.makeProcResult(tx, name0, err)
+		return name0, err
 	}
 
-	return m.makeProcResult(tx, name0, tx.Commit())
+	return name0, tx.Commit()
 }

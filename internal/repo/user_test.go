@@ -2,23 +2,28 @@ package repo
 
 import (
 	"context"
+	"os"
 	"testing"
 
 	"gitlab.com/mikrowezel/db"
 	"gitlab.com/mikrowezel/granica/internal/migration"
 	"gitlab.com/mikrowezel/granica/internal/model"
 	"gitlab.com/mikrowezel/granica/internal/repo"
+	mwmig "gitlab.com/mikrowezel/migration"
 
 	"gitlab.com/mikrowezel/config"
 	"gitlab.com/mikrowezel/log"
 )
 
+func TestMain(m *testing.M) {
+	mgr := setup()
+	code := m.Run()
+	teardown(mgr)
+	os.Exit(code)
+}
+
 // TestCreateUser tests user repo creation.
 func TestCreateUser(t *testing.T) {
-	// TODO: move to test setup and teardown function.
-	migration.Init()
-	m := migration.Migrator()
-	m.MigrateAll()
 
 	// Valid user data
 	user := &model.User{
@@ -58,6 +63,17 @@ func TestCreateUser(t *testing.T) {
 		t.Error("create user commit error")
 	}
 
+}
+
+func setup() *mwmig.Migrator {
+	m := migration.Init(testConfig())
+	m.RollbackAll()
+	m.MigrateAll()
+	return m
+}
+
+func teardown(m *mwmig.Migrator) {
+	m.RollbackAll()
 }
 
 func testConfig() *config.Config {

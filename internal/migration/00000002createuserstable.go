@@ -5,8 +5,8 @@ const (
 )
 
 // Up00000002 migration
-func (m *migrator) Up00000002() procResult {
-	tx := m.getTx()
+func (m *mig) Up00000002() (string, error) {
+	tx := m.GetTx()
 
 	st := `CREATE TABLE users
 	(
@@ -22,7 +22,7 @@ func (m *migrator) Up00000002() procResult {
 
 	_, err := tx.Exec(st)
 	if err != nil {
-		return m.makeProcResult(tx, name2, err)
+		return name2, err
 	}
 
 	st = `
@@ -42,22 +42,22 @@ func (m *migrator) Up00000002() procResult {
 
 	_, err = tx.Exec(st)
 	if err != nil {
-		return m.makeProcResult(tx, name2, err)
+		return name2, err
 	}
 
-	return m.makeProcResult(tx, name2, tx.Commit())
+	return name2, tx.Commit()
 }
 
 // Down00000002 migration
-func (m *migrator) Down00000002() procResult {
-	tx := m.getTx()
+func (m *mig) Down00000002() (string, error) {
+	tx := m.GetTx()
 
 	st := `DROP TABLE users;`
 
 	_, err := tx.Exec(st)
 	if err != nil {
-		return m.makeProcResult(tx, name2, err)
+		return name2, err
 	}
 
-	return m.makeProcResult(tx, name2, tx.Commit())
+	return name2, tx.Commit()
 }
