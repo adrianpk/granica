@@ -9,15 +9,16 @@ import (
 	"gitlab.com/mikrowezel/granica/internal/migration"
 	"gitlab.com/mikrowezel/granica/internal/model"
 	"gitlab.com/mikrowezel/granica/internal/repo"
+	mwmig "gitlab.com/mikrowezel/migration"
 
 	"gitlab.com/mikrowezel/config"
 	"gitlab.com/mikrowezel/log"
 )
 
 func TestMain(m *testing.M) {
-	setup()
+	mgr := setup()
 	code := m.Run()
-	teardown()
+	teardown(mgr)
 	os.Exit(code)
 }
 
@@ -64,14 +65,15 @@ func TestCreateUser(t *testing.T) {
 
 }
 
-func setup() {
-	migration.Init(testConfig())
-	m := migration.Migrator()
+func setup() *mwmig.Migrator {
+	m := migration.Init(testConfig())
+	m.RollbackAll()
 	m.MigrateAll()
+	return m
 }
 
-func teardown() {
-	migration.Migrator().RollbackAll()
+func teardown(m *mwmig.Migrator) {
+	m.RollbackAll()
 }
 
 func testConfig() *config.Config {
