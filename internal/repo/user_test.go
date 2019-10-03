@@ -16,7 +16,7 @@ import (
 // TestCreateUser tests user repo creation.
 func TestCreateUser(t *testing.T) {
 	// TODO: move to test setup and teardown function.
-	migration.Init()
+	migration.Init(testConfig())
 	m := migration.Migrator()
 	m.MigrateAll()
 
