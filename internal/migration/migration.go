@@ -8,6 +8,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq" // package init.
+	"gitlab.com/mikrowezel/config"
 )
 
 // TODO: Refactor to make it a generically usable module.
@@ -25,8 +26,8 @@ var (
 )
 
 // Init to explicitly start the migrator.
-func Init() {
-	mig = &migrator{}
+func Init(cfg *config.Config) {
+	mig = &migrator{cfg: cfg}
 	err := mig.Connect()
 	if err != nil {
 		os.Exit(1)
@@ -153,11 +154,10 @@ func (m *migrator) makeProcResult(tx *sqlx.Tx, name string, err error) procResul
 }
 
 func (m *migrator) dbURL() string {
-	// TODO: make these values configurable
-	host := "localhost"
-	port := "5432"
-	db := "granica_test"
-	user := "granica"
-	pass := "granica"
+	host := m.cfg.ValOrDef("pg.host", "localhost")
+	port := m.cfg.ValOrDef("pg.port", "5432")
+	db := m.cfg.ValOrDef("pg.database", "granica_test_d1x89s0l")
+	user := m.cfg.ValOrDef("pg.user", "granica")
+	pass := m.cfg.ValOrDef("pg.password", "granica")
 	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, port, user, pass, db)
 }

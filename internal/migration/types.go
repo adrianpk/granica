@@ -1,9 +1,13 @@
 package migration
 
-import "github.com/jmoiron/sqlx"
+import (
+	"github.com/jmoiron/sqlx"
+	"gitlab.com/mikrowezel/config"
+)
 
 type (
 	migrator struct {
+		cfg  *config.Config
 		conn *sqlx.DB
 		up   []*migration
 		down []*rollback
