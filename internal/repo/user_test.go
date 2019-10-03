@@ -2,6 +2,7 @@ package repo
 
 import (
 	"context"
+	"os"
 	"testing"
 
 	"gitlab.com/mikrowezel/db"
@@ -13,12 +14,15 @@ import (
 	"gitlab.com/mikrowezel/log"
 )
 
+func TestMain(m *testing.M) {
+	setup()
+	code := m.Run()
+	teardown()
+	os.Exit(code)
+}
+
 // TestCreateUser tests user repo creation.
 func TestCreateUser(t *testing.T) {
-	// TODO: move to test setup and teardown function.
-	migration.Init(testConfig())
-	m := migration.Migrator()
-	m.MigrateAll()
 
 	// Valid user data
 	user := &model.User{
@@ -58,6 +62,16 @@ func TestCreateUser(t *testing.T) {
 		t.Error("create user commit error")
 	}
 
+}
+
+func setup() {
+	migration.Init(testConfig())
+	m := migration.Migrator()
+	m.MigrateAll()
+}
+
+func teardown() {
+	migration.Migrator().RollbackAll()
 }
 
 func testConfig() *config.Config {
