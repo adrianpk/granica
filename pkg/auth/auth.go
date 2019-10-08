@@ -4,9 +4,9 @@ import (
 	"context"
 	"net/http"
 
-	"gitlab.com/mikrowezel/config"
-	logger "gitlab.com/mikrowezel/log"
-	svc "gitlab.com/mikrowezel/service"
+	"gitlab.com/mikrowezel/backend/config"
+	logger "gitlab.com/mikrowezel/backend/log"
+	svc "gitlab.com/mikrowezel/backend/service"
 )
 
 type (

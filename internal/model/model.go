@@ -8,7 +8,7 @@ import (
 
 	"github.com/lib/pq"
 	uuid "github.com/satori/go.uuid"
-	"gitlab.com/mikrowezel/db"
+	"gitlab.com/mikrowezel/backend/db"
 	"golang.org/x/crypto/bcrypt"
 )
 
