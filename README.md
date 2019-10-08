@@ -46,7 +46,7 @@ $ sudo vim /etc/supervisor/conf.d
 logfile = /tmp/supervisord.log
 
 [program:granica]
-user=you-username
+user=your-username
 command=/path/to/mikrowezel/backend/granica/bin/granica
 autostart=true
 autorestart=true
