@@ -16,7 +16,7 @@ build-linux:
 	CGOENABLED=0 GOOS=linux GOARCH=amd64; go build -o ./bin/$(BINARY_UNIX) ./cmd/$(BINARY_NAME).go
 
 test:
-	go test -v -count=1 ./internal/repo/user_test.go
+	go test -v -count=1 -timeout=5s  ./internal/repo/user_test.go
 
 clean:
 	go clean
