@@ -16,7 +16,7 @@ build-linux:
 	CGOENABLED=0 GOOS=linux GOARCH=amd64; go build -o ./bin/$(BINARY_UNIX) ./cmd/$(BINARY_NAME).go
 
 test:
-	go test -v -count=1 ./internal/repo/user_test.go
+	go test -v -count=1 -timeout=5s  ./internal/repo/user_test.go
 
 clean:
 	go clean
@@ -109,7 +109,7 @@ get-deps:
 	go get "github.com/heptiolabs/healthcheck"
 	go get "github.com/jmoiron/sqlx"
 	go get "github.com/lib/pq"
-	go get "gitlab.com/mikrowezel/config"
-	go get "gitlab.com/mikrowezel/log"
-	go get "gitlab.com/mikrowezel/service"
+	go get "gitlab.com/mikrowezel/backend/config"
+	go get "gitlab.com/mikrowezel/backend/log"
+	go get "gitlab.com/mikrowezel/backend/service"
 	go get "google.golang.org/appengine"

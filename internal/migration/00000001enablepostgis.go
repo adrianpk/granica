@@ -15,7 +15,7 @@ func (m *mig) Up00000001() (string, error) {
 		return name1, err
 	}
 
-	return name1, tx.Commit()
+	return name1, nil
 }
 
 // Down00000001 rollback
@@ -29,5 +29,5 @@ func (m *mig) Down00000001() (string, error) {
 		return name1, err
 	}
 
-	return name1, tx.Commit()
+	return name1, nil
 }

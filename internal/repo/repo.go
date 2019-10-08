@@ -7,10 +7,10 @@ import (
 	"time"
 
 	"github.com/jmoiron/sqlx"
-	"gitlab.com/mikrowezel/config"
-	"gitlab.com/mikrowezel/db/postgres"
-	"gitlab.com/mikrowezel/log"
-	svc "gitlab.com/mikrowezel/service"
+	"gitlab.com/mikrowezel/backend/config"
+	"gitlab.com/mikrowezel/backend/db/postgres"
+	"gitlab.com/mikrowezel/backend/log"
+	svc "gitlab.com/mikrowezel/backend/service"
 )
 
 var (

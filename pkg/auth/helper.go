@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"gitlab.com/mikrowezel/db"
+	"gitlab.com/mikrowezel/backend/db"
 	"gitlab.com/mikrowezel/granica/internal/model"
 )
 

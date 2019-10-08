@@ -1,5 +1,7 @@
 package migration
 
+import "log"
+
 const (
 	name2 = "create_users_table"
 )
@@ -45,7 +47,7 @@ func (m *mig) Up00000002() (string, error) {
 		return name2, err
 	}
 
-	return name2, tx.Commit()
+	return name2, nil
 }
 
 // Down00000002 migration
@@ -56,8 +58,9 @@ func (m *mig) Down00000002() (string, error) {
 
 	_, err := tx.Exec(st)
 	if err != nil {
+		log.Println(err)
 		return name2, err
 	}
 
-	return name2, tx.Commit()
+	return name2, nil
 }

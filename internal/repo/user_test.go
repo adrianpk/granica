@@ -5,14 +5,14 @@ import (
 	"os"
 	"testing"
 
-	"gitlab.com/mikrowezel/db"
+	"gitlab.com/mikrowezel/backend/db"
+	mwmig "gitlab.com/mikrowezel/backend/migration"
 	"gitlab.com/mikrowezel/granica/internal/migration"
 	"gitlab.com/mikrowezel/granica/internal/model"
 	"gitlab.com/mikrowezel/granica/internal/repo"
-	mwmig "gitlab.com/mikrowezel/migration"
 
-	"gitlab.com/mikrowezel/config"
-	"gitlab.com/mikrowezel/log"
+	"gitlab.com/mikrowezel/backend/config"
+	"gitlab.com/mikrowezel/backend/log"
 )
 
 func TestMain(m *testing.M) {
@@ -81,6 +81,7 @@ func testConfig() *config.Config {
 	values := map[string]string{
 		"pg.host":               "localhost",
 		"pg.port":               "5432",
+		"pg.schema":             "public",
 		"pg.database":           "granica_test",
 		"pg.user":               "granica",
 		"pg.password":           "granica",

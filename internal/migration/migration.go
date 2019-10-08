@@ -2,8 +2,8 @@ package migration
 
 import (
 	_ "github.com/lib/pq" // package init.
-	"gitlab.com/mikrowezel/config"
-	"gitlab.com/mikrowezel/migration"
+	"gitlab.com/mikrowezel/backend/config"
+	"gitlab.com/mikrowezel/backend/migration"
 )
 
 // TODO: Implement a more ergonomic way to add migrations.
