@@ -6,8 +6,6 @@ import (
 	"gitlab.com/mikrowezel/backend/migration"
 )
 
-// TODO: Implement a more ergonomic way to add migrations.
-
 const (
 	devDb  = "granica"
 	testDb = "granica_test"

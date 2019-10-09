@@ -2,17 +2,15 @@ package repo
 
 import (
 	"context"
-	"os"
-	"testing"
-
+	"gitlab.com/mikrowezel/backend/config"
 	"gitlab.com/mikrowezel/backend/db"
+	"gitlab.com/mikrowezel/backend/log"
 	mwmig "gitlab.com/mikrowezel/backend/migration"
 	"gitlab.com/mikrowezel/granica/internal/migration"
 	"gitlab.com/mikrowezel/granica/internal/model"
 	"gitlab.com/mikrowezel/granica/internal/repo"
-
-	"gitlab.com/mikrowezel/backend/config"
-	"gitlab.com/mikrowezel/backend/log"
+	"os"
+	"testing"
 )
 
 func TestMain(m *testing.M) {
@@ -21,6 +19,11 @@ func TestMain(m *testing.M) {
 	teardown(mgr)
 	os.Exit(code)
 }
+
+// TestCreateUser tests user repo creation.
+//func TestCreateUser(t *testing.T) {
+//t.Log("Mock test")
+//}
 
 // TestCreateUser tests user repo creation.
 func TestCreateUser(t *testing.T) {
@@ -68,12 +71,12 @@ func TestCreateUser(t *testing.T) {
 func setup() *mwmig.Migrator {
 	m := migration.Init(testConfig())
 	m.RollbackAll()
-	m.MigrateAll()
+	m.Migrate()
 	return m
 }
 
 func teardown(m *mwmig.Migrator) {
-	//m.RollbackAll()
+	m.RollbackAll()
 }
 
 func testConfig() *config.Config {
