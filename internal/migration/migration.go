@@ -19,12 +19,12 @@ func Init(cfg *config.Config) *migration.Migrator {
 	m := migration.Init(cfg)
 
 	// Migrations
-	// 00000001
+	// Enable Postgis
 	mg := &mig{}
 	mg.Config(mg.EnablePostgis, mg.DropPostgis)
 	m.AddMigration(mg)
 
-	// 00000002
+	// CreateUsersTable
 	mg = &mig{}
 	mg.Config(mg.CreateUsersTable, mg.DropUsersTable)
 	m.AddMigration(mg)
