@@ -2,12 +2,8 @@ package migration
 
 import "log"
 
-const (
-	name2 = "create_users_table"
-)
-
-// Up00000002 migration
-func (m *mig) Up00000002() (string, error) {
+// CreateUsersTable migration
+func (m *mig) CreateUsersTable() error {
 	tx := m.GetTx()
 
 	st := `CREATE TABLE users
@@ -24,7 +20,7 @@ func (m *mig) Up00000002() (string, error) {
 
 	_, err := tx.Exec(st)
 	if err != nil {
-		return name2, err
+		return err
 	}
 
 	st = `
@@ -44,14 +40,14 @@ func (m *mig) Up00000002() (string, error) {
 
 	_, err = tx.Exec(st)
 	if err != nil {
-		return name2, err
+		return err
 	}
 
-	return name2, nil
+	return nil
 }
 
-// Down00000002 migration
-func (m *mig) Down00000002() (string, error) {
+// DropUsersTable rollback
+func (m *mig) DropUsersTable() error {
 	tx := m.GetTx()
 
 	st := `DROP TABLE users;`
@@ -59,8 +55,8 @@ func (m *mig) Down00000002() (string, error) {
 	_, err := tx.Exec(st)
 	if err != nil {
 		log.Println(err)
-		return name2, err
+		return err
 	}
 
-	return name2, nil
+	return nil
 }

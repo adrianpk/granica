@@ -21,22 +21,13 @@ func Init(cfg *config.Config) *migration.Migrator {
 	// Migrations
 	// 00000001
 	mg := &mig{}
-	mg.SetFx(mg.Up00000001)
-	m.AddMigration(mg)
-	// 00000002
-	mg = &mig{}
-	mg.SetFx(mg.Up00000001)
+	mg.Config(mg.EnablePostgis, mg.DropPostgis)
 	m.AddMigration(mg)
 
-	// Rollbacks
-	// 00000001
-	mg = &mig{}
-	mg.SetFx(mg.Down00000001)
-	m.AddRollback(mg)
 	// 00000002
 	mg = &mig{}
-	mg.SetFx(mg.Down00000002)
-	m.AddRollback(mg)
+	mg.Config(mg.CreateUsersTable, mg.DropUsersTable)
+	m.AddMigration(mg)
 
 	return m
 }
