@@ -129,7 +129,7 @@ func compareUsers(user, toCompare *model.User) (areEqual bool) {
 //}
 
 func setup() *mwmig.Migrator {
-	m := migration.Init(testConfig())
+	m := migration.GetMigrator(testConfig())
 	m.RollbackAll()
 	m.Migrate()
 	return m
