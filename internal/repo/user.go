@@ -5,8 +5,8 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"gitlab.com/mikrowezel/backend/config"
-	"gitlab.com/mikrowezel/granica/internal/model"
 	logger "gitlab.com/mikrowezel/backend/log"
+	"gitlab.com/mikrowezel/granica/internal/model"
 )
 
 type (
