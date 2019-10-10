@@ -28,15 +28,15 @@ const (
 }*/
 func (a *Auth) createUser(w http.ResponseWriter, r *http.Request) {
 	// Unmarshal
-	var ureq CreateUserReq
-	err := json.NewDecoder(r.Body).Decode(&ureq)
+	var uReq CreateUserReq
+	err := json.NewDecoder(r.Body).Decode(&uReq)
 	if err != nil {
 		err = a.createUserResponse(w, r, nil, createErr, err)
 		return
 	}
 
 	// Create a model
-	u := ureq.toModel()
+	u := uReq.toModel()
 
 	// Repo
 	repo, err := a.userRepo()
