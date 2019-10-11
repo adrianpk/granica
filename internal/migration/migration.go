@@ -50,8 +50,8 @@ func (h *Migrator) Init(s svc.Service) chan bool {
 	go func() {
 		defer close(ok)
 
-		// NOTE: Check this before release
-		err := h.Reset()
+		// NOTE: Remove this before release
+		err := h.SoftReset()
 		if err != nil {
 			s.Log().Error(err, "Init Postgres Db handler error")
 			ok <- false

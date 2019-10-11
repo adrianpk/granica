@@ -94,6 +94,7 @@ func TestCreateUser(t *testing.T) {
 	}
 }
 
+// Helpers
 func getUserByUsername(username string, cfg *config.Config) (*model.User, error) {
 	conn, err := getConn()
 	if err != nil {
