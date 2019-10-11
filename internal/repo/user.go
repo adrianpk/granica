@@ -40,8 +40,12 @@ func (ur *UserRepo) Create(user *model.User) error {
 }
 
 // GetAll users from repo.
-func (ur *UserRepo) GetAll() ([]*model.User, error) {
-	return nil, nil
+func (ur *UserRepo) GetAll() (users []model.User, err error) {
+	st := `SELECT * FROM public.users;`
+
+	err = ur.Tx.Select(&users, st)
+
+	return users, err
 }
 
 // Get user data from repo.

@@ -16,6 +16,10 @@ type (
 		Lng               string `json:"lng"`
 	}
 
+	Users []User
+)
+
+type (
 	// CreateUserReq input data.
 	CreateUserReq struct {
 		User
@@ -24,6 +28,15 @@ type (
 	// CreateUserRes output data.
 	CreateUserRes struct {
 		User
+		Msg   string `json:"msg,omitempty"`
+		Error string `json:"err,omitempty"`
+	}
+)
+
+type (
+	// GetUsersRes output data.
+	GetUsersRes struct {
+		Users
 		Msg   string `json:"msg,omitempty"`
 		Error string `json:"err,omitempty"`
 	}
