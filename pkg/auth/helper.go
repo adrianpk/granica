@@ -48,6 +48,7 @@ func (cur *CreateUserReq) toModel() model.User {
 func (cur *CreateUserRes) fromModel(u *model.User, msg string, err error) {
 	if u != nil {
 		cur.User = User{
+			Slug:        u.Slug.String,
 			Username:    u.Username.String,
 			Password:    "",
 			Email:       u.Email.String,

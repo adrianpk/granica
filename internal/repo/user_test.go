@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	//"github.com/davecgh/go-spew/spew"
+
 	"github.com/jmoiron/sqlx"
 	"gitlab.com/mikrowezel/backend/config"
 	"gitlab.com/mikrowezel/backend/db"
@@ -28,6 +29,26 @@ var (
 		"middleNames":       "middles",
 		"familyName":        "family",
 	}
+
+	userSample1 = map[string]string{
+		"username":          "username1",
+		"password":          "password1",
+		"email":             "username1@mail.com",
+		"emailConfirmation": "username1@mail.com",
+		"givenName":         "name1",
+		"middleNames":       "middles1",
+		"familyName":        "family1",
+	}
+
+	userSample2 = map[string]string{
+		"username":          "username2",
+		"password":          "password2",
+		"email":             "username2@mail.com",
+		"emailConfirmation": "username2@mail.com",
+		"givenName":         "name2",
+		"middleNames":       "middles2",
+		"familyName":        "family2",
+	}
 )
 
 func TestMain(m *testing.M) {
@@ -37,9 +58,13 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
+////TestCreateUser tests user repo creation.
+//func TestCreateUser(t *testing.T) {
+//t.Log("Mock test")
+//}
+
 // TestCreateUser tests user repo creation.
 func TestCreateUser(t *testing.T) {
-
 	// Valid user data
 	user := &model.User{
 		Username:          db.ToNullString(userDataValid["username"]),
@@ -94,6 +119,164 @@ func TestCreateUser(t *testing.T) {
 	}
 }
 
+// TestGetAllUsers tests get all users from repo.
+func TestGetAllUsers(t *testing.T) {
+	// Create some sample users
+	createSampleUsers()
+
+	ctx := context.Background()
+	cfg := testConfig()
+	log := testLogger()
+
+	r, err := repo.NewHandler(ctx, cfg, log, "repo-handler")
+	if err != nil {
+		t.Errorf("cannot initialize repo handler: %s", err.Error())
+	}
+	r.Connect()
+
+	userRepo, err := r.UserRepoNewTx()
+	if err != nil {
+		t.Errorf("cannot initialize user repo: %s", err.Error())
+	}
+
+	users, err := userRepo.GetAll()
+	if err != nil {
+		t.Errorf("get users error: %s", err.Error())
+	}
+
+	err = userRepo.Commit()
+	if err != nil {
+		t.Log(err)
+		t.Errorf("get users commit error: %s", err.Error())
+	}
+
+	qty := len(users)
+	if qty != 2 {
+		t.Errorf("expecting two users got %d", qty)
+	}
+
+	if users[0].Username.String != userSample1["username"] || users[1].Username.String != userSample2["username"] {
+		t.Error("obtained values do not match expected ones")
+	}
+}
+
+// TestGetUserByID tests get users by ID from repo.
+func TestGetUserByID(t *testing.T) {
+	// Create some sample users
+	users, err := createSampleUsers()
+	if err != nil {
+		t.Errorf("error creating sample users: %s", err.Error())
+	}
+
+	ctx := context.Background()
+	cfg := testConfig()
+	log := testLogger()
+
+	r, err := repo.NewHandler(ctx, cfg, log, "repo-handler")
+	if err != nil {
+		t.Errorf("cannot initialize repo handler: %s", err.Error())
+	}
+	r.Connect()
+
+	userRepo, err := r.UserRepoNewTx()
+	if err != nil {
+		t.Errorf("cannot initialize user repo: %s", err.Error())
+	}
+
+	user, err := userRepo.Get(users[0].ID.String())
+	if err != nil {
+		t.Errorf("get user error: %s", err.Error())
+	}
+
+	err = userRepo.Commit()
+	if err != nil {
+		t.Log(err)
+		t.Errorf("get user commit error: %s", err.Error())
+	}
+
+	if user.Username.String != userSample1["username"] {
+		t.Error("obtained values do not match expected ones")
+	}
+}
+
+// TestGetUserBySlug tests get users from repo.
+func TestGetUserBySlug(t *testing.T) {
+	// Create some sample users
+	users, err := createSampleUsers()
+	if err != nil {
+		t.Errorf("error creating sample users: %s", err.Error())
+	}
+
+	ctx := context.Background()
+	cfg := testConfig()
+	log := testLogger()
+
+	r, err := repo.NewHandler(ctx, cfg, log, "repo-handler")
+	if err != nil {
+		t.Errorf("cannot initialize repo handler: %s", err.Error())
+	}
+	r.Connect()
+
+	userRepo, err := r.UserRepoNewTx()
+	if err != nil {
+		t.Errorf("cannot initialize user repo: %s", err.Error())
+	}
+
+	user, err := userRepo.GetBySlug(users[0].Slug.String)
+	if err != nil {
+		t.Errorf("get user error: %s", err.Error())
+	}
+
+	err = userRepo.Commit()
+	if err != nil {
+		t.Log(err)
+		t.Errorf("get user commit error: %s", err.Error())
+	}
+
+	if user.Username.String != userSample1["username"] {
+		t.Error("obtained values do not match expected ones")
+	}
+}
+
+// TestGetUserByUsername tests get users by username from repo.
+func TestGetUserByUsername(t *testing.T) {
+	// Create some sample users
+	users, err := createSampleUsers()
+	if err != nil {
+		t.Errorf("error creating sample users: %s", err.Error())
+	}
+
+	ctx := context.Background()
+	cfg := testConfig()
+	log := testLogger()
+
+	r, err := repo.NewHandler(ctx, cfg, log, "repo-handler")
+	if err != nil {
+		t.Errorf("cannot initialize repo handler: %s", err.Error())
+	}
+	r.Connect()
+
+	userRepo, err := r.UserRepoNewTx()
+	if err != nil {
+		t.Errorf("cannot initialize user repo: %s", err.Error())
+	}
+
+	user, err := userRepo.GetByUsername(users[0].Username.String)
+	if err != nil {
+		t.Errorf("get user error: %s", err.Error())
+	}
+
+	err = userRepo.Commit()
+	if err != nil {
+		t.Log(err)
+		t.Errorf("get user commit error: %s", err.Error())
+	}
+
+	if user.Username.String != userSample1["username"] {
+		t.Error("obtained values do not match expected ones")
+	}
+}
+
 // Helpers
 func getUserByUsername(username string, cfg *config.Config) (*model.User, error) {
 	conn, err := getConn()
@@ -124,10 +307,72 @@ func compareUsers(user, toCompare *model.User) (areEqual bool) {
 		user.FamilyName.String == toCompare.FamilyName.String
 }
 
-////TestCreateUser tests user repo creation.
-//func TestCreateUser(t *testing.T) {
-//t.Log("Mock test")
-//}
+func createSampleUsers() (users []*model.User, err error) {
+	ctx := context.Background()
+	cfg := testConfig()
+	log := testLogger()
+
+	r, err := repo.NewHandler(ctx, cfg, log, "repo-handler")
+	if err != nil {
+		return users, err
+	}
+	r.Connect()
+
+	user1 := &model.User{
+		Username:          db.ToNullString(userSample1["username"]),
+		Password:          userSample2["password1"],
+		Email:             db.ToNullString(userSample1["email"]),
+		EmailConfirmation: db.ToNullString(userSample1["emailConfirmation"]),
+		GivenName:         db.ToNullString(userSample1["givenName"]),
+		MiddleNames:       db.ToNullString(userSample1["middleNames"]),
+		FamilyName:        db.ToNullString(userSample1["familyName"]),
+	}
+
+	err = createUser(r, user1)
+	if err != nil {
+		return users, err
+	}
+
+	users = append(users, user1)
+
+	user2 := &model.User{
+		Username:          db.ToNullString(userSample2["username"]),
+		Password:          userSample2["password"],
+		Email:             db.ToNullString(userSample2["email"]),
+		EmailConfirmation: db.ToNullString(userSample2["emailConfirmation"]),
+		GivenName:         db.ToNullString(userSample2["givenName"]),
+		MiddleNames:       db.ToNullString(userSample2["middleNames"]),
+		FamilyName:        db.ToNullString(userSample2["familyName"]),
+	}
+
+	err = createUser(r, user2)
+	if err != nil {
+		return users, err
+	}
+
+	users = append(users, user2)
+
+	return users, nil
+}
+
+func createUser(r *repo.Repo, user *model.User) error {
+	userRepo, err := r.UserRepoNewTx()
+	if err != nil {
+		return err
+	}
+
+	err = userRepo.Create(user)
+	if err != nil {
+		return err
+	}
+
+	err = userRepo.Commit()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
 
 func setup() *mwmig.Migrator {
 	m := migration.GetMigrator(testConfig())
