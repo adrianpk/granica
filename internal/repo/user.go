@@ -2,6 +2,7 @@ package repo
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/jmoiron/sqlx"
 	"gitlab.com/mikrowezel/backend/config"
@@ -49,8 +50,15 @@ func (ur *UserRepo) GetAll() (users []model.User, err error) {
 }
 
 // Get user data from repo.
-func (ur *UserRepo) Get(id interface{}) (*model.User, error) {
-	return &model.User{}, nil
+func (ur *UserRepo) Get(id interface{}) (model.User, error) {
+	var user model.User
+
+	st := `SELECT * FROM USERS WHERE id = '%s' LIMIT 1;`
+	st = fmt.Sprintf(st, id.(string))
+
+	err := ur.Tx.Get(&user, st)
+
+	return user, err
 }
 
 // Update user data in repo.

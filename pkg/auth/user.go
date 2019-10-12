@@ -13,6 +13,8 @@ import (
 
 const (
 	createErr = "Cannot create user"
+	getAllErr = "Cannot get users"
+	getErr    = "Cannot get user"
 )
 
 // createUser
@@ -32,6 +34,7 @@ func (a *Auth) createUser(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&uReq)
 	if err != nil {
 		err = a.createUserResponse(w, r, nil, createErr, err)
+		a.Log().Error(err)
 		return
 	}
 
@@ -42,18 +45,21 @@ func (a *Auth) createUser(w http.ResponseWriter, r *http.Request) {
 	repo, err := a.userRepo()
 	if err != nil {
 		err = a.createUserResponse(w, r, &u, createErr, err)
+		a.Log().Error(err)
 		return
 	}
 
 	err = repo.Create(&u)
 	if err != nil {
 		err = a.createUserResponse(w, r, &u, createErr, err)
+		a.Log().Error(err)
 		return
 	}
 
 	err = repo.Commit()
 	if err != nil {
 		err = a.createUserResponse(w, r, &u, createErr, err)
+		a.Log().Error(err)
 		return
 	}
 
@@ -68,24 +74,66 @@ func (a *Auth) getUsers(w http.ResponseWriter, r *http.Request) {
 	// Repo
 	repo, err := a.userRepo()
 	if err != nil {
-		err = a.getUsersResponse(w, r, nil, createErr, err)
+		err = a.getUsersResponse(w, r, nil, getAllErr, err)
+		a.Log().Error(err)
 		return
 	}
 
 	us, err := repo.GetAll()
 	if err != nil {
-		err = a.getUsersResponse(w, r, nil, createErr, err)
+		err = a.getUsersResponse(w, r, nil, getAllErr, err)
+		a.Log().Error(err)
 		return
 	}
 
 	err = repo.Commit()
 	if err != nil {
-		err = a.getUsersResponse(w, r, us, createErr, err)
+		err = a.getUsersResponse(w, r, us, getAllErr, err)
+		a.Log().Error(err)
 		return
 	}
 
 	// Output
 	err = a.getUsersResponse(w, r, us, "", nil)
+	if err != nil {
+		a.Log().Error(err)
+	}
+}
+
+func (a *Auth) getUser(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	id, ok := ctx.Value(userCtxKey).(string)
+	if !ok {
+		e := errors.New("ID was not provided")
+		err := a.getUserResponse(w, r, nil, getErr, e)
+		a.Log().Error(err)
+		return
+	}
+
+	// Repo
+	repo, err := a.userRepo()
+	if err != nil {
+		err = a.getUserResponse(w, r, nil, getErr, err)
+		a.Log().Error(err)
+		return
+	}
+
+	u, err := repo.Get(id)
+	if err != nil {
+		err = a.getUserResponse(w, r, nil, getErr, err)
+		a.Log().Error(err)
+		return
+	}
+
+	err = repo.Commit()
+	if err != nil {
+		err = a.getUserResponse(w, r, nil, getErr, err)
+		a.Log().Error(err)
+		return
+	}
+
+	// Output
+	err = a.getUserResponse(w, r, &u, "", nil)
 	if err != nil {
 		a.Log().Error(err)
 	}

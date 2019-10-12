@@ -57,16 +57,21 @@ func (a *Auth) makeAPIRouter(parent chi.Router) chi.Router {
 
 func (a *Auth) makeUserAPIRouter(parent chi.Router) chi.Router {
 	return parent.Route("/users", func(uar chi.Router) {
-		uar.Use(userCtx)
 		uar.Post("/", a.createUser)
 		uar.Get("/", a.getUsers)
+		uar.Route("/{userID}", func(uarid chi.Router) {
+			uarid.Use(userCtx)
+			uarid.Get("/", a.getUser)
+			//uarid.Put("/", updateUser)
+			//uarid.Delete("/", deleteUser)
+		})
 	})
 }
 
 func userCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		//userID := chi.URLParam(r, "userID")
-		ctx := context.WithValue(r.Context(), userCtxKey, "userID")
+		userID := chi.URLParam(r, "userID")
+		ctx := context.WithValue(r.Context(), userCtxKey, userID)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

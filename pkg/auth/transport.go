@@ -1,7 +1,5 @@
 package auth
 
-import "encoding/json"
-
 type (
 	// User request and response data.
 	User struct {
@@ -42,6 +40,11 @@ type (
 	}
 )
 
-func toJSON(res interface{}) ([]byte, error) {
-	return json.Marshal(res)
-}
+type (
+	// GetUserRes output data.
+	GetUserRes struct {
+		User
+		Msg   string `json:"msg,omitempty"`
+		Error string `json:"err,omitempty"`
+	}
+)
