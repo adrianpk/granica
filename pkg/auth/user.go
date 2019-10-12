@@ -17,17 +17,6 @@ const (
 	getErr    = "Cannot get user"
 )
 
-// createUser
-/* Sample JSON input like this:
-{
-  "username": "username",
-  "password": "username@mail.com",
-  "email": "username@mail.com",
-  "emailConfirmation": "username@mail.com",
-  "givenName": "name",
-  "middleNames": "middle",
-  "familyName": "family"
-}*/
 func (a *Auth) createUser(w http.ResponseWriter, r *http.Request) {
 	// Unmarshal
 	var uReq CreateUserReq

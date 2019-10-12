@@ -119,8 +119,8 @@ func TestCreateUser(t *testing.T) {
 	}
 }
 
-// TestGetUsers tests get all users from repo.
-func TestGetUsers(t *testing.T) {
+// TestGetAllUsers tests get all users from repo.
+func TestGetAllUsers(t *testing.T) {
 	// Create some sample users
 	createSampleUsers()
 
@@ -155,7 +155,124 @@ func TestGetUsers(t *testing.T) {
 		t.Errorf("expecting two users got %d", qty)
 	}
 
-	if users[0].Username.String != "username1" || users[1].Username.String != "username2" {
+	if users[0].Username.String != userSample1["username"] || users[1].Username.String != userSample2["username"] {
+		t.Error("obtained values do not match expected ones")
+	}
+}
+
+// TestGetUserByID tests get users by ID from repo.
+func TestGetUserByID(t *testing.T) {
+	// Create some sample users
+	users, err := createSampleUsers()
+	if err != nil {
+		t.Errorf("error creating sample users: %s", err.Error())
+	}
+
+	ctx := context.Background()
+	cfg := testConfig()
+	log := testLogger()
+
+	r, err := repo.NewHandler(ctx, cfg, log, "repo-handler")
+	if err != nil {
+		t.Errorf("cannot initialize repo handler: %s", err.Error())
+	}
+	r.Connect()
+
+	userRepo, err := r.UserRepoNewTx()
+	if err != nil {
+		t.Errorf("cannot initialize user repo: %s", err.Error())
+	}
+
+	user, err := userRepo.Get(users[0].ID.String())
+	if err != nil {
+		t.Errorf("get user error: %s", err.Error())
+	}
+
+	err = userRepo.Commit()
+	if err != nil {
+		t.Log(err)
+		t.Errorf("get user commit error: %s", err.Error())
+	}
+
+	if user.Username.String != userSample1["username"] {
+		t.Error("obtained values do not match expected ones")
+	}
+}
+
+// TestGetUserBySlug tests get users from repo.
+func TestGetUserBySlug(t *testing.T) {
+	// Create some sample users
+	users, err := createSampleUsers()
+	if err != nil {
+		t.Errorf("error creating sample users: %s", err.Error())
+	}
+
+	ctx := context.Background()
+	cfg := testConfig()
+	log := testLogger()
+
+	r, err := repo.NewHandler(ctx, cfg, log, "repo-handler")
+	if err != nil {
+		t.Errorf("cannot initialize repo handler: %s", err.Error())
+	}
+	r.Connect()
+
+	userRepo, err := r.UserRepoNewTx()
+	if err != nil {
+		t.Errorf("cannot initialize user repo: %s", err.Error())
+	}
+
+	user, err := userRepo.GetBySlug(users[0].Slug.String)
+	if err != nil {
+		t.Errorf("get user error: %s", err.Error())
+	}
+
+	err = userRepo.Commit()
+	if err != nil {
+		t.Log(err)
+		t.Errorf("get user commit error: %s", err.Error())
+	}
+
+	if user.Username.String != userSample1["username"] {
+		t.Error("obtained values do not match expected ones")
+	}
+}
+
+// TestGetUserByUsername tests get users by username from repo.
+func TestGetUserByUsername(t *testing.T) {
+	// Create some sample users
+	users, err := createSampleUsers()
+	if err != nil {
+		t.Errorf("error creating sample users: %s", err.Error())
+	}
+
+	ctx := context.Background()
+	cfg := testConfig()
+	log := testLogger()
+
+	r, err := repo.NewHandler(ctx, cfg, log, "repo-handler")
+	if err != nil {
+		t.Errorf("cannot initialize repo handler: %s", err.Error())
+	}
+	r.Connect()
+
+	userRepo, err := r.UserRepoNewTx()
+	if err != nil {
+		t.Errorf("cannot initialize user repo: %s", err.Error())
+	}
+
+	user, err := userRepo.GetByUsername(users[0].Username.String)
+	if err != nil {
+		t.Errorf("get user error: %s", err.Error())
+	}
+
+	err = userRepo.Commit()
+	if err != nil {
+		t.Log(err)
+		t.Errorf("get user commit error: %s", err.Error())
+	}
+
+	if user.Username.String != userSample1["username"] {
 		t.Error("obtained values do not match expected ones")
 	}
 }
@@ -190,14 +307,14 @@ func compareUsers(user, toCompare *model.User) (areEqual bool) {
 		user.FamilyName.String == toCompare.FamilyName.String
 }
 
-func createSampleUsers() error {
+func createSampleUsers() (users []*model.User, err error) {
 	ctx := context.Background()
 	cfg := testConfig()
 	log := testLogger()
 
 	r, err := repo.NewHandler(ctx, cfg, log, "repo-handler")
 	if err != nil {
-		return err
+		return users, err
 	}
 	r.Connect()
 
@@ -213,8 +330,10 @@ func createSampleUsers() error {
 
 	err = createUser(r, user1)
 	if err != nil {
-		return err
+		return users, err
 	}
+
+	users = append(users, user1)
 
 	user2 := &model.User{
 		Username:          db.ToNullString(userSample2["username"]),
@@ -228,10 +347,12 @@ func createSampleUsers() error {
 
 	err = createUser(r, user2)
 	if err != nil {
-		return err
+		return users, err
 	}
 
-	return nil
+	users = append(users, user2)
+
+	return users, nil
 }
 
 func createUser(r *repo.Repo, user *model.User) error {

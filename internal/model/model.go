@@ -2,6 +2,9 @@ package model
 
 import (
 	"database/sql"
+	"errors"
+	"fmt"
+	"strings"
 
 	"encoding/json"
 	"time"
@@ -15,7 +18,7 @@ import (
 type (
 	// User model
 	User struct {
-		ID uuid.UUID `db:"id" json:"id"`
+		ID                uuid.UUID      `db:"id" json:"id"`
 		Slug              sql.NullString `db:"slug" json:"slug"`
 		Username          sql.NullString `db:"username" json:"username"`
 		Password          string         `db:"password" json:"password"`
@@ -69,6 +72,37 @@ func (user *User) UpdatePasswordDigest() (digest string, err error) {
 	}
 	user.PasswordDigest.String = string(hpass)
 	return user.PasswordDigest.String, nil
+}
+
+// UpdateSlug if it was not set.
+func (user *User) UpateSlug() (slug string, err error) {
+	if user.Slug.String == "" {
+		s, err := user.genSlug()
+		if err != nil {
+			return "", err
+		}
+		user.Slug = db.ToNullString(s)
+	}
+	return user.Slug.String, nil
+}
+
+// genSlug if it was not set.
+func (user *User) genSlug() (slug string, err error) {
+	if strings.TrimSpace(user.Username.String) == "" {
+		return "", errors.New("no username set")
+	}
+
+	s := strings.Split(uuid.NewV4().String(), "-")
+	l := s[len(s)-1]
+
+	return strings.ToLower(fmt.Sprintf("%s-%s", user.Username.String, l)), nil
+}
+
+// SetCreateValues sets de ID and slug.
+func (user *User) SetCreateValues() error {
+	user.GenID()
+	_, err := user.UpateSlug()
+	return err
 }
 
 // MarshalJSON - Custom MarshalJSON function.

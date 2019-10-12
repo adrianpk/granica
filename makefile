@@ -15,7 +15,8 @@ build:
 build-linux:
 	CGOENABLED=0 GOOS=linux GOARCH=amd64; go build -o ./bin/$(BINARY_UNIX) ./cmd/$(BINARY_NAME).go
 
-
+test:
+	go test -v -count=1 -timeout=5s  ./internal/repo/user_test.go
 
 clean:
 	go clean
@@ -84,11 +85,17 @@ deploy-prod:
 test-create-user:
 	go test -v -run TestCreateUser -count=1 -timeout=5s  ./internal/repo/user_test.go
 
-test-get-user:
-	go test -v -run TestGetUser -count=1 -timeout=5s  ./internal/repo/user_test.go
-
 test-get-users:
-	go test -v -run TestGetUsers -count=1 -timeout=5s  ./internal/repo/user_test.go
+	go test -v -run TestGetAllUsers -count=1 -timeout=5s  ./internal/repo/user_test.go
+
+test-get-user-by-id:
+	go test -v -run TestGetUserByID -count=1 -timeout=5s  ./internal/repo/user_test.go
+
+test-get-user-by-slug:
+	go test -v -run TestGetUserBySlug -count=1 -timeout=5s  ./internal/repo/user_test.go
+
+test-get-user-by-username:
+	go test -v -run TestGetUserByUsername -count=1 -timeout=5s  ./internal/repo/user_test.go
 
 ## Misc
 custom-build:
