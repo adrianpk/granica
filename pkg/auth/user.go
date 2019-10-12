@@ -13,10 +13,12 @@ import (
 
 const (
 	createErr = "Cannot create user"
+	getAllErr = "Cannot get users"
+	getErr    = "Cannot get user"
 )
 
 // createUser
-/* using a JSON input like this:
+/* Sample JSON input like this:
 {
   "username": "username",
   "password": "username@mail.com",
@@ -28,32 +30,36 @@ const (
 }*/
 func (a *Auth) createUser(w http.ResponseWriter, r *http.Request) {
 	// Unmarshal
-	var ureq CreateUserReq
-	err := json.NewDecoder(r.Body).Decode(&ureq)
+	var uReq CreateUserReq
+	err := json.NewDecoder(r.Body).Decode(&uReq)
 	if err != nil {
 		err = a.createUserResponse(w, r, nil, createErr, err)
+		a.Log().Error(err)
 		return
 	}
 
 	// Create a model
-	u := ureq.toModel()
+	u := uReq.toModel()
 
 	// Repo
 	repo, err := a.userRepo()
 	if err != nil {
 		err = a.createUserResponse(w, r, &u, createErr, err)
+		a.Log().Error(err)
 		return
 	}
 
 	err = repo.Create(&u)
 	if err != nil {
 		err = a.createUserResponse(w, r, &u, createErr, err)
+		a.Log().Error(err)
 		return
 	}
 
 	err = repo.Commit()
 	if err != nil {
 		err = a.createUserResponse(w, r, &u, createErr, err)
+		a.Log().Error(err)
 		return
 	}
 
@@ -65,55 +71,72 @@ func (a *Auth) createUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *Auth) getUsers(w http.ResponseWriter, r *http.Request) {
-	//ctx := r.Context()
-
-	// Repo handler.
-	//repo, err := a.repoHandler()
-	//if err != nil {
-	//a.errorResponse(w, r, err)
-	//return
-	//}
-
-	// Transform output
-	json, err := a.toJSON("")
+	// Repo
+	repo, err := a.userRepo()
 	if err != nil {
-		a.errorResponse(w, r, err)
+		err = a.getUsersResponse(w, r, nil, getAllErr, err)
+		a.Log().Error(err)
 		return
 	}
 
-	// Output result.
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(json)
+	us, err := repo.GetAll()
+	if err != nil {
+		err = a.getUsersResponse(w, r, nil, getAllErr, err)
+		a.Log().Error(err)
+		return
+	}
+
+	err = repo.Commit()
+	if err != nil {
+		err = a.getUsersResponse(w, r, us, getAllErr, err)
+		a.Log().Error(err)
+		return
+	}
+
+	// Output
+	err = a.getUsersResponse(w, r, us, "", nil)
+	if err != nil {
+		a.Log().Error(err)
+	}
 }
 
 func (a *Auth) getUser(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-
-	// User context
-	_, ok := ctx.Value(userCtxKey).(string)
+	id, ok := ctx.Value(userCtxKey).(string)
 	if !ok {
-		err := errors.New("no user context")
-		a.errorResponse(w, r, err)
+		e := errors.New("ID was not provided")
+		err := a.getUserResponse(w, r, nil, getErr, e)
+		a.Log().Error(err)
 		return
 	}
 
-	// Repo handler.
-	//repo, err := a.repoHandler()
-	//if err != nil {
-	//a.errorResponse(w, r, err)
-	//return
-	//}
-
-	// Transform output
-	json, err := a.toJSON("")
+	// Repo
+	repo, err := a.userRepo()
 	if err != nil {
-		a.errorResponse(w, r, err)
+		err = a.getUserResponse(w, r, nil, getErr, err)
+		a.Log().Error(err)
 		return
 	}
 
-	// Output result.
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(json)
+	u, err := repo.Get(id)
+	if err != nil {
+		err = a.getUserResponse(w, r, nil, getErr, err)
+		a.Log().Error(err)
+		return
+	}
+
+	err = repo.Commit()
+	if err != nil {
+		err = a.getUserResponse(w, r, nil, getErr, err)
+		a.Log().Error(err)
+		return
+	}
+
+	// Output
+	err = a.getUserResponse(w, r, &u, "", nil)
+	if err != nil {
+		a.Log().Error(err)
+	}
 }
 
 func (a *Auth) updateUser(w http.ResponseWriter, r *http.Request) {
@@ -184,9 +207,4 @@ func formatRequest(r *http.Request) string {
 	}
 	// Return the request as a string
 	return strings.Join(request, "\n")
-}
-
-// TODO: Move to response method.
-func (a *Auth) toJSON(res interface{}) ([]byte, error) {
-	return json.Marshal(res)
 }

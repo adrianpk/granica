@@ -7,10 +7,11 @@ import (
 	"syscall"
 
 	"gitlab.com/mikrowezel/backend/config"
-	"gitlab.com/mikrowezel/granica/internal/repo"
-	"gitlab.com/mikrowezel/granica/pkg/auth"
 	"gitlab.com/mikrowezel/backend/log"
 	svc "gitlab.com/mikrowezel/backend/service"
+	"gitlab.com/mikrowezel/granica/internal/migration"
+	"gitlab.com/mikrowezel/granica/internal/repo"
+	"gitlab.com/mikrowezel/granica/pkg/auth"
 )
 
 type contextKey string
@@ -30,8 +31,13 @@ func main() {
 	s = newService(ctx, cfg, log, cancel)
 
 	// Add service handlers
-	r, err := repo.NewHandler(ctx, cfg, log, "repo-handler")
-	s.AddHandler(r)
+	// Migration
+	mh, err := migration.NewHandler(ctx, cfg, log, "migration-handler")
+	s.AddHandler(mh)
+
+	// Repo
+	rh, err := repo.NewHandler(ctx, cfg, log, "repo-handler")
+	s.AddHandler(rh)
 
 	// Set service worker
 	auth := auth.NewWorker(ctx, cfg, log, "auth-worker")

@@ -1,7 +1,5 @@
 package auth
 
-import "encoding/json"
-
 type (
 	// User request and response data.
 	User struct {
@@ -16,6 +14,10 @@ type (
 		Lng               string `json:"lng"`
 	}
 
+	Users []User
+)
+
+type (
 	// CreateUserReq input data.
 	CreateUserReq struct {
 		User
@@ -29,6 +31,20 @@ type (
 	}
 )
 
-func toJSON(res interface{}) ([]byte, error) {
-	return json.Marshal(res)
-}
+type (
+	// GetUsersRes output data.
+	GetUsersRes struct {
+		Users
+		Msg   string `json:"msg,omitempty"`
+		Error string `json:"err,omitempty"`
+	}
+)
+
+type (
+	// GetUserRes output data.
+	GetUserRes struct {
+		User
+		Msg   string `json:"msg,omitempty"`
+		Error string `json:"err,omitempty"`
+	}
+)

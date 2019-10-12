@@ -94,6 +94,7 @@ func TestCreateUser(t *testing.T) {
 	}
 }
 
+// Helpers
 func getUserByUsername(username string, cfg *config.Config) (*model.User, error) {
 	conn, err := getConn()
 	if err != nil {
@@ -129,7 +130,7 @@ func compareUsers(user, toCompare *model.User) (areEqual bool) {
 //}
 
 func setup() *mwmig.Migrator {
-	m := migration.Init(testConfig())
+	m := migration.GetMigrator(testConfig())
 	m.RollbackAll()
 	m.Migrate()
 	return m

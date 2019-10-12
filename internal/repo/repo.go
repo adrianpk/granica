@@ -3,8 +3,6 @@ package repo
 import (
 	"context"
 	"fmt"
-	"hash/fnv"
-	"time"
 
 	"github.com/jmoiron/sqlx"
 	"gitlab.com/mikrowezel/backend/config"
@@ -25,10 +23,10 @@ type (
 	}
 )
 
-// NewRepo creates and returns a new repo handler.
+// NewHandler creates and returns a new repo handler.
 func NewHandler(ctx context.Context, cfg *config.Config, log *log.Logger, name string) (*Repo, error) {
 	if name == "" {
-		name = fmt.Sprintf("repo-handler-%s", nameSufix())
+		name = fmt.Sprintf("repo-handler-%s", svc.NameSufix())
 	}
 	log.Info("New handler", "name", name)
 
@@ -84,15 +82,4 @@ func (r *Repo) UserRepoNewTx() (*UserRepo, error) {
 		return nil, err
 	}
 	return makeUserRepo(context.Background(), r.Cfg(), r.Log(), tx), nil
-}
-
-func nameSufix() string {
-	digest := hash(time.Now().String())
-	return digest[len(digest)-8:]
-}
-
-func hash(s string) string {
-	h := fnv.New32a()
-	h.Write([]byte(s))
-	return fmt.Sprintf("%d", h.Sum32())
 }
