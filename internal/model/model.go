@@ -99,10 +99,17 @@ func (user *User) genSlug() (slug string, err error) {
 }
 
 // SetCreateValues sets de ID and slug.
+// TODO: it also should set createdBy and createdAt values
 func (user *User) SetCreateValues() error {
 	user.GenID()
 	_, err := user.UpateSlug()
 	return err
+}
+
+// SetUpdateValues
+// TODO: it also should set updatedBy and createdBy values
+func (user *User) SetUpdateValues() error {
+	return nil
 }
 
 // MarshalJSON - Custom MarshalJSON function.

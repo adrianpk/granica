@@ -15,6 +15,7 @@ const (
 	createErr = "Cannot create user"
 	getAllErr = "Cannot get users"
 	getErr    = "Cannot get user"
+	updateErr = "Cannot update user"
 )
 
 func (a *Auth) createUser(w http.ResponseWriter, r *http.Request) {
@@ -93,7 +94,7 @@ func (a *Auth) getUser(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	id, ok := ctx.Value(userCtxKey).(string)
 	if !ok {
-		e := errors.New("ID was not provided")
+		e := errors.New("username was not provided")
 		err := a.getUserResponse(w, r, nil, getErr, e)
 		a.Log().Error(err)
 		return
@@ -129,7 +130,45 @@ func (a *Auth) getUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *Auth) updateUser(w http.ResponseWriter, r *http.Request) {
-	panic("not implemented")
+	// Unmarshal
+	var uReq UpdateUserReq
+	err := json.NewDecoder(r.Body).Decode(&uReq)
+	if err != nil {
+		err = a.updateUserResponse(w, r, nil, updateErr, err)
+		a.Log().Error(err)
+		return
+	}
+
+	// Create a model
+	u := uReq.toModel()
+
+	// Repo
+	repo, err := a.userRepo()
+	if err != nil {
+		err = a.updateUserResponse(w, r, &u, updateErr, err)
+		a.Log().Error(err)
+		return
+	}
+
+	err = repo.Update(&u)
+	if err != nil {
+		err = a.updateUserResponse(w, r, &u, updateErr, err)
+		a.Log().Error(err)
+		return
+	}
+
+	err = repo.Commit()
+	if err != nil {
+		err = a.updateUserResponse(w, r, &u, updateErr, err)
+		a.Log().Error(err)
+		return
+	}
+
+	// Output
+	err = a.updateUserResponse(w, r, &u, "", nil)
+	if err != nil {
+		a.Log().Error(err)
+	}
 }
 
 func (a *Auth) deleteUser(w http.ResponseWriter, r *http.Request) {

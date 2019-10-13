@@ -150,6 +150,62 @@ func (cur *GetUserRes) fromModel(u *model.User, msg string, err error) {
 	}
 }
 
+// updateUser ------------------------------------------------------------------
+
+// updateUserResponse creates an UpdateUserRes and encodes it to JSON
+// and write it using the ResponseWriter.
+func (a *Auth) updateUserResponse(w http.ResponseWriter, r *http.Request, u *model.User, msg string, err error) error {
+	out, err := a.makeUpdateUserResJSON(u, msg, err)
+	if err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(out)
+	return nil
+}
+
+// makeUpdateUserResJSON creates a JSON output using user model and error.
+func (a *Auth) makeUpdateUserResJSON(u *model.User, msg string, err error) ([]byte, error) {
+	cur := UpdateUserRes{}
+	cur.fromModel(u, msg, err)
+	return a.toJSON(cur)
+}
+
+// toModel creates a User model fron transport values.
+func (cur *UpdateUserReq) toModel() model.User {
+	return model.User{
+		Username:          db.ToNullString(cur.Username),
+		Password:          cur.Password,
+		Email:             db.ToNullString(cur.Email),
+		EmailConfirmation: db.ToNullString(cur.EmailConfirmation),
+		GivenName:         db.ToNullString(cur.GivenName),
+		MiddleNames:       db.ToNullString(cur.MiddleNames),
+		FamilyName:        db.ToNullString(cur.FamilyName),
+		// Geolocation:    db.ToNullGeometry(cur.Lat, cur.Lng)
+	}
+}
+
+// fromModel update UpdateUserRes using model values.
+func (cur *UpdateUserRes) fromModel(u *model.User, msg string, err error) {
+	if u != nil {
+		cur.User = User{
+			Slug:        u.Slug.String,
+			Username:    u.Username.String,
+			Password:    "",
+			Email:       u.Email.String,
+			GivenName:   u.GivenName.String,
+			MiddleNames: u.MiddleNames.String,
+			FamilyName:  u.FamilyName.String,
+			Lat:         fmt.Sprintf("%f", u.Geolocation.Point.Lat),
+			Lng:         fmt.Sprintf("%f", u.Geolocation.Point.Lng),
+		}
+	}
+	cur.Msg = msg
+	if err != nil {
+		cur.Error = err.Error()
+	}
+}
+
 // TODO: Move to response method.
 func (a *Auth) toJSON(res interface{}) ([]byte, error) {
 	return json.Marshal(res)

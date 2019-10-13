@@ -97,6 +97,9 @@ test-get-user-by-slug:
 test-get-user-by-username:
 	go test -v -run TestGetUserByUsername -count=1 -timeout=5s  ./internal/repo/user_test.go
 
+test-update-user:
+	go test -v -run TestUpdateUser -count=1 -timeout=5s  ./internal/repo/user_test.go
+
 ## Misc
 custom-build:
 	make mod tidy; go mod vendor; go build ./...
