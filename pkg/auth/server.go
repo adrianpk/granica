@@ -59,10 +59,10 @@ func (a *Auth) makeUserAPIRouter(parent chi.Router) chi.Router {
 	return parent.Route("/users", func(uar chi.Router) {
 		uar.Post("/", a.createUser)
 		uar.Get("/", a.getUsers)
-		uar.Route("/{userID}", func(uarid chi.Router) {
+		uar.Route("/{username}", func(uarid chi.Router) {
 			uarid.Use(userCtx)
 			uarid.Get("/", a.getUser)
-			//uarid.Put("/", updateUser)
+			uarid.Put("/", a.updateUser)
 			//uarid.Delete("/", deleteUser)
 		})
 	})
@@ -70,8 +70,8 @@ func (a *Auth) makeUserAPIRouter(parent chi.Router) chi.Router {
 
 func userCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		userID := chi.URLParam(r, "userID")
-		ctx := context.WithValue(r.Context(), userCtxKey, userID)
+		username := chi.URLParam(r, "username")
+		ctx := context.WithValue(r.Context(), userCtxKey, username)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

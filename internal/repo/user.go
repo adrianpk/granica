@@ -3,6 +3,7 @@ package repo
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/jmoiron/sqlx"
 	"gitlab.com/mikrowezel/backend/config"
@@ -86,8 +87,80 @@ func (ur *UserRepo) GetByUsername(username string) (model.User, error) {
 }
 
 // Update user data in repo.
-func (ur *UserRepo) Update(*model.User) (*model.User, error) {
-	return &model.User{}, nil
+func (ur *UserRepo) Update(user *model.User) error {
+	ref, err := ur.Get(user.ID.String())
+	if err != nil {
+		return fmt.Errorf("cannot retrieve reference user: %s", err.Error())
+	}
+
+	user.SetUpdateValues()
+
+	var st strings.Builder
+	pcu := false // previous column updated?
+
+	st.WriteString("UPDATE users SET ")
+
+	if user.Username.String != ref.Username.String {
+		st.WriteString(strUpd("username", "username"))
+		pcu = true
+	}
+
+	if user.PasswordDigest.String != ref.PasswordDigest.String {
+		st.WriteString(preDelimiter(pcu))
+		st.WriteString(strUpd("password_digest", "password_digest"))
+		pcu = true
+	}
+
+	if user.Email.String != ref.Email.String {
+		st.WriteString(preDelimiter(pcu))
+		st.WriteString(strUpd("email", "email"))
+		pcu = true
+	}
+
+	if user.GivenName.String != ref.GivenName.String {
+		st.WriteString(preDelimiter(pcu))
+		st.WriteString(strUpd("given_name", "given_name"))
+		pcu = true
+	}
+
+	if user.MiddleNames.String != ref.MiddleNames.String {
+		st.WriteString(preDelimiter(pcu))
+		st.WriteString(strUpd("middle_names", "middle_names"))
+		pcu = true
+	}
+
+	if user.FamilyName.String != ref.FamilyName.String {
+		st.WriteString(preDelimiter(pcu))
+		st.WriteString(strUpd("family_name", "family_name"))
+		pcu = true
+	}
+
+	st.WriteString(" ")
+	st.WriteString(whereID(ref.ID.String()))
+	st.WriteString(";")
+
+	//fmt.Println(st.String())
+
+	_, err = ur.Tx.NamedExec(st.String(), user)
+
+	return err
+}
+
+func preDelimiter(upc bool) string {
+	if upc {
+		return ", "
+	}
+	return " "
+}
+
+// strUpdCol build an update colum fragment of type string.
+func strUpd(colName, fieldName string) string {
+	return fmt.Sprintf("%s = :%s", colName, fieldName)
+}
+
+// whereID build an SQL where clause for ID.
+func whereID(id string) string {
+	return fmt.Sprintf("WHERE id = '%s'", id)
 }
 
 // Delete user data from repo.

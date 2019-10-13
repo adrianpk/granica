@@ -3,6 +3,7 @@ package auth
 type (
 	// User request and response data.
 	User struct {
+		Slug              string `json:"slug"`
 		Username          string `json:"username"`
 		Password          string `json:"password"`
 		Email             string `json:"email"`
@@ -43,6 +44,20 @@ type (
 type (
 	// GetUserRes output data.
 	GetUserRes struct {
+		User
+		Msg   string `json:"msg,omitempty"`
+		Error string `json:"err,omitempty"`
+	}
+)
+
+type (
+	// UpdateUserReq input data.
+	UpdateUserReq struct {
+		User
+	}
+
+	// UpdateUserRes output data.
+	UpdateUserRes struct {
 		User
 		Msg   string `json:"msg,omitempty"`
 		Error string `json:"err,omitempty"`

@@ -30,6 +30,16 @@ var (
 		"familyName":        "family",
 	}
 
+	userUpdateDataValid = map[string]string{
+		"username":          "usernameUpd",
+		"password":          "passwordUpd",
+		"email":             "usernameUpd@mail.com",
+		"emailConfirmation": "usernameUpd@mail.com",
+		"givenName":         "nameUpd",
+		"middleNames":       "middlesUpd",
+		"familyName":        "familyUpd",
+	}
+
 	userSample1 = map[string]string{
 		"username":          "username1",
 		"password":          "password1",
@@ -261,7 +271,7 @@ func TestGetUserByUsername(t *testing.T) {
 		t.Errorf("cannot initialize user repo: %s", err.Error())
 	}
 
-	user, err := userRepo.GetByUsername(users[0].Username.String)
+	u, err := userRepo.GetByUsername(users[0].Username.String)
 	if err != nil {
 		t.Errorf("get user error: %s", err.Error())
 	}
@@ -272,7 +282,63 @@ func TestGetUserByUsername(t *testing.T) {
 		t.Errorf("get user commit error: %s", err.Error())
 	}
 
-	if user.Username.String != userSample1["username"] {
+	if u.Username.String != userSample1["username"] {
+		t.Error("obtained values do not match expected ones")
+	}
+}
+
+// TestUpdateUser user repo update.
+func TestUpdateUser(t *testing.T) {
+	// Create some sample users
+	users, err := createSampleUsers()
+	if err != nil {
+		t.Errorf("error creating sample users: %s", err.Error())
+	}
+
+	ctx := context.Background()
+	cfg := testConfig()
+	log := testLogger()
+
+	r, err := repo.NewHandler(ctx, cfg, log, "repo-handler")
+	if err != nil {
+		t.Errorf("cannot initialize repo handler: %s", err.Error())
+	}
+	r.Connect()
+
+	userRepo, err := r.UserRepoNewTx()
+	if err != nil {
+		t.Errorf("cannot initialize user repo: %s", err.Error())
+	}
+
+	u := users[0]
+	// Change field values (sample1 to sample2 values)
+	u.Username = db.ToNullString(userUpdateDataValid["username"])
+	u.Email = db.ToNullString(userUpdateDataValid["email"])
+	u.GivenName = db.ToNullString(userUpdateDataValid["given_name"])
+	u.MiddleNames = db.ToNullString(userUpdateDataValid["middle_names"])
+	u.FamilyName = db.ToNullString(userUpdateDataValid["family_name"])
+
+	err = userRepo.Update(u)
+	if err != nil {
+		t.Errorf("update user error: %s", err.Error())
+	}
+
+	err = userRepo.Commit()
+	if err != nil {
+		t.Log(err)
+		t.Errorf("update user commit error: %s", err.Error())
+	}
+
+	userVerify, err := getUserByUsername(userUpdateDataValid["username"], cfg)
+	if err != nil {
+		t.Errorf("cannot get user from database: %s", err.Error())
+	}
+
+	if userVerify == nil {
+		t.Errorf("cannot get user from database")
+	}
+
+	if userVerify.Username.String != userUpdateDataValid["username"] {
 		t.Error("obtained values do not match expected ones")
 	}
 }
@@ -382,7 +448,7 @@ func setup() *mwmig.Migrator {
 }
 
 func teardown(m *mwmig.Migrator) {
-	m.RollbackAll()
+	//m.RollbackAll()
 }
 
 func testConfig() *config.Config {
