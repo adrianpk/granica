@@ -12,6 +12,7 @@ import (
 	"github.com/lib/pq"
 	uuid "github.com/satori/go.uuid"
 	"gitlab.com/mikrowezel/backend/db"
+	pg "gitlab.com/mikrowezel/backend/db/postgres"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -76,7 +77,7 @@ func (user *User) UpdatePasswordDigest() (digest string, err error) {
 
 // UpdateSlug if it was not set.
 func (user *User) UpateSlug() (slug string, err error) {
-	if user.Slug.String == "" {
+	if strings.Trim(user.Slug.String, " ") == "" {
 		s, err := user.genSlug()
 		if err != nil {
 			return "", err
@@ -103,12 +104,20 @@ func (user *User) genSlug() (slug string, err error) {
 func (user *User) SetCreateValues() error {
 	user.GenID()
 	_, err := user.UpateSlug()
-	return err
+	if err != nil {
+		return err
+	}
+	now := time.Now()
+	user.CreatedAt = pg.ToNullTime(now)
+	user.UpdatedAt = pg.NullTime()
+	return nil
 }
 
 // SetUpdateValues
 // TODO: it also should set updatedBy and createdBy values
 func (user *User) SetUpdateValues() error {
+	now := time.Now()
+	user.UpdatedAt = pg.ToNullTime(now)
 	return nil
 }
 
