@@ -131,6 +131,15 @@ func (a *Auth) getUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *Auth) updateUser(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	username, ok := ctx.Value(userCtxKey).(string)
+	if !ok {
+		e := errors.New("username was not provided")
+		err := a.getUserResponse(w, r, nil, getErr, e)
+		a.Log().Error(err)
+		return
+	}
+
 	// Unmarshal
 	var uReq UpdateUserReq
 	err := json.NewDecoder(r.Body).Decode(&uReq)
@@ -140,17 +149,33 @@ func (a *Auth) updateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Create a model
-	u := uReq.toModel()
-
 	// Repo
 	repo, err := a.userRepo()
 	if err != nil {
-		err = a.updateUserResponse(w, r, &u, updateErr, err)
+		err = a.updateUserResponse(w, r, nil, updateErr, err)
 		a.Log().Error(err)
 		return
 	}
 
+	// Get user
+	current, err := repo.GetByUsername(username)
+	if err != nil {
+		err = a.getUserResponse(w, r, nil, getErr, err)
+		a.Log().Error(err)
+		return
+	}
+
+	// Create a model
+	// Neither ID nor Username should change.
+	u := uReq.toModel()
+	u.ID = current.ID
+	// Set envar GRN_APP_USERNAME_UPDATABLE=true
+	// to let username be updatable.
+	if !(a.Cfg().ValAsBool("upp.username.updatable", false)) {
+		u.Username = current.Username
+	}
+
+	// Upadate
 	err = repo.Update(&u)
 	if err != nil {
 		err = a.updateUserResponse(w, r, &u, updateErr, err)
@@ -174,7 +199,7 @@ func (a *Auth) updateUser(w http.ResponseWriter, r *http.Request) {
 
 func (a *Auth) deleteUser(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	id, ok := ctx.Value(userCtxKey).(string)
+	username, ok := ctx.Value(userCtxKey).(string)
 	if !ok {
 		e := errors.New("username was not provided")
 		err := a.deleteUserResponse(w, r, deleteErr, e)
@@ -190,7 +215,7 @@ func (a *Auth) deleteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = repo.Delete(id)
+	err = repo.DeleteByUsername(username)
 	if err != nil {
 		err = a.deleteUserResponse(w, r, deleteErr, err)
 		a.Log().Error(err)
