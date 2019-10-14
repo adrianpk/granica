@@ -146,6 +146,18 @@ func (ur *UserRepo) Update(user *model.User) error {
 	return err
 }
 
+// Delete user from repo by slug.
+func (ur *UserRepo) DeleteBySlug(slug string) error {
+	st := `DELETE FROM USERS WHERE slug = '%s';`
+	st = fmt.Sprintf(st, slug)
+
+	_, err := ur.Tx.Exec(st)
+
+	return err
+}
+
+// preDelimiter selects a comma or space
+// for each field in update statements.
 func preDelimiter(upc bool) string {
 	if upc {
 		return ", "

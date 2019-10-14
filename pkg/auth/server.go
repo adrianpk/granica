@@ -63,7 +63,7 @@ func (a *Auth) makeUserAPIRouter(parent chi.Router) chi.Router {
 			uarid.Use(userCtx)
 			uarid.Get("/", a.getUser)
 			uarid.Put("/", a.updateUser)
-			//uarid.Delete("/", deleteUser)
+			uarid.Delete("/", a.deleteUser)
 		})
 	})
 }

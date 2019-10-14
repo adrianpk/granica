@@ -343,6 +343,57 @@ func TestUpdateUser(t *testing.T) {
 	}
 }
 
+// TestDeleteUser tests delete users from repo.
+func TestDeleteUser(t *testing.T) {
+	// Create some sample users
+	users, err := createSampleUsers()
+	if err != nil {
+		t.Errorf("error creating sample users: %s", err.Error())
+	}
+
+	ctx := context.Background()
+	cfg := testConfig()
+	log := testLogger()
+
+	r, err := repo.NewHandler(ctx, cfg, log, "repo-handler")
+	if err != nil {
+		t.Errorf("cannot initialize repo handler: %s", err.Error())
+	}
+	r.Connect()
+
+	userRepo, err := r.UserRepoNewTx()
+	if err != nil {
+		t.Errorf("cannot initialize user repo: %s", err.Error())
+	}
+
+	user := users[0]
+	err = userRepo.DeleteBySlug(user.Slug.String)
+	if err != nil {
+		t.Errorf("delete user error: %s", err.Error())
+	}
+
+	err = userRepo.Commit()
+	if err != nil {
+		t.Log(err)
+		t.Errorf("get user commit error: %s", err.Error())
+	}
+
+	userVerify, err := getUserBySlug(user.Slug.String, cfg)
+	if err != nil {
+		return
+	}
+
+	t.Errorf("user was not deleted")
+
+	if userVerify == nil {
+		t.Errorf("cannot get user from database")
+	}
+
+	if userVerify.Username.String == user.Username.String {
+		t.Error("user was not deleted from database")
+	}
+}
+
 // Helpers
 func getUserByUsername(username string, cfg *config.Config) (*model.User, error) {
 	conn, err := getConn()
@@ -353,6 +404,27 @@ func getUserByUsername(username string, cfg *config.Config) (*model.User, error)
 	schema := cfg.ValOrDef("pg.schema", "public")
 
 	st := `SELECT * FROM %s.users WHERE username='%s';`
+	st = fmt.Sprintf(st, schema, username)
+
+	u := &model.User{}
+	err = conn.Get(u, st)
+	if err != nil {
+		msg := fmt.Sprintf("cannot get user: %s", err.Error())
+		return nil, errors.New(msg)
+	}
+
+	return u, nil
+}
+
+func getUserBySlug(username string, cfg *config.Config) (*model.User, error) {
+	conn, err := getConn()
+	if err != nil {
+		return nil, err
+	}
+
+	schema := cfg.ValOrDef("pg.schema", "public")
+
+	st := `SELECT * FROM %s.users WHERE slug='%s';`
 	st = fmt.Sprintf(st, schema, username)
 
 	u := &model.User{}

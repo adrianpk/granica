@@ -100,6 +100,9 @@ test-get-user-by-username:
 test-update-user:
 	go test -v -run TestUpdateUser -count=1 -timeout=5s  ./internal/repo/user_test.go
 
+test-delete-user:
+	go test -v -run TestDeleteUser -count=1 -timeout=5s  ./internal/repo/user_test.go
+
 ## Misc
 custom-build:
 	make mod tidy; go mod vendor; go build ./...
