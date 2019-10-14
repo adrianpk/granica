@@ -55,6 +55,10 @@ func (a *Auth) makeAPIRouter(parent chi.Router) chi.Router {
 	})
 }
 
+// We usually use slug to avoid exposing database ID to the world.
+// But because but as this value is immutable and includes the
+// username selected when the user was created/registered we
+// prefer to use username as the external main identifier.
 func (a *Auth) makeUserAPIRouter(parent chi.Router) chi.Router {
 	return parent.Route("/users", func(uar chi.Router) {
 		uar.Post("/", a.createUser)
