@@ -61,13 +61,13 @@ func (a *Auth) makeAPIRouter(parent chi.Router) chi.Router {
 // prefer to use username as the external main identifier.
 func (a *Auth) makeUserAPIRouter(parent chi.Router) chi.Router {
 	return parent.Route("/users", func(uar chi.Router) {
-		uar.Post("/", a.createUser)
-		uar.Get("/", a.getUsers)
+		uar.Post("/", a.createUserJSON)
+		uar.Get("/", a.getUsersJSON)
 		uar.Route("/{username}", func(uarid chi.Router) {
 			uarid.Use(userCtx)
-			uarid.Get("/", a.getUser)
-			uarid.Put("/", a.updateUser)
-			uarid.Delete("/", a.deleteUser)
+			uarid.Get("/", a.getUserJSON)
+			uarid.Put("/", a.updateUserJSON)
+			uarid.Delete("/", a.deleteUserJSON)
 		})
 	})
 }
