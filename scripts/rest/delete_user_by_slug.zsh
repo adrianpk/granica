@@ -10,7 +10,7 @@ USER_SLUG="username1-129a82a252c2"
 
 
 delete () {
-  echo "POST $1"
+  echo "DELETE $1"
   /usr/bin/curl -X DELETE $1
 }
 
