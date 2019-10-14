@@ -30,7 +30,7 @@ func (a *Auth) makeCreateUserResJSON(u *model.User, msg string, err error) ([]by
 	return a.toJSON(cur)
 }
 
-// toModel creates a User model fron transport values.
+// toModel creates a User model from transport values.
 func (cur *CreateUserReq) toModel() model.User {
 	return model.User{
 		Username:          db.ToNullString(cur.Username),
@@ -171,7 +171,7 @@ func (a *Auth) makeUpdateUserResJSON(u *model.User, msg string, err error) ([]by
 	return a.toJSON(cur)
 }
 
-// toModel creates a User model fron transport values.
+// toModel creates a User model from transport values.
 func (cur *UpdateUserReq) toModel() model.User {
 	return model.User{
 		Username:          db.ToNullString(cur.Username),
@@ -186,9 +186,9 @@ func (cur *UpdateUserReq) toModel() model.User {
 }
 
 // fromModel update UpdateUserRes using model values.
-func (cur *UpdateUserRes) fromModel(u *model.User, msg string, err error) {
+func (uur *UpdateUserRes) fromModel(u *model.User, msg string, err error) {
 	if u != nil {
-		cur.User = User{
+		uur.User = User{
 			Slug:        u.Slug.String,
 			Username:    u.Username.String,
 			Password:    "",
@@ -200,10 +200,35 @@ func (cur *UpdateUserRes) fromModel(u *model.User, msg string, err error) {
 			Lng:         fmt.Sprintf("%f", u.Geolocation.Point.Lng),
 		}
 	}
-	cur.Msg = msg
+	uur.Msg = msg
 	if err != nil {
-		cur.Error = err.Error()
+		uur.Error = err.Error()
 	}
+}
+
+// deleteUser ------------------------------------------------------------------
+
+// deleteUserResponse creates a DeleteUserRes and encodes it to JSON
+// and write it using the ResponseWriter.
+func (a *Auth) deleteUserResponse(w http.ResponseWriter, r *http.Request, msg string, err error) error {
+	out, err := a.makeDeleteUserResJSON(msg, err)
+	if err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(out)
+	return nil
+}
+
+// makeCreateUserResJSON creates a JSON output using user model and error.
+func (a *Auth) makeDeleteUserResJSON(msg string, err error) ([]byte, error) {
+	uur := DeleteUserRes{
+		Msg: msg,
+	}
+	if err != nil {
+		uur.Error = err.Error()
+	}
+	return a.toJSON(uur)
 }
 
 // TODO: Move to response method.

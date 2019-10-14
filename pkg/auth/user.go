@@ -12,10 +12,11 @@ import (
 )
 
 const (
-	createErr = "Cannot create user"
-	getAllErr = "Cannot get users"
-	getErr    = "Cannot get user"
-	updateErr = "Cannot update user"
+	createErr = "Cannot create entity"
+	getAllErr = "Cannot get entity"
+	getErr    = "Cannot get entity"
+	updateErr = "Cannot update entity"
+	deleteErr = "Cannot delete entity"
 )
 
 func (a *Auth) createUser(w http.ResponseWriter, r *http.Request) {
@@ -172,7 +173,42 @@ func (a *Auth) updateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *Auth) deleteUser(w http.ResponseWriter, r *http.Request) {
-	panic("not implemented")
+	ctx := r.Context()
+	id, ok := ctx.Value(userCtxKey).(string)
+	if !ok {
+		e := errors.New("username was not provided")
+		err := a.deleteUserResponse(w, r, deleteErr, e)
+		a.Log().Error(err)
+		return
+	}
+
+	// Repo
+	repo, err := a.userRepo()
+	if err != nil {
+		err = a.deleteUserResponse(w, r, deleteErr, err)
+		a.Log().Error(err)
+		return
+	}
+
+	err = repo.Delete(id)
+	if err != nil {
+		err = a.deleteUserResponse(w, r, deleteErr, err)
+		a.Log().Error(err)
+		return
+	}
+
+	err = repo.Commit()
+	if err != nil {
+		err = a.deleteUserResponse(w, r, deleteErr, err)
+		a.Log().Error(err)
+		return
+	}
+
+	// Output
+	err = a.deleteUserResponse(w, r, "", nil)
+	if err != nil {
+		a.Log().Error(err)
+	}
 }
 
 func (a *Auth) errorResponse(w http.ResponseWriter, r *http.Request, err error) {

@@ -63,3 +63,11 @@ type (
 		Error string `json:"err,omitempty"`
 	}
 )
+
+type (
+	// DeleteUserRes output data.
+	DeleteUserRes struct {
+		Msg   string `json:"msg,omitempty"`
+		Error string `json:"err,omitempty"`
+	}
+)
