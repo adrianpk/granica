@@ -520,7 +520,7 @@ func setup() *mwmig.Migrator {
 }
 
 func teardown(m *mwmig.Migrator) {
-	//m.RollbackAll()
+	m.RollbackAll()
 }
 
 func testConfig() *config.Config {

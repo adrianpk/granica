@@ -15,8 +15,7 @@ type (
 		Server http.Handler
 	}
 
-	AuthCtx struct {
-	}
+	AuthCtx struct{}
 
 	contextKey string
 )

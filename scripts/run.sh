@@ -19,6 +19,8 @@ export GRN_PG_PORT="5432"
 export GRN_PG_USER="granica"
 export GRN_PG_PASSWORD="granica"
 export GRN_PG_BACKOFF_MAXTRIES="3"
+# Switches
+export GRN_APP_USERNAME_UPDATABLE=false
 
 go build -o ./bin/granica ./cmd/granica.go
 ./bin/granica

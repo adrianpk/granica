@@ -146,10 +146,30 @@ func (ur *UserRepo) Update(user *model.User) error {
 	return err
 }
 
-// Delete user from repo by slug.
+// Delete user from repo by ID.
+func (ur *UserRepo) Delete(id string) error {
+	st := `DELETE FROM USERS WHERE id = '%s';`
+	st = fmt.Sprintf(st, id)
+
+	_, err := ur.Tx.Exec(st)
+
+	return err
+}
+
+// DeleteBySlug:w user from repo by slug.
 func (ur *UserRepo) DeleteBySlug(slug string) error {
 	st := `DELETE FROM USERS WHERE slug = '%s';`
 	st = fmt.Sprintf(st, slug)
+
+	_, err := ur.Tx.Exec(st)
+
+	return err
+}
+
+// DeleteByusername user from repo by username.
+func (ur *UserRepo) DeleteByUsername(username string) error {
+	st := `DELETE FROM USERS WHERE username = '%s';`
+	st = fmt.Sprintf(st, username)
 
 	_, err := ur.Tx.Exec(st)
 
@@ -173,11 +193,6 @@ func strUpd(colName, fieldName string) string {
 // whereID build an SQL where clause for ID.
 func whereID(id string) string {
 	return fmt.Sprintf("WHERE id = '%s'", id)
-}
-
-// Delete user data from repo.
-func (ur *UserRepo) Delete(id interface{}) error {
-	return nil
 }
 
 // Commit transaction

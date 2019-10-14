@@ -1,6 +1,11 @@
 package auth
 
 type (
+	Identifier struct {
+		Slug     string
+		Username string
+	}
+
 	// User request and response data.
 	User struct {
 		Slug              string `json:"slug"`
@@ -33,6 +38,10 @@ type (
 )
 
 type (
+	// GetUsersReq input data.
+	GetUsersReq struct {
+	}
+
 	// GetUsersRes output data.
 	GetUsersRes struct {
 		Users
@@ -42,6 +51,11 @@ type (
 )
 
 type (
+	// GetUserReq input data.
+	GetUserReq struct {
+		User
+	}
+
 	// GetUserRes output data.
 	GetUserRes struct {
 		User
@@ -53,6 +67,7 @@ type (
 type (
 	// UpdateUserReq input data.
 	UpdateUserReq struct {
+		Identifier
 		User
 	}
 
@@ -65,6 +80,11 @@ type (
 )
 
 type (
+	// DeleteUserReq input data.
+	DeleteUserReq struct {
+		Identifier
+	}
+
 	// DeleteUserRes output data.
 	DeleteUserRes struct {
 		Msg   string `json:"msg,omitempty"`
