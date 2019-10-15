@@ -78,7 +78,7 @@ func TestMain(m *testing.M) {
 // TestCreateUser tests user repo creation.
 func TestCreateUser(t *testing.T) {
 	// Setup
-	cuReq := auth.CreateUserReq{
+	req := auth.CreateUserReq{
 		auth.User{
 			Username:          userDataValid["username"],
 			Password:          userDataValid["password"],
@@ -90,26 +90,22 @@ func TestCreateUser(t *testing.T) {
 		},
 	}
 
-	var cuRes auth.CreateUserRes
+	var res auth.CreateUserRes
 
 	ctx := context.Background()
 	cfg := testConfig()
 	log := testLogger()
 
 	// Repo
-	rhName := "repo-handler"
-	rh, err := repo.NewHandler(ctx, cfg, log, rhName)
-	rh.Connect()
-
-	// Set service worker
-	a := auth.NewWorker(ctx, cfg, log, "auth-worker")
-	hs := map[string]svc.Handler{
-		rhName: rh,
+	ur, err := testRepo(ctx, cfg, log, "repo-handler")
+	if err != nil {
+		t.Error(err.Error())
 	}
-	a.SetHandlers(hs)
+	// Auth
+	a := testAuth(ctx, cfg, log, "auth-handler", ur)
 
 	// Test
-	err = a.CreateUser(cuReq, &cuRes)
+	err = a.CreateUser(req, &res)
 	if err != nil {
 		t.Errorf("create user error: %s", err.Error())
 	}
@@ -124,14 +120,285 @@ func TestCreateUser(t *testing.T) {
 		t.Errorf("cannot get user from database")
 	}
 
-	// t.Logf("%+v\n", spew.Sdump(user))
-	// t.Logf("%+v\n", spew.Sdump(userVerify))
+	//t.Logf("%+v\n", spew.Sdump(user))
+	//t.Logf("%+v\n", spew.Sdump(userVerify))
 
-	user := cuRes.User
+	user := res.User
 	if !compareUsers(user, *userVerify) {
 		t.Error("User data and its verification does not match.")
 	}
 }
+
+// TestGetAllUsers tests get all users from repo.
+func TestGetAllUsers(t *testing.T) {
+	// Prerequisites
+	createSampleUsers()
+
+	// Setup
+	req := auth.GetUsersReq{}
+
+	var res auth.GetUsersRes
+
+	ctx := context.Background()
+	cfg := testConfig()
+	log := testLogger()
+
+	// Repo
+	ur, err := testRepo(ctx, cfg, log, "repo-handler")
+	if err != nil {
+		t.Error(err.Error())
+	}
+	// Auth
+	a := testAuth(ctx, cfg, log, "auth-handler", ur)
+
+	// Test
+	err = a.GetUsers(req, &res)
+	if err != nil {
+		t.Errorf("get users error: %s", err.Error())
+	}
+
+	if res.Users == nil {
+		t.Error("no response")
+	}
+
+	if res.Error != "" {
+		t.Errorf("Response error: %s", res.Error)
+	}
+
+	qty := len(res.Users)
+	if qty != 2 {
+		t.Errorf("expecting two users got %d", qty)
+	}
+
+	users := res.Users
+	if users[0].Username != userSample1["username"] || users[1].Username != userSample2["username"] {
+		t.Error("obtained values do not match expected ones")
+	}
+}
+
+//// TestGetUserByID tests get users by ID from repo.
+//func TestGetUserByID(t *testing.T) {
+//// Create some sample users
+//users, err := createSampleUsers()
+//if err != nil {
+//t.Errorf("error creating sample users: %s", err.Error())
+//}
+
+//ctx := context.Background()
+//cfg := testConfig()
+//log := testLogger()
+
+//r, err := repo.NewHandler(ctx, cfg, log, "repo-handler")
+//if err != nil {
+//t.Errorf("cannot initialize repo handler: %s", err.Error())
+//}
+//r.Connect()
+
+//userRepo, err := r.UserRepoNewTx()
+//if err != nil {
+//t.Errorf("cannot initialize user repo: %s", err.Error())
+//}
+
+//user, err := userRepo.Get(users[0].ID.String())
+//if err != nil {
+//t.Errorf("get user error: %s", err.Error())
+//}
+
+//err = userRepo.Commit()
+//if err != nil {
+//t.Log(err)
+//t.Errorf("get user commit error: %s", err.Error())
+//}
+
+//if user.Username.String != userSample1["username"] {
+//t.Error("obtained values do not match expected ones")
+//}
+//}
+
+//// TestGetUserBySlug tests get users from repo.
+//func TestGetUserBySlug(t *testing.T) {
+//// Create some sample users
+//users, err := createSampleUsers()
+//if err != nil {
+//t.Errorf("error creating sample users: %s", err.Error())
+//}
+
+//ctx := context.Background()
+//cfg := testConfig()
+//log := testLogger()
+
+//r, err := repo.NewHandler(ctx, cfg, log, "repo-handler")
+//if err != nil {
+//t.Errorf("cannot initialize repo handler: %s", err.Error())
+//}
+//r.Connect()
+
+//userRepo, err := r.UserRepoNewTx()
+//if err != nil {
+//t.Errorf("cannot initialize user repo: %s", err.Error())
+//}
+
+//user, err := userRepo.GetBySlug(users[0].Slug.String)
+//if err != nil {
+//t.Errorf("get user error: %s", err.Error())
+//}
+
+//err = userRepo.Commit()
+//if err != nil {
+//t.Log(err)
+//t.Errorf("get user commit error: %s", err.Error())
+//}
+
+//if user.Username.String != userSample1["username"] {
+//t.Error("obtained values do not match expected ones")
+//}
+//}
+
+//// TestGetUserByUsername tests get users by username from repo.
+//func TestGetUserByUsername(t *testing.T) {
+//// Create some sample users
+//users, err := createSampleUsers()
+//if err != nil {
+//t.Errorf("error creating sample users: %s", err.Error())
+//}
+
+//ctx := context.Background()
+//cfg := testConfig()
+//log := testLogger()
+
+//r, err := repo.NewHandler(ctx, cfg, log, "repo-handler")
+//if err != nil {
+//t.Errorf("cannot initialize repo handler: %s", err.Error())
+//}
+//r.Connect()
+
+//userRepo, err := r.UserRepoNewTx()
+//if err != nil {
+//t.Errorf("cannot initialize user repo: %s", err.Error())
+//}
+
+//u, err := userRepo.GetByUsername(users[0].Username.String)
+//if err != nil {
+//t.Errorf("get user error: %s", err.Error())
+//}
+
+//err = userRepo.Commit()
+//if err != nil {
+//t.Log(err)
+//t.Errorf("get user commit error: %s", err.Error())
+//}
+
+//if u.Username.String != userSample1["username"] {
+//t.Error("obtained values do not match expected ones")
+//}
+//}
+
+//// TestUpdateUser user repo update.
+//func TestUpdateUser(t *testing.T) {
+//// Create some sample users
+//users, err := createSampleUsers()
+//if err != nil {
+//t.Errorf("error creating sample users: %s", err.Error())
+//}
+
+//ctx := context.Background()
+//cfg := testConfig()
+//log := testLogger()
+
+//r, err := repo.NewHandler(ctx, cfg, log, "repo-handler")
+//if err != nil {
+//t.Errorf("cannot initialize repo handler: %s", err.Error())
+//}
+//r.Connect()
+
+//userRepo, err := r.UserRepoNewTx()
+//if err != nil {
+//t.Errorf("cannot initialize user repo: %s", err.Error())
+//}
+
+//u := users[0]
+//// Change field values (sample1 to sample2 values)
+//u.Username = db.ToNullString(userUpdateDataValid["username"])
+//u.Email = db.ToNullString(userUpdateDataValid["email"])
+//u.GivenName = db.ToNullString(userUpdateDataValid["given_name"])
+//u.MiddleNames = db.ToNullString(userUpdateDataValid["middle_names"])
+//u.FamilyName = db.ToNullString(userUpdateDataValid["family_name"])
+
+//err = userRepo.Update(u)
+//if err != nil {
+//t.Errorf("update user error: %s", err.Error())
+//}
+
+//err = userRepo.Commit()
+//if err != nil {
+//t.Log(err)
+//t.Errorf("update user commit error: %s", err.Error())
+//}
+
+//userVerify, err := getUserByUsername(userUpdateDataValid["username"], cfg)
+//if err != nil {
+//t.Errorf("cannot get user from database: %s", err.Error())
+//}
+
+//if userVerify == nil {
+//t.Errorf("cannot get user from database")
+//}
+
+//if userVerify.Username.String != userUpdateDataValid["username"] {
+//t.Error("obtained values do not match expected ones")
+//}
+//}
+
+//// TestDeleteUser tests delete users from repo.
+//func TestDeleteUser(t *testing.T) {
+//// Create some sample users
+//users, err := createSampleUsers()
+//if err != nil {
+//t.Errorf("error creating sample users: %s", err.Error())
+//}
+
+//ctx := context.Background()
+//cfg := testConfig()
+//log := testLogger()
+
+//r, err := repo.NewHandler(ctx, cfg, log, "repo-handler")
+//if err != nil {
+//t.Errorf("cannot initialize repo handler: %s", err.Error())
+//}
+//r.Connect()
+
+//userRepo, err := r.UserRepoNewTx()
+//if err != nil {
+//t.Errorf("cannot initialize user repo: %s", err.Error())
+//}
+
+//user := users[0]
+//err = userRepo.DeleteBySlug(user.Slug.String)
+//if err != nil {
+//t.Errorf("delete user error: %s", err.Error())
+//}
+
+//err = userRepo.Commit()
+//if err != nil {
+//t.Log(err)
+//t.Errorf("get user commit error: %s", err.Error())
+//}
+
+//userVerify, err := getUserBySlug(user.Slug.String, cfg)
+//if err != nil {
+//return
+//}
+
+//t.Errorf("user was not deleted")
+
+//if userVerify == nil {
+//t.Errorf("cannot get user from database")
+//}
+
+//if userVerify.Username.String == user.Username.String {
+//t.Error("user was not deleted from database")
+//}
+//}
 
 // Helpers
 func getUserByUsername(username string, cfg *config.Config) (*model.User, error) {
@@ -281,6 +548,27 @@ func testConfig() *config.Config {
 
 func testLogger() *log.Logger {
 	return log.NewDevLogger(0, "granica", "n/a")
+}
+
+func testRepo(ctx context.Context, cfg *config.Config, log *log.Logger, name string) (*repo.Repo, error) {
+	rh, err := repo.NewHandler(ctx, cfg, log, name)
+	if err != nil {
+		return nil, err
+	}
+	rh.Connect()
+	if err != nil {
+		return nil, err
+	}
+	return rh, nil
+}
+
+func testAuth(ctx context.Context, cfg *config.Config, log *log.Logger, name string, rh *repo.Repo) *auth.Auth {
+	a := auth.NewWorker(ctx, cfg, log, name)
+	hs := map[string]svc.Handler{
+		rh.Name(): rh,
+	}
+	a.SetHandlers(hs)
+	return a
 }
 
 // getConn returns a connection used to

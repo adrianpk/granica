@@ -84,6 +84,9 @@ deploy-prod:
 test-auth-create-user:
 	go test -v -run TestCreateUser -count=1 -timeout=5s  ./pkg/auth/user_test.go
 
+test-auth-get-users:
+	go test -v -run TestGetUsers -count=1 -timeout=5s  ./pkg/auth/user_test.go
+
 # Repo
 test-repo-create-user:
 	go test -v -run TestCreateUser -count=1 -timeout=5s  ./internal/repo/user_test.go
