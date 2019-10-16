@@ -17,6 +17,10 @@
 $ make migrate
 ```
 
+## Auth package
+
+[Readme](pkg/auth/readme.md)
+
 ## Deployment
 ### Production
 
