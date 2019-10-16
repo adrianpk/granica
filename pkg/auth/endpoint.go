@@ -77,7 +77,7 @@ func (a *Auth) GetUserJSON(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Service
-	req.User.Username = username
+	req.Username = username
 	err := a.GetUser(req, &res)
 	if err != nil {
 		a.Log().Error(err)

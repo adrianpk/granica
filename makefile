@@ -87,6 +87,15 @@ test-auth-create-user:
 test-auth-get-users:
 	go test -v -run TestGetUsers -count=1 -timeout=5s  ./pkg/auth/user_test.go
 
+test-auth-get-user:
+	go test -v -run TestGetUser -count=1 -timeout=5s  ./pkg/auth/user_test.go
+
+test-auth-update-user:
+	go test -v -run TestUpdateUser -count=1 -timeout=5s  ./pkg/auth/user_test.go
+
+test-auth-delete-user:
+	go test -v -run TestDeleteUser -count=1 -timeout=5s  ./pkg/auth/user_test.go
+
 # Repo
 test-repo-create-user:
 	go test -v -run TestCreateUser -count=1 -timeout=5s  ./internal/repo/user_test.go
