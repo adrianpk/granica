@@ -6,7 +6,7 @@ import (
 	"gitlab.com/mikrowezel/granica/internal/repo"
 )
 
-func (a *Auth) createUser(req CreateUserReq, res *CreateUserRes) error {
+func (a *Auth) CreateUser(req CreateUserReq, res *CreateUserRes) error {
 	// Model
 	u := req.toModel()
 
@@ -34,7 +34,7 @@ func (a *Auth) createUser(req CreateUserReq, res *CreateUserRes) error {
 	return nil
 }
 
-func (a *Auth) getUsers(req GetUsersReq, res *GetUsersRes) error {
+func (a *Auth) GetUsers(req GetUsersReq, res *GetUsersRes) error {
 	// Repo
 	repo, err := a.userRepo()
 	if err != nil {
@@ -59,7 +59,7 @@ func (a *Auth) getUsers(req GetUsersReq, res *GetUsersRes) error {
 	return nil
 }
 
-func (a *Auth) getUser(req GetUserReq, res *GetUserRes) error {
+func (a *Auth) GetUser(req GetUserReq, res *GetUserRes) error {
 	// Model
 	u := req.toModel()
 
@@ -87,7 +87,7 @@ func (a *Auth) getUser(req GetUserReq, res *GetUserRes) error {
 	return nil
 }
 
-func (a *Auth) updateUser(req UpdateUserReq, res *UpdateUserRes) error {
+func (a *Auth) UpdateUser(req UpdateUserReq, res *UpdateUserRes) error {
 	// Repo
 	repo, err := a.userRepo()
 	if err != nil {
@@ -130,7 +130,7 @@ func (a *Auth) updateUser(req UpdateUserReq, res *UpdateUserRes) error {
 	return nil
 }
 
-func (a *Auth) deleteUser(req DeleteUserReq, res *DeleteUserRes) error {
+func (a *Auth) DeleteUser(req DeleteUserReq, res *DeleteUserRes) error {
 	// Repo
 	repo, err := a.userRepo()
 	if err != nil {

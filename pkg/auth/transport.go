@@ -53,7 +53,7 @@ type (
 type (
 	// GetUserReq input data.
 	GetUserReq struct {
-		User
+		Identifier
 	}
 
 	// GetUserRes output data.

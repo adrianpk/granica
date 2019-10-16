@@ -68,7 +68,7 @@ func (gur *GetUsersRes) fromModel(us []model.User, msg string, err error) {
 // getUser ---------------------------------------------------------------------
 func (gur *GetUserReq) toModel() model.User {
 	return model.User{
-		Username: db.ToNullString(gur.Username),
+		Username: db.ToNullString(gur.Identifier.Username),
 	}
 }
 

@@ -26,8 +26,6 @@ clean:
 run:
 	./scripts/run.sh
 
-rest-create-user:
-	./scripts/rest/create_user.zsh
 
 connect-stg:
 	gcloud beta container clusters get-credentials ${GC_STG_CLUSTER} --region ${GC_REGION} --project ${GC_STG_PROJECT}
@@ -82,25 +80,42 @@ deploy-prod:
 	make install-prod
 
 # Tests
-test-create-user:
+# Auth
+test-auth-create-user:
+	go test -v -run TestCreateUser -count=1 -timeout=5s  ./pkg/auth/user_test.go
+
+test-auth-get-users:
+	go test -v -run TestGetUsers -count=1 -timeout=5s  ./pkg/auth/user_test.go
+
+test-auth-get-user:
+	go test -v -run TestGetUser -count=1 -timeout=5s  ./pkg/auth/user_test.go
+
+test-auth-update-user:
+	go test -v -run TestUpdateUser -count=1 -timeout=5s  ./pkg/auth/user_test.go
+
+test-auth-delete-user:
+	go test -v -run TestDeleteUser -count=1 -timeout=5s  ./pkg/auth/user_test.go
+
+# Repo
+test-repo-create-user:
 	go test -v -run TestCreateUser -count=1 -timeout=5s  ./internal/repo/user_test.go
 
-test-get-users:
+test-repo-get-users:
 	go test -v -run TestGetAllUsers -count=1 -timeout=5s  ./internal/repo/user_test.go
 
-test-get-user-by-id:
+test-repo-get-user-by-id:
 	go test -v -run TestGetUserByID -count=1 -timeout=5s  ./internal/repo/user_test.go
 
-test-get-user-by-slug:
+test-repo-get-user-by-slug:
 	go test -v -run TestGetUserBySlug -count=1 -timeout=5s  ./internal/repo/user_test.go
 
-test-get-user-by-username:
+test-repo-get-user-by-username:
 	go test -v -run TestGetUserByUsername -count=1 -timeout=5s  ./internal/repo/user_test.go
 
-test-update-user:
+test-repo-update-user:
 	go test -v -run TestUpdateUser -count=1 -timeout=5s  ./internal/repo/user_test.go
 
-test-delete-user:
+test-repo-delete-user:
 	go test -v -run TestDeleteUser -count=1 -timeout=5s  ./internal/repo/user_test.go
 
 ## Misc

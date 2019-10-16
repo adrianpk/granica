@@ -23,7 +23,7 @@ const (
 	deleteErr = "Cannot delete entity"
 )
 
-func (a *Auth) createUserJSON(w http.ResponseWriter, r *http.Request) {
+func (a *Auth) CreateUserJSON(w http.ResponseWriter, r *http.Request) {
 	var req CreateUserReq
 	var res CreateUserRes
 
@@ -36,7 +36,7 @@ func (a *Auth) createUserJSON(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Service
-	err = a.createUser(req, &res)
+	err = a.CreateUser(req, &res)
 	if err != nil {
 		a.Log().Error(err)
 		a.writeResponse(w, res)
@@ -47,12 +47,12 @@ func (a *Auth) createUserJSON(w http.ResponseWriter, r *http.Request) {
 	a.writeResponse(w, res)
 }
 
-func (a *Auth) getUsersJSON(w http.ResponseWriter, r *http.Request) {
+func (a *Auth) GetUsersJSON(w http.ResponseWriter, r *http.Request) {
 	var req GetUsersReq
 	var res GetUsersRes
 
 	// Service
-	err := a.getUsers(req, &res)
+	err := a.GetUsers(req, &res)
 	if err != nil {
 		a.Log().Error(err)
 		a.writeResponse(w, res)
@@ -63,7 +63,7 @@ func (a *Auth) getUsersJSON(w http.ResponseWriter, r *http.Request) {
 	a.writeResponse(w, res)
 }
 
-func (a *Auth) getUserJSON(w http.ResponseWriter, r *http.Request) {
+func (a *Auth) GetUserJSON(w http.ResponseWriter, r *http.Request) {
 	var req GetUserReq
 	var res GetUserRes
 
@@ -77,8 +77,8 @@ func (a *Auth) getUserJSON(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Service
-	req.User.Username = username
-	err := a.getUser(req, &res)
+	req.Username = username
+	err := a.GetUser(req, &res)
 	if err != nil {
 		a.Log().Error(err)
 		a.writeResponse(w, res)
@@ -89,7 +89,7 @@ func (a *Auth) getUserJSON(w http.ResponseWriter, r *http.Request) {
 	a.writeResponse(w, res)
 }
 
-func (a *Auth) updateUserJSON(w http.ResponseWriter, r *http.Request) {
+func (a *Auth) UpdateUserJSON(w http.ResponseWriter, r *http.Request) {
 	var req UpdateUserReq
 	var res UpdateUserRes
 
@@ -112,7 +112,7 @@ func (a *Auth) updateUserJSON(w http.ResponseWriter, r *http.Request) {
 
 	// Service
 	req.Identifier.Username = username
-	err = a.updateUser(req, &res)
+	err = a.UpdateUser(req, &res)
 	if err != nil {
 		a.Log().Error(err)
 		a.writeResponse(w, res)
@@ -123,7 +123,7 @@ func (a *Auth) updateUserJSON(w http.ResponseWriter, r *http.Request) {
 	a.writeResponse(w, res)
 }
 
-func (a *Auth) deleteUserJSON(w http.ResponseWriter, r *http.Request) {
+func (a *Auth) DeleteUserJSON(w http.ResponseWriter, r *http.Request) {
 	var req DeleteUserReq
 	var res DeleteUserRes
 
@@ -138,7 +138,7 @@ func (a *Auth) deleteUserJSON(w http.ResponseWriter, r *http.Request) {
 
 	// Service
 	req.Identifier.Username = username
-	err := a.deleteUser(req, &res)
+	err := a.DeleteUser(req, &res)
 	if err != nil {
 		e := errors.New("username not provided")
 		a.Log().Error(e)
