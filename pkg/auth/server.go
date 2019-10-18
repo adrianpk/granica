@@ -26,6 +26,9 @@ func (a *Auth) AddServer() http.Handler {
 	// User
 	a.makeUserAPIRouter(ar)
 
+	// Account
+	a.makeAccountAPIRouter(ar)
+
 	a.Server = hr
 
 	return hr
@@ -76,6 +79,28 @@ func userCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		username := chi.URLParam(r, "username")
 		ctx := context.WithValue(r.Context(), userCtxKey, username)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+// Account
+func (a *Auth) makeAccountAPIRouter(parent chi.Router) chi.Router {
+	return parent.Route("/accounts", func(aar chi.Router) {
+		aar.Post("/", a.CreateAccountJSON)
+		aar.Get("/", a.GetAccountJSON)
+		aar.Route("/{account}", func(aarid chi.Router) {
+			aarid.Use(accountCtx)
+			aarid.Get("/", a.GetAccountJSON)
+			aarid.Put("/", a.UpdateAccountJSON)
+			aarid.Delete("/", a.DeleteAccountJSON)
+		})
+	})
+}
+
+func accountCtx(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		slug := chi.URLParam(r, "account-slug")
+		ctx := context.WithValue(r.Context(), accountCtxKey, slug)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

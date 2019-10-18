@@ -1,18 +1,9 @@
 package auth
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
-	"strings"
-)
-
-type (
-	Response interface {
-		GetErr() error
-	}
 )
 
 const (
@@ -23,6 +14,7 @@ const (
 	deleteErr = "Cannot delete entity"
 )
 
+// User -----------------------------------------------------------------------
 func (a *Auth) CreateUserJSON(w http.ResponseWriter, r *http.Request) {
 	var req CreateUserReq
 	var res CreateUserRes
@@ -70,7 +62,7 @@ func (a *Auth) GetUserJSON(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	username, ok := ctx.Value(userCtxKey).(string)
 	if !ok {
-		e := errors.New("username not provided")
+		e := errors.New("invalid username")
 		a.Log().Error(e)
 		a.writeResponse(w, res)
 		return
@@ -96,7 +88,7 @@ func (a *Auth) UpdateUserJSON(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	username, ok := ctx.Value(userCtxKey).(string)
 	if !ok {
-		e := errors.New("username not provided")
+		e := errors.New("invalid username")
 		a.Log().Error(e)
 		a.writeResponse(w, res)
 		return
@@ -130,7 +122,7 @@ func (a *Auth) DeleteUserJSON(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	username, ok := ctx.Value(userCtxKey).(string)
 	if !ok {
-		e := errors.New("username not provided")
+		e := errors.New("invalid username")
 		a.Log().Error(e)
 		a.writeResponse(w, res)
 		return
@@ -140,7 +132,7 @@ func (a *Auth) DeleteUserJSON(w http.ResponseWriter, r *http.Request) {
 	req.Identifier.Username = username
 	err := a.DeleteUser(req, &res)
 	if err != nil {
-		e := errors.New("username not provided")
+		e := errors.New("invalid username")
 		a.Log().Error(e)
 		a.writeResponse(w, res)
 		return
@@ -150,46 +142,130 @@ func (a *Auth) DeleteUserJSON(w http.ResponseWriter, r *http.Request) {
 	a.writeResponse(w, res)
 }
 
-// Output
-func (a *Auth) writeResponse(w http.ResponseWriter, res interface{}) {
-	// Marshalling
-	o, err := a.toJSON(res)
+// Account --------------------------------------------------------------------
+func (a *Auth) CreateAccountJSON(w http.ResponseWriter, r *http.Request) {
+	var req CreateAccountReq
+	var res CreateAccountRes
+
+	// Decode
+	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		a.Log().Error(err)
+		a.writeResponse(w, res)
+		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(o)
+	// Service
+	err = a.CreateAccount(req, &res)
+	if err != nil {
+		a.Log().Error(err)
+		a.writeResponse(w, res)
+		return
+	}
+
+	// Output
+	a.writeResponse(w, res)
 }
 
-func formatRequestBody(r *http.Request) string {
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(r.Body)
-	return buf.String()
+func (a *Auth) GetAccountsJSON(w http.ResponseWriter, r *http.Request) {
+	var req GetAccountsReq
+	var res GetAccountsRes
+
+	// Service
+	err := a.GetAccounts(req, &res)
+	if err != nil {
+		a.Log().Error(err)
+		a.writeResponse(w, res)
+		return
+	}
+
+	// Output
+	a.writeResponse(w, res)
 }
 
-// formatRequest generates ascii representation of a request
-func formatRequest(r *http.Request) string {
-	// Create return string
-	var request []string
-	// Add the request string
-	url := fmt.Sprintf("%v %v %v", r.Method, r.URL, r.Proto)
-	request = append(request, url)
-	// Add the host
-	request = append(request, fmt.Sprintf("Host: %v", r.Host))
-	// Loop through headers
-	for name, headers := range r.Header {
-		name = strings.ToLower(name)
-		for _, h := range headers {
-			request = append(request, fmt.Sprintf("%v: %v", name, h))
-		}
+func (a *Auth) GetAccountJSON(w http.ResponseWriter, r *http.Request) {
+	var req GetAccountReq
+	var res GetAccountRes
+
+	ctx := r.Context()
+	slug, ok := ctx.Value(accountCtxKey).(string)
+	if !ok {
+		e := errors.New("invalid slug")
+		a.Log().Error(e)
+		a.writeResponse(w, res)
+		return
 	}
-	// If this is a POST, add post data
-	if r.Method == "POST" || r.Method == "PUT" || r.Method == "PATCH" {
-		r.ParseForm()
-		request = append(request, "\n")
-		request = append(request, r.Form.Encode())
+
+	// Service
+	req.Slug = slug
+	err := a.GetAccount(req, &res)
+	if err != nil {
+		a.Log().Error(err)
+		a.writeResponse(w, res)
+		return
 	}
-	// Return the request as a string
-	return strings.Join(request, "\n")
+
+	// Output
+	a.writeResponse(w, res)
+}
+
+func (a *Auth) UpdateAccountJSON(w http.ResponseWriter, r *http.Request) {
+	var req UpdateAccountReq
+	var res UpdateAccountRes
+
+	ctx := r.Context()
+	slug, ok := ctx.Value(accountCtxKey).(string)
+	if !ok {
+		e := errors.New("invalid slug")
+		a.Log().Error(e)
+		a.writeResponse(w, res)
+		return
+	}
+
+	// Decode
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		a.Log().Error(err)
+		a.writeResponse(w, res)
+		return
+	}
+
+	// Service
+	req.Identifier.Slug = slug
+	err = a.UpdateAccount(req, &res)
+	if err != nil {
+		a.Log().Error(err)
+		a.writeResponse(w, res)
+		return
+	}
+
+	// Output
+	a.writeResponse(w, res)
+}
+
+func (a *Auth) DeleteAccountJSON(w http.ResponseWriter, r *http.Request) {
+	var req DeleteAccountReq
+	var res DeleteAccountRes
+
+	ctx := r.Context()
+	slug, ok := ctx.Value(accountCtxKey).(string)
+	if !ok {
+		e := errors.New("invalid slug")
+		a.Log().Error(e)
+		a.writeResponse(w, res)
+		return
+	}
+
+	// Service
+	req.Identifier.Slug = slug
+	err := a.DeleteAccount(req, &res)
+	if err != nil {
+		e := errors.New("invalid slug")
+		a.Log().Error(e)
+		a.writeResponse(w, res)
+		return
+	}
+
+	// Output
+	a.writeResponse(w, res)
 }
