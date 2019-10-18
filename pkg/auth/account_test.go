@@ -127,7 +127,7 @@ func TestCreateAccount(t *testing.T) {
 }
 
 // TestGetAccounts tests get all accounts.
-func Test1GetAccounts(t *testing.T) {
+func TestGetAccounts(t *testing.T) {
 	// Prerequisites
 	_, err := createSampleAccounts()
 	if err != nil {
@@ -177,7 +177,7 @@ func Test1GetAccounts(t *testing.T) {
 	}
 }
 
-// TestGetAccount tests get accounts by accountname.
+// TestGetAccount tests get accounts by slug.
 func TestGetAccount(t *testing.T) {
 	// Prerequisites
 	accounts, err := createSampleAccounts()
@@ -445,13 +445,14 @@ func createAccount(r *repo.Repo, account *model.Account) error {
 
 func setup() *mwmig.Migrator {
 	m := migration.GetMigrator(testConfig())
-	m.RollbackAll()
-	m.Migrate()
+	m.Reset()
+	//m.RollbackAll()
+	//m.Migrate()
 	return m
 }
 
 func teardown(m *mwmig.Migrator) {
-	//m.RollbackAll()
+	// m.RollbackAll()
 }
 
 func testConfig() *config.Config {
