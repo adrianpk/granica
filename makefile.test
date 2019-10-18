@@ -12,7 +12,15 @@ test-selected:
 	#@make spacer
 	#make -f makefile.test test-auth-delete-user
 	#@make spacer
-	make -f makefile.test test-auth-create-account
+	#make -f makefile.test test-auth-create-account
+	#@make spacer
+	#make -f makefile.test test-auth-get-accounts
+	#@make spacer
+	#make -f makefile.test test-auth-get-account
+	#@make spacer
+	#make -f makefile.test test-auth-update-account
+	#@make spacer
+	make -f makefile.test test-auth-delete-account
 
 ## Auth
 
@@ -35,6 +43,18 @@ test-auth-delete-user:
 ### Account
 test-auth-create-account:
 	go test -v -run TestCreateAccount -count=1 -timeout=5s  ./pkg/auth/account_test.go
+
+test-auth-get-accounts:
+	go test -v -run TestGetAccounts -count=1 -timeout=5s  ./pkg/auth/account_test.go
+
+test-auth-get-account:
+	go test -v -run TestGetAccount -count=1 -timeout=5s  ./pkg/auth/account_test.go
+
+test-auth-update-account:
+	go test -v -run TestUpdateAccount -count=1 -timeout=5s  ./pkg/auth/account_test.go
+
+test-auth-delete-account:
+	go test -v -run TestDeleteAccount -count=1 -timeout=5s  ./pkg/auth/account_test.go
 
 ## Repo
 ### User
