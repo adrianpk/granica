@@ -14,8 +14,8 @@ func (m *mig) CreateAccountsTable() error {
 		slug VARCHAR(36) UNIQUE,
 		owner_id UUID,
 		parent_id UUID,
-	  account_type VARCHAR(36) UNIQUE,
-		email VARCHAR(255) UNIQUE,
+	  account_type VARCHAR(36),
+		email VARCHAR(255),
 		shown_name VARCHAR(128)
 	);`
 
