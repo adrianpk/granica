@@ -229,6 +229,9 @@ func (a *Auth) makeUpdateAccountResJSON(m *model.Account, msg string, err error)
 // toModel creates a Account model from transport values.
 func (req *UpdateAccountReq) toModel() model.Account {
 	return model.Account{
+		Identification: model.Identification{
+			Slug: db.ToNullString(req.Identifier.Slug),
+		},
 		Name:        db.ToNullString(req.Name),
 		AccountType: db.ToNullString(req.AccountType),
 		OwnerID:     db.ToNullString(req.OwnerID),

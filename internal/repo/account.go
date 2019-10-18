@@ -74,18 +74,6 @@ func (ur *AccountRepo) GetBySlug(slug string) (model.Account, error) {
 	return account, err
 }
 
-// GetByAccountname account from repo by accountname.
-func (ur *AccountRepo) GetByAccountname(accountname string) (model.Account, error) {
-	var account model.Account
-
-	st := `SELECT * FROM ACCOUNTS WHERE accountname = '%s' LIMIT 1;`
-	st = fmt.Sprintf(st, accountname)
-
-	err := ur.Tx.Get(&account, st)
-
-	return account, err
-}
-
 // Update account data in repo.
 func (ur *AccountRepo) Update(account *model.Account) error {
 	ref, err := ur.Get(account.ID.String())
@@ -106,12 +94,6 @@ func (ur *AccountRepo) Update(account *model.Account) error {
 		pcu = true
 	}
 
-	if account.AccountType.String != ref.AccountType.String {
-		st.WriteString(preDelimiter(pcu))
-		st.WriteString(strUpd("account_type", "account_type"))
-		pcu = true
-	}
-
 	if account.OwnerID.String != ref.OwnerID.String {
 		st.WriteString(preDelimiter(pcu))
 		st.WriteString(strUpd("owner_id", "owner_id"))
@@ -121,6 +103,12 @@ func (ur *AccountRepo) Update(account *model.Account) error {
 	if account.ParentID.String != ref.ParentID.String {
 		st.WriteString(preDelimiter(pcu))
 		st.WriteString(strUpd("parent_id", "parent_id"))
+		pcu = true
+	}
+
+	if account.AccountType.String != ref.AccountType.String {
+		st.WriteString(preDelimiter(pcu))
+		st.WriteString(strUpd("account_type", "account_type"))
 		pcu = true
 	}
 

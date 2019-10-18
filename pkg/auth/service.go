@@ -241,7 +241,7 @@ func (a *Auth) UpdateAccount(req UpdateAccountReq, res *UpdateAccountRes) error 
 	}
 
 	// Get account
-	current, err := repo.GetByAccountname(req.Identifier.Slug)
+	current, err := repo.GetBySlug(req.Identifier.Slug)
 	if err != nil {
 		res.fromModel(nil, updateErr, err)
 		return err

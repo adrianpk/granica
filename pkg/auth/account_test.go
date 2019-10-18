@@ -223,8 +223,8 @@ func TestGetAccount(t *testing.T) {
 		t.Errorf("Response error: %s", res.Error)
 	}
 
-	account := res.Account
-	if account.Slug != accountSample1["slug"] {
+	accountRes := res.Account
+	if accountRes.Name != accountSample1["name"] {
 		t.Error("obtained values do not match expected ones")
 	}
 }
@@ -233,6 +233,7 @@ func TestGetAccount(t *testing.T) {
 func TestUpdateAccount(t *testing.T) {
 	// Prerequisites
 	accounts, err := createSampleAccounts()
+
 	if err != nil {
 		t.Errorf("error creating sample accounts: %s", err.Error())
 	}
@@ -274,7 +275,9 @@ func TestUpdateAccount(t *testing.T) {
 		t.Errorf("update account error: %s", err.Error())
 	}
 
-	accountVerify, err := getAccountBySlug(accountSample1["slug"], cfg)
+	// Verify
+	accountRes := res.Account
+	accountVerify, err := getAccountBySlug(accountRes.Slug, cfg)
 	if err != nil {
 		t.Errorf("cannot get account from database: %s", err.Error())
 	}
@@ -340,7 +343,7 @@ func TestDeleteAccount(t *testing.T) {
 	}
 }
 
-func getAccountBySlug(accountname string, cfg *config.Config) (*model.Account, error) {
+func getAccountBySlug(slug string, cfg *config.Config) (*model.Account, error) {
 	conn, err := getConn()
 	if err != nil {
 		return nil, err
@@ -349,7 +352,7 @@ func getAccountBySlug(accountname string, cfg *config.Config) (*model.Account, e
 	schema := cfg.ValOrDef("pg.schema", "public")
 
 	st := `SELECT * FROM %s.accounts WHERE slug='%s';`
-	st = fmt.Sprintf(st, schema, accountname)
+	st = fmt.Sprintf(st, schema, slug)
 
 	u := &model.Account{}
 	err = conn.Get(u, st)
@@ -384,9 +387,6 @@ func createSampleAccounts() (accounts []*model.Account, err error) {
 	r.Connect()
 
 	account1 := &model.Account{
-		Identification: model.Identification{
-			Slug: db.ToNullString(accountSample1["slug"]),
-		},
 		Name:        db.ToNullString(accountSample1["name"]),
 		OwnerID:     db.ToNullString(accountSample1["ownerID"]),
 		ParentID:    db.ToNullString(accountSample1["parentID"]),
@@ -403,9 +403,6 @@ func createSampleAccounts() (accounts []*model.Account, err error) {
 	accounts = append(accounts, account1)
 
 	account2 := &model.Account{
-		Identification: model.Identification{
-			Slug: db.ToNullString(accountSample2["slug"]),
-		},
 		Name:        db.ToNullString(accountSample2["name"]),
 		OwnerID:     db.ToNullString(accountSample2["ownerID"]),
 		ParentID:    db.ToNullString(accountSample2["parentID"]),
@@ -430,6 +427,7 @@ func createAccount(r *repo.Repo, account *model.Account) error {
 		return err
 	}
 
+	account.SetCreateValues()
 	err = accountRepo.Create(account)
 	if err != nil {
 		return err
