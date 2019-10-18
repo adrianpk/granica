@@ -16,7 +16,10 @@ build-linux:
 	CGOENABLED=0 GOOS=linux GOARCH=amd64; go build -o ./bin/$(BINARY_UNIX) ./cmd/$(BINARY_NAME).go
 
 test:
-	go test -v -count=1 -timeout=5s  ./internal/repo/user_test.go
+	make -f makefile.test test-selected
+
+grc-test:
+	grc make -f makefile.test test-selected
 
 clean:
 	go clean
@@ -79,51 +82,19 @@ deploy-prod:
 	make delete-prod
 	make install-prod
 
-# Tests
-# Auth
-test-auth-create-user:
-	go test -v -run TestCreateUser -count=1 -timeout=5s  ./pkg/auth/user_test.go
-
-test-auth-get-users:
-	go test -v -run TestGetUsers -count=1 -timeout=5s  ./pkg/auth/user_test.go
-
-test-auth-get-user:
-	go test -v -run TestGetUser -count=1 -timeout=5s  ./pkg/auth/user_test.go
-
-test-auth-update-user:
-	go test -v -run TestUpdateUser -count=1 -timeout=5s  ./pkg/auth/user_test.go
-
-test-auth-delete-user:
-	go test -v -run TestDeleteUser -count=1 -timeout=5s  ./pkg/auth/user_test.go
-
-# Repo
-test-repo-create-user:
-	go test -v -run TestCreateUser -count=1 -timeout=5s  ./internal/repo/user_test.go
-
-test-repo-get-users:
-	go test -v -run TestGetAllUsers -count=1 -timeout=5s  ./internal/repo/user_test.go
-
-test-repo-get-user-by-id:
-	go test -v -run TestGetUserByID -count=1 -timeout=5s  ./internal/repo/user_test.go
-
-test-repo-get-user-by-slug:
-	go test -v -run TestGetUserBySlug -count=1 -timeout=5s  ./internal/repo/user_test.go
-
-test-repo-get-user-by-username:
-	go test -v -run TestGetUserByUsername -count=1 -timeout=5s  ./internal/repo/user_test.go
-
-test-repo-update-user:
-	go test -v -run TestUpdateUser -count=1 -timeout=5s  ./internal/repo/user_test.go
-
-test-repo-delete-user:
-	go test -v -run TestDeleteUser -count=1 -timeout=5s  ./internal/repo/user_test.go
-
 ## Misc
 custom-build:
 	make mod tidy; go mod vendor; go build ./...
 
 current-conn:
 	kubectl config current-context
+
+grc-install:
+	sudo apt-get install grc
+	make grc-configure
+
+spacer:
+	@echo "\n"
 
 get-deps:
 	go get -u "github.com/go-chi/chi"
