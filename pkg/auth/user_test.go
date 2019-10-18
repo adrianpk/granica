@@ -9,6 +9,7 @@ import (
 
 	//"github.com/davecgh/go-spew/spew"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/jmoiron/sqlx"
 	"gitlab.com/mikrowezel/backend/config"
 	"gitlab.com/mikrowezel/backend/db"
@@ -97,12 +98,12 @@ func TestCreateUser(t *testing.T) {
 	log := testLogger()
 
 	// Repo
-	ur, err := testRepo(ctx, cfg, log, "repo-handler")
+	userRepo, err := testRepo(ctx, cfg, log, "repo-handler")
 	if err != nil {
 		t.Error(err.Error())
 	}
 	// Auth
-	a := testAuth(ctx, cfg, log, "auth-handler", ur)
+	a := testAuth(ctx, cfg, log, "auth-handler", userRepo)
 
 	// Test
 	err = a.CreateUser(req, &res)
@@ -120,11 +121,12 @@ func TestCreateUser(t *testing.T) {
 		t.Errorf("cannot get user from database")
 	}
 
-	//t.Logf("%+v\n", spew.Sdump(user))
-	//t.Logf("%+v\n", spew.Sdump(userVerify))
-
 	user := res.User
-	if !compareUsers(user, *userVerify) {
+	if !isSameUser(user, *userVerify) {
+
+		t.Logf("%+v\n", spew.Sdump(user))
+		t.Logf("%+v\n", spew.Sdump(userVerify))
+
 		t.Error("User data and its verification does not match.")
 	}
 }
@@ -147,12 +149,12 @@ func Test1GetUsers(t *testing.T) {
 	log := testLogger()
 
 	// Repo
-	ur, err := testRepo(ctx, cfg, log, "repo-handler")
+	userRepo, err := testRepo(ctx, cfg, log, "repo-handler")
 	if err != nil {
 		t.Error(err.Error())
 	}
 	// Auth
-	a := testAuth(ctx, cfg, log, "auth-handler", ur)
+	a := testAuth(ctx, cfg, log, "auth-handler", userRepo)
 
 	// Test
 	err = a.GetUsers(req, &res)
@@ -208,12 +210,12 @@ func TestGetUser(t *testing.T) {
 	r.Connect()
 
 	// Repo
-	ur, err := testRepo(ctx, cfg, log, "repo-handler")
+	userRepo, err := testRepo(ctx, cfg, log, "repo-handler")
 	if err != nil {
 		t.Error(err.Error())
 	}
 	// Auth
-	a := testAuth(ctx, cfg, log, "auth-handler", ur)
+	a := testAuth(ctx, cfg, log, "auth-handler", userRepo)
 
 	// Test
 	err = a.GetUser(req, &res)
@@ -264,12 +266,12 @@ func TestUpdateUser(t *testing.T) {
 	log := testLogger()
 
 	// Repo
-	ur, err := testRepo(ctx, cfg, log, "repo-handler")
+	userRepo, err := testRepo(ctx, cfg, log, "repo-handler")
 	if err != nil {
 		t.Error(err.Error())
 	}
 	// Auth
-	a := testAuth(ctx, cfg, log, "auth-handler", ur)
+	a := testAuth(ctx, cfg, log, "auth-handler", userRepo)
 
 	// Test
 	err = a.UpdateUser(req, &res)
@@ -315,12 +317,12 @@ func TestDeleteUser(t *testing.T) {
 	log := testLogger()
 
 	// Repo
-	ur, err := testRepo(ctx, cfg, log, "repo-handler")
+	userRepo, err := testRepo(ctx, cfg, log, "repo-handler")
 	if err != nil {
 		t.Error(err.Error())
 	}
 	// Auth
-	a := testAuth(ctx, cfg, log, "auth-handler", ur)
+	a := testAuth(ctx, cfg, log, "auth-handler", userRepo)
 
 	// Test
 	err = a.DeleteUser(req, &res)
@@ -386,7 +388,7 @@ func getUserBySlug(username string, cfg *config.Config) (*model.User, error) {
 	return u, nil
 }
 
-func compareUsers(user auth.User, toCompare model.User) (areEqual bool) {
+func isSameUser(user auth.User, toCompare model.User) bool {
 	return user.Username == toCompare.Username.String &&
 		user.Email == toCompare.Email.String &&
 		user.GivenName == toCompare.GivenName.String &&
@@ -407,7 +409,7 @@ func createSampleUsers() (users []*model.User, err error) {
 
 	user1 := &model.User{
 		Username:          db.ToNullString(userSample1["username"]),
-		Password:          userSample2["password1"],
+		Password:          userSample1["password"],
 		Email:             db.ToNullString(userSample1["email"]),
 		EmailConfirmation: db.ToNullString(userSample1["emailConfirmation"]),
 		GivenName:         db.ToNullString(userSample1["givenName"]),
@@ -463,13 +465,14 @@ func createUser(r *repo.Repo, user *model.User) error {
 
 func setup() *mwmig.Migrator {
 	m := migration.GetMigrator(testConfig())
+	// m.Reset()
 	m.RollbackAll()
 	m.Migrate()
 	return m
 }
 
 func teardown(m *mwmig.Migrator) {
-	m.RollbackAll()
+	// m.RollbackAll()
 }
 
 func testConfig() *config.Config {
@@ -531,7 +534,7 @@ func getConn() (*sqlx.DB, error) {
 	return conn, nil
 }
 
-//
+// dbURL returns a Postgres connection string.
 func dbURL(cfg *config.Config) string {
 	host := cfg.ValOrDef("pg.host", "localhost")
 	port := cfg.ValOrDef("pg.port", "5432")

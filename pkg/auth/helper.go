@@ -1,146 +1,271 @@
 package auth
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"gitlab.com/mikrowezel/backend/db"
 	"gitlab.com/mikrowezel/granica/internal/model"
 )
 
-// createUser ------------------------------------------------------------------
-func (cur *CreateUserReq) toModel() model.User {
+// User -----------------------------------------------------------------------
+func (req *CreateUserReq) toModel() model.User {
 	return model.User{
-		Username:          db.ToNullString(cur.Username),
-		Password:          cur.Password,
-		Email:             db.ToNullString(cur.Email),
-		EmailConfirmation: db.ToNullString(cur.EmailConfirmation),
-		GivenName:         db.ToNullString(cur.GivenName),
-		MiddleNames:       db.ToNullString(cur.MiddleNames),
-		FamilyName:        db.ToNullString(cur.FamilyName),
-		// Geolocation:    db.ToNullGeometry(cur.Lat, cur.Lng)
+		Username:          db.ToNullString(req.Username),
+		Password:          req.Password,
+		Email:             db.ToNullString(req.Email),
+		EmailConfirmation: db.ToNullString(req.EmailConfirmation),
+		GivenName:         db.ToNullString(req.GivenName),
+		MiddleNames:       db.ToNullString(req.MiddleNames),
+		FamilyName:        db.ToNullString(req.FamilyName),
+		// Geolocation:    db.ToNullGeometry(req.Lat, req.Lng)
 	}
 }
 
-func (cur *CreateUserRes) fromModel(u *model.User, msg string, err error) {
-	if u != nil {
-		cur.User = User{
-			Slug:        u.Slug.String,
-			Username:    u.Username.String,
+func (res *CreateUserRes) fromModel(m *model.User, msg string, err error) {
+	if m != nil {
+		res.User = User{
+			Slug:        m.Slug.String,
+			Username:    m.Username.String,
 			Password:    "",
-			Email:       u.Email.String,
-			GivenName:   u.GivenName.String,
-			MiddleNames: u.MiddleNames.String,
-			FamilyName:  u.FamilyName.String,
-			Lat:         fmt.Sprintf("%f", u.Geolocation.Point.Lat),
-			Lng:         fmt.Sprintf("%f", u.Geolocation.Point.Lng),
+			Email:       m.Email.String,
+			GivenName:   m.GivenName.String,
+			MiddleNames: m.MiddleNames.String,
+			FamilyName:  m.FamilyName.String,
+			Lat:         fmt.Sprintf("%f", m.Geolocation.Point.Lat),
+			Lng:         fmt.Sprintf("%f", m.Geolocation.Point.Lng),
 		}
 	}
-	cur.Msg = msg
+	res.Msg = msg
 	if err != nil {
-		cur.Error = err.Error()
+		res.Error = err.Error()
 	}
 }
 
-// getUsers -------------------------------------------------------------------
-func (gur *GetUsersRes) fromModel(us []model.User, msg string, err error) {
-	gurUsers := []User{}
-	for _, u := range us {
-		gur := User{
-			Username:    u.Username.String,
+func (res *GetUsersRes) fromModel(ms []model.User, msg string, err error) {
+	resUsers := []User{}
+	for _, m := range ms {
+		res := User{
+			Username:    m.Username.String,
 			Password:    "",
-			Email:       u.Email.String,
-			GivenName:   u.GivenName.String,
-			MiddleNames: u.MiddleNames.String,
-			FamilyName:  u.FamilyName.String,
-			Lat:         fmt.Sprintf("%f", u.Geolocation.Point.Lat),
-			Lng:         fmt.Sprintf("%f", u.Geolocation.Point.Lng),
+			Email:       m.Email.String,
+			GivenName:   m.GivenName.String,
+			MiddleNames: m.MiddleNames.String,
+			FamilyName:  m.FamilyName.String,
+			Lat:         fmt.Sprintf("%f", m.Geolocation.Point.Lat),
+			Lng:         fmt.Sprintf("%f", m.Geolocation.Point.Lng),
 		}
-		gurUsers = append(gurUsers, gur)
+		resUsers = append(resUsers, res)
 	}
-	gur.Users = gurUsers
-	gur.Msg = msg
+	res.Users = resUsers
+	res.Msg = msg
 	if err != nil {
-		gur.Error = err.Error()
+		res.Error = err.Error()
 	}
 }
 
-// getUser ---------------------------------------------------------------------
-func (gur *GetUserReq) toModel() model.User {
+func (req *GetUserReq) toModel() model.User {
 	return model.User{
-		Username: db.ToNullString(gur.Identifier.Username),
+		Username: db.ToNullString(req.Identifier.Username),
 	}
 }
 
-func (cur *GetUserRes) fromModel(u *model.User, msg string, err error) {
-	if u != nil {
-		cur.User = User{
-			Username:    u.Username.String,
+func (res *GetUserRes) fromModel(m *model.User, msg string, err error) {
+	if m != nil {
+		res.User = User{
+			Username:    m.Username.String,
 			Password:    "",
-			Email:       u.Email.String,
-			GivenName:   u.GivenName.String,
-			MiddleNames: u.MiddleNames.String,
-			FamilyName:  u.FamilyName.String,
-			Lat:         fmt.Sprintf("%f", u.Geolocation.Point.Lat),
-			Lng:         fmt.Sprintf("%f", u.Geolocation.Point.Lng),
+			Email:       m.Email.String,
+			GivenName:   m.GivenName.String,
+			MiddleNames: m.MiddleNames.String,
+			FamilyName:  m.FamilyName.String,
+			Lat:         fmt.Sprintf("%f", m.Geolocation.Point.Lat),
+			Lng:         fmt.Sprintf("%f", m.Geolocation.Point.Lng),
 		}
 	}
-	cur.Msg = msg
+	res.Msg = msg
 	if err != nil {
-		cur.Error = err.Error()
+		res.Error = err.Error()
 	}
 }
 
-// updateUser ------------------------------------------------------------------
-func (a *Auth) makeUpdateUserResJSON(u *model.User, msg string, err error) ([]byte, error) {
-	cur := UpdateUserRes{}
-	cur.fromModel(u, msg, err)
-	return a.toJSON(cur)
+func (a *Auth) makeUpdateUserResJSON(m *model.User, msg string, err error) ([]byte, error) {
+	res := UpdateUserRes{}
+	res.fromModel(m, msg, err)
+	return a.toJSON(res.User)
 }
 
 // toModel creates a User model from transport values.
-func (cur *UpdateUserReq) toModel() model.User {
+func (req *UpdateUserReq) toModel() model.User {
 	return model.User{
-		Username:          db.ToNullString(cur.User.Username),
-		Password:          cur.Password,
-		Email:             db.ToNullString(cur.Email),
-		EmailConfirmation: db.ToNullString(cur.EmailConfirmation),
-		GivenName:         db.ToNullString(cur.GivenName),
-		MiddleNames:       db.ToNullString(cur.MiddleNames),
-		FamilyName:        db.ToNullString(cur.FamilyName),
-		// Geolocation:    db.ToNullGeometry(cur.Lat, cur.Lng)
+		Username:          db.ToNullString(req.User.Username),
+		Password:          req.Password,
+		Email:             db.ToNullString(req.Email),
+		EmailConfirmation: db.ToNullString(req.EmailConfirmation),
+		GivenName:         db.ToNullString(req.GivenName),
+		MiddleNames:       db.ToNullString(req.MiddleNames),
+		FamilyName:        db.ToNullString(req.FamilyName),
+		// Geolocation:    db.ToNullGeometry(req.Lat, req.Lng)
 	}
 }
 
-func (uur *UpdateUserRes) fromModel(u *model.User, msg string, err error) {
-	if u != nil {
-		uur.User = User{
-			Slug:        u.Slug.String,
-			Username:    u.Username.String,
+func (res *UpdateUserRes) fromModel(m *model.User, msg string, err error) {
+	if m != nil {
+		res.User = User{
+			Slug:        m.Slug.String,
+			Username:    m.Username.String,
 			Password:    "",
-			Email:       u.Email.String,
-			GivenName:   u.GivenName.String,
-			MiddleNames: u.MiddleNames.String,
-			FamilyName:  u.FamilyName.String,
-			Lat:         fmt.Sprintf("%f", u.Geolocation.Point.Lat),
-			Lng:         fmt.Sprintf("%f", u.Geolocation.Point.Lng),
+			Email:       m.Email.String,
+			GivenName:   m.GivenName.String,
+			MiddleNames: m.MiddleNames.String,
+			FamilyName:  m.FamilyName.String,
+			Lat:         fmt.Sprintf("%f", m.Geolocation.Point.Lat),
+			Lng:         fmt.Sprintf("%f", m.Geolocation.Point.Lng),
 		}
 	}
-	uur.Msg = msg
+	res.Msg = msg
 	if err != nil {
-		uur.Error = err.Error()
+		res.Error = err.Error()
 	}
 }
 
-// deleteUser ------------------------------------------------------------------
-func (dur *DeleteUserRes) fromModel(u *model.User, msg string, err error) {
-	dur.Msg = msg
+func (res *DeleteUserRes) fromModel(m *model.User, msg string, err error) {
+	res.Msg = msg
 	if err != nil {
-		dur.Error = err.Error()
+		res.Error = err.Error()
 	}
 }
 
-// TODO: Move to response method.
-func (a *Auth) toJSON(res interface{}) ([]byte, error) {
-	return json.Marshal(res)
+// Account -----------------------------------------------------------------------
+func (req *CreateAccountReq) toModel() model.Account {
+	return model.Account{
+		Name:        db.ToNullString(req.Name),
+		AccountType: db.ToNullString(req.AccountType),
+		OwnerID:     db.ToNullString(req.OwnerID),
+		ParentID:    db.ToNullString(req.ParentID),
+		Email:       db.ToNullString(req.Email),
+		ShownName:   db.ToNullString(req.ShownName),
+		// Geolocation:    db.ToNullGeometry(req.Lat, req.Lng)
+	}
+}
+
+func (res *CreateAccountRes) fromModel(m *model.Account, msg string, err error) {
+	if m != nil {
+		res.Account = Account{
+			Slug:        m.Slug.String,
+			Name:        m.Name.String,
+			AccountType: m.AccountType.String,
+			OwnerID:     m.OwnerID.String,
+			ParentID:    m.ParentID.String,
+			Email:       m.Email.String,
+			ShownName:   m.ShownName.String,
+			Lat:         fmt.Sprintf("%f", m.Geolocation.Point.Lat),
+			Lng:         fmt.Sprintf("%f", m.Geolocation.Point.Lng),
+		}
+	}
+	res.Msg = msg
+	if err != nil {
+		res.Error = err.Error()
+	}
+}
+
+// getAccounts -------------------------------------------------------------------
+func (res *GetAccountsRes) fromModel(ms []model.Account, msg string, err error) {
+	resAccounts := []Account{}
+	for _, m := range ms {
+		res := Account{
+			Name:        m.Name.String,
+			AccountType: m.AccountType.String,
+			OwnerID:     m.OwnerID.String,
+			ParentID:    m.ParentID.String,
+			Email:       m.Email.String,
+			ShownName:   m.ShownName.String,
+			Lat:         fmt.Sprintf("%f", m.Geolocation.Point.Lat),
+			Lng:         fmt.Sprintf("%f", m.Geolocation.Point.Lng),
+		}
+		resAccounts = append(resAccounts, res)
+	}
+	res.Accounts = resAccounts
+	res.Msg = msg
+	if err != nil {
+		res.Error = err.Error()
+	}
+}
+
+// getAccount ---------------------------------------------------------------------
+func (req *GetAccountReq) toModel() model.Account {
+	return model.Account{
+		Identification: model.Identification{
+			Slug: db.ToNullString(req.Identifier.Slug),
+		},
+	}
+}
+
+func (res *GetAccountRes) fromModel(m *model.Account, msg string, err error) {
+	if m != nil {
+		res.Account = Account{
+			Name:        m.Name.String,
+			AccountType: m.AccountType.String,
+			OwnerID:     m.OwnerID.String,
+			ParentID:    m.ParentID.String,
+			Email:       m.Email.String,
+			ShownName:   m.ShownName.String,
+			Lat:         fmt.Sprintf("%f", m.Geolocation.Point.Lat),
+			Lng:         fmt.Sprintf("%f", m.Geolocation.Point.Lng),
+		}
+	}
+	res.Msg = msg
+	if err != nil {
+		res.Error = err.Error()
+	}
+}
+
+// updateAccount ------------------------------------------------------------------
+func (a *Auth) makeUpdateAccountResJSON(m *model.Account, msg string, err error) ([]byte, error) {
+	res := UpdateAccountRes{}
+	res.fromModel(m, msg, err)
+	return a.toJSON(res.Account)
+}
+
+// toModel creates a Account model from transport values.
+func (req *UpdateAccountReq) toModel() model.Account {
+	return model.Account{
+		Identification: model.Identification{
+			Slug: db.ToNullString(req.Identifier.Slug),
+		},
+		Name:        db.ToNullString(req.Name),
+		AccountType: db.ToNullString(req.AccountType),
+		OwnerID:     db.ToNullString(req.OwnerID),
+		ParentID:    db.ToNullString(req.ParentID),
+		Email:       db.ToNullString(req.Email),
+		ShownName:   db.ToNullString(req.ShownName),
+		// Geolocation:    db.ToNullGeometry(req.Lat, req.Lng)
+	}
+}
+
+func (res *UpdateAccountRes) fromModel(m *model.Account, msg string, err error) {
+	if m != nil {
+		res.Account = Account{
+			Slug:        m.Slug.String,
+			Name:        m.Name.String,
+			AccountType: m.AccountType.String,
+			OwnerID:     m.OwnerID.String,
+			ParentID:    m.ParentID.String,
+			Email:       m.Email.String,
+			ShownName:   m.ShownName.String,
+			Lat:         fmt.Sprintf("%f", m.Geolocation.Point.Lat),
+			Lng:         fmt.Sprintf("%f", m.Geolocation.Point.Lng),
+		}
+	}
+	res.Msg = msg
+	if err != nil {
+		res.Error = err.Error()
+	}
+}
+
+// deleteAccount ------------------------------------------------------------------
+func (res *DeleteAccountRes) fromModel(m *model.Account, msg string, err error) {
+	res.Msg = msg
+	if err != nil {
+		res.Error = err.Error()
+	}
 }

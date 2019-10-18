@@ -21,7 +21,8 @@ type (
 )
 
 const (
-	userCtxKey contextKey = "user"
+	userCtxKey    contextKey = "user"
+	accountCtxKey contextKey = "account"
 )
 
 // NewWorker creates a new Auth worker instance.

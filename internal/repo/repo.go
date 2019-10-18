@@ -72,14 +72,30 @@ func (r *Repo) NewTx() (*sqlx.Tx, error) {
 	return r.Conn.Beginx()
 }
 
+// UserRepo from Repo.
 func (r *Repo) UserRepo(tx *sqlx.Tx) *UserRepo {
 	return makeUserRepo(context.Background(), r.Cfg(), r.Log(), tx)
 }
 
+// UserRepoNewTx returns a user repo initialized with a new transaction
 func (r *Repo) UserRepoNewTx() (*UserRepo, error) {
 	tx, err := r.NewTx()
 	if err != nil {
 		return nil, err
 	}
 	return makeUserRepo(context.Background(), r.Cfg(), r.Log(), tx), nil
+}
+
+// AccountRepo from Repo.
+func (r *Repo) AccountRepo(tx *sqlx.Tx) *AccountRepo {
+	return makeAccountRepo(context.Background(), r.Cfg(), r.Log(), tx)
+}
+
+// AccountRepoNewTx returns a user repo initialized with a new transaction
+func (r *Repo) AccountRepoNewTx() (*AccountRepo, error) {
+	tx, err := r.NewTx()
+	if err != nil {
+		return nil, err
+	}
+	return makeAccountRepo(context.Background(), r.Cfg(), r.Log(), tx), nil
 }

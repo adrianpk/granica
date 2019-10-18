@@ -2,21 +2,21 @@ package migration
 
 import "log"
 
-// CreateUsersTable migration
-func (m *mig) CreateUsersTable() error {
+// CreateAccountsTable migration
+func (m *mig) CreateAccountsTable() error {
 	tx := m.GetTx()
 
-	st := `CREATE TABLE users
+	st := `CREATE TABLE accounts
 	(
 		id UUID PRIMARY KEY,
 		tenant_id VARCHAR(128),
+		name VARCHAR(64),
 		slug VARCHAR(36) UNIQUE,
-		username VARCHAR(32) UNIQUE,
-		password_digest CHAR(128),
-		email VARCHAR(255) UNIQUE,
-		given_name VARCHAR(32),
-		middle_names VARCHAR(32) NULL,
-		family_name VARCHAR(64)
+		owner_id UUID,
+		parent_id UUID,
+	  account_type VARCHAR(36),
+		email VARCHAR(255),
+		shown_name VARCHAR(128)
 	);`
 
 	_, err := tx.Exec(st)
@@ -25,7 +25,7 @@ func (m *mig) CreateUsersTable() error {
 	}
 
 	st = `
-		ALTER TABLE users
+		ALTER TABLE accounts
 		ADD COLUMN geolocation geography (Point,4326),
 		ADD COLUMN locale VARCHAR(32),
 		ADD COLUMN base_tz VARCHAR(2),
@@ -48,10 +48,10 @@ func (m *mig) CreateUsersTable() error {
 }
 
 // DropUsersTable rollback
-func (m *mig) DropUsersTable() error {
+func (m *mig) DropAccountsTable() error {
 	tx := m.GetTx()
 
-	st := `DROP TABLE users;`
+	st := `DROP TABLE accounts;`
 
 	_, err := tx.Exec(st)
 	if err != nil {
