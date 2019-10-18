@@ -215,7 +215,7 @@ func (a *Auth) GetAccount(req GetAccountReq, res *GetAccountRes) error {
 		return err
 	}
 
-	u, err = repo.GetByAccountname(u.Slug.String)
+	u, err = repo.GetBySlug(u.Slug.String)
 	if err != nil {
 		res.fromModel(nil, getErr, err)
 		return err

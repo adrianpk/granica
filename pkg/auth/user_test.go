@@ -465,14 +465,14 @@ func createUser(r *repo.Repo, user *model.User) error {
 
 func setup() *mwmig.Migrator {
 	m := migration.GetMigrator(testConfig())
-	m.Reset()
+	// m.Reset()
 	m.RollbackAll()
 	m.Migrate()
 	return m
 }
 
 func teardown(m *mwmig.Migrator) {
-	m.RollbackAll()
+	// m.RollbackAll()
 }
 
 func testConfig() *config.Config {
