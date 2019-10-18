@@ -33,8 +33,8 @@ func makeUserRepo(ctx context.Context, cfg *config.Config, log *logger.Logger, t
 func (ur *UserRepo) Create(user *model.User) error {
 	user.SetCreateValues()
 
-	st := `INSERT INTO users (id, slug, username, password_digest, email, given_name, middle_names, family_name, geolocation, locale, base_tz, current_tz, starts_at, ends_at, is_active, is_deleted, created_by_id, updated_by_id, created_at, updated_at)
-	VALUES (:id, :slug, :username, :password_digest, :email, :given_name, :middle_names, :family_name, :geolocation, :locale, :base_tz, :current_tz, :starts_at, :ends_at, :is_active, :is_deleted, :created_by_id, :updated_by_id, :created_at, :updated_at)`
+	st := `INSERT INTO users (id, tenant_id, slug, username, password_digest, email, given_name, middle_names, family_name, geolocation, locale, base_tz, current_tz, starts_at, ends_at, is_active, is_deleted, created_by_id, updated_by_id, created_at, updated_at)
+VALUES (:id, :tenant_id, :slug, :username, :password_digest, :email, :given_name, :middle_names, :family_name, :geolocation, :locale, :base_tz, :current_tz, :starts_at, :ends_at, :is_active, :is_deleted, :created_by_id, :updated_by_id, :created_at, :updated_at)`
 
 	_, err := ur.Tx.NamedExec(st, user)
 
@@ -43,7 +43,7 @@ func (ur *UserRepo) Create(user *model.User) error {
 
 // GetAll users from repo.
 func (ur *UserRepo) GetAll() (users []model.User, err error) {
-	st := `SELECT * FROM public.users;`
+	st := `SELECT * FROM users;`
 
 	err = ur.Tx.Select(&users, st)
 

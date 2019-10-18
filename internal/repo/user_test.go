@@ -514,13 +514,14 @@ func createUser(r *repo.Repo, user *model.User) error {
 
 func setup() *mwmig.Migrator {
 	m := migration.GetMigrator(testConfig())
+	//m.Reset()
 	m.RollbackAll()
 	m.Migrate()
 	return m
 }
 
 func teardown(m *mwmig.Migrator) {
-	m.RollbackAll()
+	//m.RollbackAll()
 }
 
 func testConfig() *config.Config {
@@ -561,7 +562,7 @@ func getConn() (*sqlx.DB, error) {
 	return conn, nil
 }
 
-//
+// dbURL returns a Postgres connection string.
 func dbURL(cfg *config.Config) string {
 	host := cfg.ValOrDef("pg.host", "localhost")
 	port := cfg.ValOrDef("pg.port", "5432")

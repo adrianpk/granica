@@ -9,6 +9,7 @@ func (m *mig) CreateUsersTable() error {
 	st := `CREATE TABLE users
 	(
 		id UUID PRIMARY KEY,
+		tenant_id VARCHAR(128),
 		slug VARCHAR(36) UNIQUE,
 		username VARCHAR(32) UNIQUE,
 		password_digest CHAR(128),
