@@ -14,9 +14,9 @@ import (
 	"gitlab.com/mikrowezel/backend/db"
 	"gitlab.com/mikrowezel/backend/log"
 	mwmig "gitlab.com/mikrowezel/backend/migration"
-	"gitlab.com/mikrowezel/granica/internal/migration"
-	"gitlab.com/mikrowezel/granica/internal/model"
-	"gitlab.com/mikrowezel/granica/internal/repo"
+	"gitlab.com/mikrowezel/backend/granica/internal/migration"
+	"gitlab.com/mikrowezel/backend/granica/internal/model"
+	"gitlab.com/mikrowezel/backend/granica/internal/repo"
 )
 
 var (

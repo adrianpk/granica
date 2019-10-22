@@ -16,10 +16,10 @@ import (
 	"gitlab.com/mikrowezel/backend/log"
 	mwmig "gitlab.com/mikrowezel/backend/migration"
 	svc "gitlab.com/mikrowezel/backend/service"
-	"gitlab.com/mikrowezel/granica/internal/migration"
-	"gitlab.com/mikrowezel/granica/internal/model"
-	"gitlab.com/mikrowezel/granica/internal/repo"
-	"gitlab.com/mikrowezel/granica/pkg/auth"
+	"gitlab.com/mikrowezel/backend/granica/internal/migration"
+	"gitlab.com/mikrowezel/backend/granica/internal/model"
+	"gitlab.com/mikrowezel/backend/granica/internal/repo"
+	"gitlab.com/mikrowezel/backend/granica/pkg/auth"
 )
 
 var (

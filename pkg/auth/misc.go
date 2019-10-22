@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"strings"
 
-	"gitlab.com/mikrowezel/granica/internal/repo"
+	"gitlab.com/mikrowezel/backend/granica/internal/repo"
 )
 
 // TODO: Move functions to a more appropriate place.

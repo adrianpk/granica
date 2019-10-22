@@ -4,7 +4,8 @@ import (
 	"fmt"
 
 	"gitlab.com/mikrowezel/backend/db"
-	"gitlab.com/mikrowezel/granica/internal/model"
+	"gitlab.com/mikrowezel/backend/granica/internal/model"
+	m "gitlab.com/mikrowezel/backend/model"
 )
 
 // User -----------------------------------------------------------------------
@@ -194,7 +195,7 @@ func (res *GetAccountsRes) fromModel(ms []model.Account, msg string, err error) 
 // getAccount ---------------------------------------------------------------------
 func (req *GetAccountReq) toModel() model.Account {
 	return model.Account{
-		Identification: model.Identification{
+		Identification: m.Identification{
 			Slug: db.ToNullString(req.Identifier.Slug),
 		},
 	}
@@ -229,7 +230,7 @@ func (a *Auth) makeUpdateAccountResJSON(m *model.Account, msg string, err error)
 // toModel creates a Account model from transport values.
 func (req *UpdateAccountReq) toModel() model.Account {
 	return model.Account{
-		Identification: model.Identification{
+		Identification: m.Identification{
 			Slug: db.ToNullString(req.Identifier.Slug),
 		},
 		Name:        db.ToNullString(req.Name),
