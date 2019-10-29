@@ -29,7 +29,11 @@ clean:
 run:
 	./scripts/run.sh
 
+# Generators
+gen-resource:
+	mw generate all assets/gen/resource.yaml
 
+# Cloud
 connect-stg:
 	gcloud beta container clusters get-credentials ${GC_STG_CLUSTER} --region ${GC_REGION} --project ${GC_STG_PROJECT}
 
