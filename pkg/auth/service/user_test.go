@@ -1,4 +1,4 @@
-package auth
+package service
 
 import (
 	"context"
@@ -13,13 +13,13 @@ import (
 	"github.com/jmoiron/sqlx"
 	"gitlab.com/mikrowezel/backend/config"
 	"gitlab.com/mikrowezel/backend/db"
-	"gitlab.com/mikrowezel/backend/log"
-	mwmig "gitlab.com/mikrowezel/backend/migration"
-	svc "gitlab.com/mikrowezel/backend/service"
 	"gitlab.com/mikrowezel/backend/granica/internal/migration"
 	"gitlab.com/mikrowezel/backend/granica/internal/model"
 	"gitlab.com/mikrowezel/backend/granica/internal/repo"
 	"gitlab.com/mikrowezel/backend/granica/pkg/auth"
+	"gitlab.com/mikrowezel/backend/log"
+	mwmig "gitlab.com/mikrowezel/backend/migration"
+	svc "gitlab.com/mikrowezel/backend/service"
 )
 
 var (

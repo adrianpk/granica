@@ -1,4 +1,4 @@
-package auth
+package service
 
 import (
 	"context"
@@ -13,13 +13,13 @@ import (
 	"github.com/jmoiron/sqlx"
 	"gitlab.com/mikrowezel/backend/config"
 	"gitlab.com/mikrowezel/backend/db"
-	"gitlab.com/mikrowezel/backend/log"
-	mwmig "gitlab.com/mikrowezel/backend/migration"
-	svc "gitlab.com/mikrowezel/backend/service"
 	"gitlab.com/mikrowezel/backend/granica/internal/migration"
 	"gitlab.com/mikrowezel/backend/granica/internal/model"
 	"gitlab.com/mikrowezel/backend/granica/internal/repo"
 	"gitlab.com/mikrowezel/backend/granica/pkg/auth"
+	"gitlab.com/mikrowezel/backend/log"
+	mig "gitlab.com/mikrowezel/backend/migration"
+	svc "gitlab.com/mikrowezel/backend/service"
 )
 
 var (
@@ -441,7 +441,7 @@ func createAccount(r *repo.Repo, account *model.Account) error {
 	return nil
 }
 
-func setup() *mwmig.Migrator {
+func setup() *mig.Migrator {
 	m := migration.GetMigrator(testConfig())
 	m.Reset()
 	//m.RollbackAll()
@@ -449,7 +449,7 @@ func setup() *mwmig.Migrator {
 	return m
 }
 
-func teardown(m *mwmig.Migrator) {
+func teardown(m *mig.Migrator) {
 	// m.RollbackAll()
 }
 

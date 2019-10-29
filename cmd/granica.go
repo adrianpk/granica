@@ -9,9 +9,9 @@ import (
 	"gitlab.com/mikrowezel/backend/config"
 	"gitlab.com/mikrowezel/backend/granica/internal/migration"
 	"gitlab.com/mikrowezel/backend/granica/internal/repo"
+	"gitlab.com/mikrowezel/backend/granica/pkg/auth"
 	"gitlab.com/mikrowezel/backend/log"
 	svc "gitlab.com/mikrowezel/backend/service"
-	"gitlab.com/mikrowezel/backend/granica/pkg/auth"
 )
 
 type contextKey string

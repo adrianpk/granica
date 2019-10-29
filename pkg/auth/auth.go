@@ -5,6 +5,8 @@ import (
 	"net/http"
 
 	"gitlab.com/mikrowezel/backend/config"
+	"gitlab.com/mikrowezel/backend/granica/pkg/auth/jsonrest"
+	"gitlab.com/mikrowezel/backend/granica/pkg/auth/service"
 	logger "gitlab.com/mikrowezel/backend/log"
 	svc "gitlab.com/mikrowezel/backend/service"
 )
@@ -12,26 +14,34 @@ import (
 type (
 	Auth struct {
 		*svc.BaseWorker
-		Server http.Handler
+		service *service.Service
+		jsonep  *jsonrest.Endpoint
+		Server  http.Handler
 	}
-
-	AuthCtx struct{}
-
-	contextKey string
-)
-
-const (
-	userCtxKey    contextKey = "user"
-	accountCtxKey contextKey = "account"
 )
 
 // NewWorker creates a new Auth worker instance.
 func NewWorker(ctx context.Context, cfg *config.Config, log *logger.Logger, name string) *Auth {
+
+	service := service.MakeService(ctx, cfg, log)
+
 	w := &Auth{
 		BaseWorker: svc.NewWorker(ctx, cfg, log, "granica-auth-worker"),
+		service:    service,
+		jsonep:     jsonrest.MakeEndpoint(ctx, cfg, log, service),
 	}
+
 	w.AddServer()
 	return w
+}
+
+func (a *Auth) Init() bool {
+	rh, err := a.repoHandler()
+	if err != nil {
+		return false
+	}
+	a.service.SetRepo(rh)
+	return true
 }
 
 func (a *Auth) Start() error {
