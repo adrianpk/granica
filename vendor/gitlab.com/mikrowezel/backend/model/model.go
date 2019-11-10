@@ -95,6 +95,14 @@ func (i *Identification) SetCreateValues(slugPrefix string) error {
 	return nil
 }
 
+// Match for Identification.
+func (identification *Identification) Match(tc Identification) bool {
+	r := identification.ID == tc.ID &&
+		identification.TenantID == tc.TenantID &&
+		identification.Slug == tc.Slug
+	return r
+}
+
 type Audit struct {
 	CreatedByID sql.NullString `db:"created_by_id" json:"createdByID"`
 	UpdatedByID sql.NullString `db:"updated_by_id" json:"updatedByID"`

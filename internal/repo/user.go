@@ -7,8 +7,8 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"gitlab.com/mikrowezel/backend/config"
-	logger "gitlab.com/mikrowezel/backend/log"
 	"gitlab.com/mikrowezel/backend/granica/internal/model"
+	logger "gitlab.com/mikrowezel/backend/log"
 )
 
 type (
@@ -198,4 +198,20 @@ func whereID(id string) string {
 // Commit transaction
 func (ur *UserRepo) Commit() error {
 	return ur.Tx.Commit()
+}
+
+// Misc
+
+// UserRepo from Repo.
+func (r *Repo) UserRepo(tx *sqlx.Tx) *UserRepo {
+	return makeUserRepo(context.Background(), r.Cfg(), r.Log(), tx)
+}
+
+// UserRepoNewTx returns a user repo initialized with a new transaction
+func (r *Repo) UserRepoNewTx() (*UserRepo, error) {
+	tx, err := r.NewTx()
+	if err != nil {
+		return nil, err
+	}
+	return makeUserRepo(context.Background(), r.Cfg(), r.Log(), tx), nil
 }

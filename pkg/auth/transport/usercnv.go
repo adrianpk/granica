@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"gitlab.com/mikrowezel/backend/db"
+
 	"gitlab.com/mikrowezel/backend/granica/internal/model"
 )
 

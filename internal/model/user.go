@@ -9,7 +9,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// User -----------------------------------------------------------------------
 type (
 	// User model
 	User struct {
@@ -62,39 +61,19 @@ func (user *User) SetUpdateValues() error {
 	return nil
 }
 
-// Account --------------------------------------------------------------------
-type (
-	// Account model
-	Account struct {
-		m.Identification
-		Name        sql.NullString `db:"name" json:"name"`
-		OwnerID     sql.NullString `db:"owner_id" json:"ownerID"`
-		ParentID    sql.NullString `db:"parent_id" json:"parentID"`
-		AccountType sql.NullString `db:"account_type" json:"accountType"`
-		Email       sql.NullString `db:"email" json:"email"`
-		ShownName   sql.NullString `db:"shown_name" json:"shownName"`
-		Geolocation db.NullPoint   `db:"geolocation" json:"geolocation"`
-		Locale      sql.NullString `db:"locale" json:"locale"`
-		BaseTZ      sql.NullString `db:"base_tz" json:"baseTZ"`
-		CurrentTZ   sql.NullString `db:"current_tz" json:"currentTZ"`
-		StartsAt    pq.NullTime    `db:"starts_at" json:"startsAt"`
-		EndsAt      pq.NullTime    `db:"ends_at" json:"endsAt"`
-		IsActive    sql.NullBool   `db:"is_active" json:"isActive"`
-		IsDeleted   sql.NullBool   `db:"is_deleted" json:"isDeleted"`
-		m.Audit
-	}
-)
-
-// SetCreateValues sets de ID and slug.
-func (account *Account) SetCreateValues() error {
-	pfx := account.Name.String
-	account.Identification.SetCreateValues(pfx)
-	account.Audit.SetCreateValues()
-	return nil
-}
-
-// SetUpdateValues
-func (account *Account) SetUpdateValues() error {
-	account.Audit.SetUpdateValues()
-	return nil
+// Match condition for model.
+func (user *User) Match(tc *User) bool {
+	r := user.Identification.Match(tc.Identification) &&
+		user.Username == tc.Username &&
+		user.PasswordDigest == tc.PasswordDigest &&
+		user.Email == tc.Email &&
+		user.GivenName == tc.GivenName &&
+		user.MiddleNames == tc.MiddleNames &&
+		user.FamilyName == tc.FamilyName &&
+		user.Geolocation == tc.Geolocation &&
+		user.BaseTZ == tc.BaseTZ &&
+		user.CurrentTZ == tc.CurrentTZ &&
+		user.StartsAt == tc.StartsAt &&
+		user.EndsAt == tc.EndsAt
+	return r
 }

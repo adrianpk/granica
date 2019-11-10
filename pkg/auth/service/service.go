@@ -40,11 +40,3 @@ func (s *Service) Log() *log.Logger {
 func (s *Service) SetRepo(repo *repo.Repo) {
 	s.repo = repo
 }
-
-func (s *Service) userRepo() (*repo.UserRepo, error) {
-	return s.repo.UserRepoNewTx()
-}
-
-func (s *Service) accountRepo() (*repo.AccountRepo, error) {
-	return s.repo.AccountRepoNewTx()
-}

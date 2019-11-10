@@ -94,5 +94,10 @@ func GetMigrator(cfg *config.Config) *migration.Migrator {
 	mg.Config(mg.CreateAccountsTable, mg.DropAccountsTable)
 	m.AddMigration(mg)
 
+	//// CreateProfilesTable
+	//mg = &mig{}
+	//mg.Config(mg.CreateProfilesTable, mg.DropProfilesTable)
+	//m.AddMigration(mg)
+
 	return m
 }

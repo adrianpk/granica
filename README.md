@@ -17,6 +17,13 @@
 $ make migrate
 ```
 
+**Test**
+```shell
+$ make test
+```
+
+Use `make grc-test` for colored output.
+
 ## Auth package
 
 [Readme](pkg/auth/readme.md)
