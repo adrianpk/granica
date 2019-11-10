@@ -2,20 +2,29 @@ package migration
 
 import "log"
 
-// CreateAccountsTable migration
-func (m *mig) CreateAccountsTable() error {
+// CreateProfilesTable migration
+func (m *mig) CreateProfilesTable() error {
 	tx := m.GetTx()
 
-	st := `CREATE TABLE accounts
+	st := `CREATE TABLE profiles
+
 	(
 		id UUID PRIMARY KEY,
 		tenant_id VARCHAR(128),
 		slug VARCHAR(36) UNIQUE,
 		owner_id UUID REFERENCES users(id) ON DELETE CASCADE,
-		parent_id UUID,
 	  account_type VARCHAR(36),
 		name VARCHAR(64),
-		email VARCHAR(255)
+		email VARCHAR(255) UNIQUE,
+		description TEXT NULL,
+		location VARCHAR(255) NULL,
+		bio VARCHAR(255),
+		moto VARCHAR(255),
+		website VARCHAR(255),
+		aniversary_date TIMESTAMP,
+		avatar_path VARCHAR(255),
+		header_path VARCHAR(255),
+		additiional_data jsonb,
 	);`
 
 	_, err := tx.Exec(st)
@@ -24,12 +33,11 @@ func (m *mig) CreateAccountsTable() error {
 	}
 
 	st = `
-		ALTER TABLE accounts
+		ALTER TABLE profiles
+		ADD COLUMN geolocation geography (Point,4326),
 		ADD COLUMN locale VARCHAR(32),
 		ADD COLUMN base_tz VARCHAR(2),
 		ADD COLUMN current_tz VARCHAR(2),
-		ADD COLUMN starts_at TIMESTAMP,
-		ADD COLUMN ends_at TIMESTAMP WITH TIME ZONE,
 		ADD COLUMN is_active BOOLEAN,
 		ADD COLUMN is_deleted BOOLEAN,
 		ADD COLUMN created_by_id UUID REFERENCES users(id),
@@ -45,11 +53,11 @@ func (m *mig) CreateAccountsTable() error {
 	return nil
 }
 
-// DropUsersTable rollback
-func (m *mig) DropAccountsTable() error {
+// DropProfilesTable rollback
+func (m *mig) DropProfilesTable() error {
 	tx := m.GetTx()
 
-	st := `DROP TABLE accounts;`
+	st := `DROP TABLE profiles;`
 
 	_, err := tx.Exec(st)
 	if err != nil {

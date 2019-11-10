@@ -1,6 +1,7 @@
 package service
 
 import (
+	"gitlab.com/mikrowezel/backend/granica/internal/repo"
 	tp "gitlab.com/mikrowezel/backend/granica/pkg/auth/transport"
 )
 
@@ -144,7 +145,7 @@ func (s *Service) DeleteUser(req tp.DeleteUserReq, res *tp.DeleteUserRes) error 
 		return err
 	}
 
-	err = repo.DeleteByUsername(req.Identifier.Username)
+	err = repo.DeleteByUsername(req.Username)
 	if err != nil {
 		res.FromModel(nil, updateUserErr, err)
 		return err
@@ -159,4 +160,9 @@ func (s *Service) DeleteUser(req tp.DeleteUserReq, res *tp.DeleteUserRes) error 
 	// Output
 	res.FromModel(nil, "", nil)
 	return nil
+}
+
+// Misc
+func (s *Service) userRepo() (*repo.UserRepo, error) {
+	return s.repo.UserRepoNewTx()
 }

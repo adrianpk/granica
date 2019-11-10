@@ -7,8 +7,8 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"gitlab.com/mikrowezel/backend/config"
-	logger "gitlab.com/mikrowezel/backend/log"
 	"gitlab.com/mikrowezel/backend/granica/internal/model"
+	logger "gitlab.com/mikrowezel/backend/log"
 )
 
 type (
@@ -33,8 +33,8 @@ func makeAccountRepo(ctx context.Context, cfg *config.Config, log *logger.Logger
 func (ur *AccountRepo) Create(account *model.Account) error {
 	account.SetCreateValues()
 
-	st := `INSERT INTO accounts (id, slug, name, account_type, owner_id, parent_id, email, shown_name, geolocation, locale, base_tz, current_tz, starts_at, ends_at, is_active, is_deleted, created_by_id, updated_by_id, created_at, updated_at)
-VALUES (:id, :slug, :name, :account_type, :owner_id, :parent_id, :email, :shown_name, :geolocation, :locale, :base_tz, :current_tz, :starts_at, :ends_at, :is_active, :is_deleted, :created_by_id, :updated_by_id, :created_at, :updated_at)`
+	st := `INSERT INTO accounts (id, tenant_id, slug, owner_id, parent_id, account_type, name, email, locale, base_tz, current_tz, starts_at, ends_at, is_active, is_deleted, created_by_id, updated_by_id, created_at, updated_at)
+VALUES (:id, :tenant_id, :slug, :owner_id, :parent_id, :account_type, :name, :email, :locale, :base_tz, :current_tz, :starts_at, :ends_at, :is_active, :is_deleted, :created_by_id, :updated_by_id, :created_at, :updated_at)`
 
 	_, err := ur.Tx.NamedExec(st, account)
 
@@ -88,12 +88,6 @@ func (ur *AccountRepo) Update(account *model.Account) error {
 
 	st.WriteString("UPDATE accounts SET ")
 
-	if account.Name.String != ref.Name.String {
-		st.WriteString(preDelimiter(pcu))
-		st.WriteString(strUpd("name", "name"))
-		pcu = true
-	}
-
 	if account.OwnerID.String != ref.OwnerID.String {
 		st.WriteString(preDelimiter(pcu))
 		st.WriteString(strUpd("owner_id", "owner_id"))
@@ -112,15 +106,15 @@ func (ur *AccountRepo) Update(account *model.Account) error {
 		pcu = true
 	}
 
-	if account.Email.String != ref.Email.String {
+	if account.Name.String != ref.Name.String {
 		st.WriteString(preDelimiter(pcu))
-		st.WriteString(strUpd("email", "email"))
+		st.WriteString(strUpd("name", "name"))
 		pcu = true
 	}
 
-	if account.ShownName.String != ref.ShownName.String {
+	if account.Email.String != ref.Email.String {
 		st.WriteString(preDelimiter(pcu))
-		st.WriteString(strUpd("shown_name", "shown_name"))
+		st.WriteString(strUpd("email", "email"))
 		pcu = true
 	}
 
@@ -158,4 +152,20 @@ func (ur *AccountRepo) DeleteBySlug(slug string) error {
 // Commit transaction
 func (ur *AccountRepo) Commit() error {
 	return ur.Tx.Commit()
+}
+
+// Misc
+
+// AccountRepo from repo.
+func (r *Repo) AccountRepo(tx *sqlx.Tx) *AccountRepo {
+	return makeAccountRepo(context.Background(), r.Cfg(), r.Log(), tx)
+}
+
+// AccountRepoNewTx returns a user repo initialized with a new transaction
+func (r *Repo) AccountRepoNewTx() (*AccountRepo, error) {
+	tx, err := r.NewTx()
+	if err != nil {
+		return nil, err
+	}
+	return makeAccountRepo(context.Background(), r.Cfg(), r.Log(), tx), nil
 }

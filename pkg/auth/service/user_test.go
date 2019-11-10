@@ -9,17 +9,16 @@ import (
 
 	//"github.com/davecgh/go-spew/spew"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/jmoiron/sqlx"
 	"gitlab.com/mikrowezel/backend/config"
 	"gitlab.com/mikrowezel/backend/db"
 	"gitlab.com/mikrowezel/backend/granica/internal/migration"
 	"gitlab.com/mikrowezel/backend/granica/internal/model"
 	"gitlab.com/mikrowezel/backend/granica/internal/repo"
-	"gitlab.com/mikrowezel/backend/granica/pkg/auth"
+	"gitlab.com/mikrowezel/backend/granica/pkg/auth/service"
+	tp "gitlab.com/mikrowezel/backend/granica/pkg/auth/transport"
 	"gitlab.com/mikrowezel/backend/log"
 	mwmig "gitlab.com/mikrowezel/backend/migration"
-	svc "gitlab.com/mikrowezel/backend/service"
 )
 
 var (
@@ -71,16 +70,17 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
-////TestCreateUser tests user repo creation.
-//func TestCreateUser(t *testing.T) {
-//t.Log("Mock test")
-//}
+// TestMock does not test anything.
+func TestMock(t *testing.T) {
+	// Only used to test migration and rollback operations
+	// on setup and teardown respectivelly.
+}
 
 // TestCreateUser tests user creation.
 func TestCreateUser(t *testing.T) {
 	// Setup
-	req := auth.CreateUserReq{
-		auth.User{
+	req := tp.CreateUserReq{
+		tp.User{
 			Username:          userDataValid["username"],
 			Password:          userDataValid["password"],
 			Email:             userDataValid["email"],
@@ -91,7 +91,7 @@ func TestCreateUser(t *testing.T) {
 		},
 	}
 
-	var res auth.CreateUserRes
+	var res tp.CreateUserRes
 
 	ctx := context.Background()
 	cfg := testConfig()
@@ -102,11 +102,12 @@ func TestCreateUser(t *testing.T) {
 	if err != nil {
 		t.Error(err.Error())
 	}
-	// Auth
-	a := testAuth(ctx, cfg, log, "auth-handler", userRepo)
+
+	// Service
+	s := testService(ctx, cfg, log, userRepo)
 
 	// Test
-	err = a.CreateUser(req, &res)
+	err = s.CreateUser(req, &res)
 	if err != nil {
 		t.Errorf("create user error: %s", err.Error())
 	}
@@ -123,16 +124,12 @@ func TestCreateUser(t *testing.T) {
 
 	user := res.User
 	if !isSameUser(user, *userVerify) {
-
-		t.Logf("%+v\n", spew.Sdump(user))
-		t.Logf("%+v\n", spew.Sdump(userVerify))
-
 		t.Error("User data and its verification does not match.")
 	}
 }
 
-// TestGetUsers tests get all users.
-func Test1GetUsers(t *testing.T) {
+// TestAllGetUsers tests get all users.
+func TestAllGetUsers(t *testing.T) {
 	// Prerequisites
 	_, err := createSampleUsers()
 	if err != nil {
@@ -140,9 +137,9 @@ func Test1GetUsers(t *testing.T) {
 	}
 
 	// Setup
-	req := auth.GetUsersReq{}
+	req := tp.GetUsersReq{}
 
-	var res auth.GetUsersRes
+	var res tp.GetUsersRes
 
 	ctx := context.Background()
 	cfg := testConfig()
@@ -153,11 +150,12 @@ func Test1GetUsers(t *testing.T) {
 	if err != nil {
 		t.Error(err.Error())
 	}
-	// Auth
-	a := testAuth(ctx, cfg, log, "auth-handler", userRepo)
+
+	// Service
+	s := testService(ctx, cfg, log, userRepo)
 
 	// Test
-	err = a.GetUsers(req, &res)
+	err = s.GetUsers(req, &res)
 	if err != nil {
 		t.Errorf("get users error: %s", err.Error())
 	}
@@ -191,13 +189,13 @@ func TestGetUser(t *testing.T) {
 	}
 
 	// Setup
-	req := auth.GetUserReq{
-		auth.Identifier{
+	req := tp.GetUserReq{
+		tp.Identifier{
 			Username: users[0].Username.String,
 		},
 	}
 
-	var res auth.GetUserRes
+	var res tp.GetUserRes
 
 	ctx := context.Background()
 	cfg := testConfig()
@@ -214,11 +212,12 @@ func TestGetUser(t *testing.T) {
 	if err != nil {
 		t.Error(err.Error())
 	}
-	// Auth
-	a := testAuth(ctx, cfg, log, "auth-handler", userRepo)
+
+	// Service
+	s := testService(ctx, cfg, log, userRepo)
 
 	// Test
-	err = a.GetUser(req, &res)
+	err = s.GetUser(req, &res)
 	if err != nil {
 		t.Errorf("get user error: %s", err.Error())
 	}
@@ -244,11 +243,11 @@ func TestUpdateUser(t *testing.T) {
 
 	// Setup
 	user := users[0]
-	req := auth.UpdateUserReq{
-		auth.Identifier{
+	req := tp.UpdateUserReq{
+		tp.Identifier{
 			Username: user.Username.String,
 		},
-		auth.User{
+		tp.User{
 			Username:          userUpdateDataValid["username"],
 			Password:          userUpdateDataValid["password"],
 			Email:             userUpdateDataValid["email"],
@@ -259,7 +258,7 @@ func TestUpdateUser(t *testing.T) {
 		},
 	}
 
-	var res auth.UpdateUserRes
+	var res tp.UpdateUserRes
 
 	ctx := context.Background()
 	cfg := testConfig()
@@ -270,11 +269,12 @@ func TestUpdateUser(t *testing.T) {
 	if err != nil {
 		t.Error(err.Error())
 	}
-	// Auth
-	a := testAuth(ctx, cfg, log, "auth-handler", userRepo)
+
+	// Service
+	s := testService(ctx, cfg, log, userRepo)
 
 	// Test
-	err = a.UpdateUser(req, &res)
+	err = s.UpdateUser(req, &res)
 	if err != nil {
 		t.Errorf("update user error: %s", err.Error())
 	}
@@ -304,13 +304,13 @@ func TestDeleteUser(t *testing.T) {
 
 	// Setup
 	user := users[0]
-	req := auth.DeleteUserReq{
-		auth.Identifier{
+	req := tp.DeleteUserReq{
+		Identifier: tp.Identifier{
 			Username: user.Username.String,
 		},
 	}
 
-	var res auth.DeleteUserRes
+	var res tp.DeleteUserRes
 
 	ctx := context.Background()
 	cfg := testConfig()
@@ -321,11 +321,12 @@ func TestDeleteUser(t *testing.T) {
 	if err != nil {
 		t.Error(err.Error())
 	}
-	// Auth
-	a := testAuth(ctx, cfg, log, "auth-handler", userRepo)
+
+	// Service
+	s := testService(ctx, cfg, log, userRepo)
 
 	// Test
-	err = a.DeleteUser(req, &res)
+	err = s.DeleteUser(req, &res)
 	if err != nil {
 		t.Errorf("delete user error: %s", err.Error())
 	}
@@ -388,7 +389,7 @@ func getUserBySlug(username string, cfg *config.Config) (*model.User, error) {
 	return u, nil
 }
 
-func isSameUser(user auth.User, toCompare model.User) bool {
+func isSameUser(user tp.User, toCompare model.User) bool {
 	return user.Username == toCompare.Username.String &&
 		user.Email == toCompare.Email.String &&
 		user.GivenName == toCompare.GivenName.String &&
@@ -472,7 +473,7 @@ func setup() *mwmig.Migrator {
 }
 
 func teardown(m *mwmig.Migrator) {
-	// m.RollbackAll()
+	m.RollbackAll()
 }
 
 func testConfig() *config.Config {
@@ -508,13 +509,10 @@ func testRepo(ctx context.Context, cfg *config.Config, log *log.Logger, name str
 	return rh, nil
 }
 
-func testAuth(ctx context.Context, cfg *config.Config, log *log.Logger, name string, rh *repo.Repo) *auth.Auth {
-	a := auth.NewWorker(ctx, cfg, log, name)
-	hs := map[string]svc.Handler{
-		rh.Name(): rh,
-	}
-	a.SetHandlers(hs)
-	return a
+func testService(ctx context.Context, cfg *config.Config, log *log.Logger, r *repo.Repo) *service.Service {
+	s := service.MakeService(ctx, cfg, log)
+	s.SetRepo(r)
+	return s
 }
 
 // getConn returns a connection used to

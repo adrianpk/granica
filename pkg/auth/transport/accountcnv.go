@@ -1,8 +1,6 @@
 package transport
 
 import (
-	"fmt"
-
 	"gitlab.com/mikrowezel/backend/db"
 	"gitlab.com/mikrowezel/backend/granica/internal/model"
 	m "gitlab.com/mikrowezel/backend/model"
@@ -15,8 +13,6 @@ func (req *CreateAccountReq) ToModel() model.Account {
 		OwnerID:     db.ToNullString(req.OwnerID),
 		ParentID:    db.ToNullString(req.ParentID),
 		Email:       db.ToNullString(req.Email),
-		ShownName:   db.ToNullString(req.ShownName),
-		// Geolocation:    db.ToNullGeometry(req.Lat, req.Lng)
 	}
 }
 
@@ -29,9 +25,6 @@ func (res *CreateAccountRes) FromModel(m *model.Account, msg string, err error) 
 			OwnerID:     m.OwnerID.String,
 			ParentID:    m.ParentID.String,
 			Email:       m.Email.String,
-			ShownName:   m.ShownName.String,
-			Lat:         fmt.Sprintf("%f", m.Geolocation.Point.Lat),
-			Lng:         fmt.Sprintf("%f", m.Geolocation.Point.Lng),
 		}
 	}
 	res.Msg = msg
@@ -50,9 +43,6 @@ func (res *GetAccountsRes) FromModel(ms []model.Account, msg string, err error) 
 			OwnerID:     m.OwnerID.String,
 			ParentID:    m.ParentID.String,
 			Email:       m.Email.String,
-			ShownName:   m.ShownName.String,
-			Lat:         fmt.Sprintf("%f", m.Geolocation.Point.Lat),
-			Lng:         fmt.Sprintf("%f", m.Geolocation.Point.Lng),
 		}
 		resAccounts = append(resAccounts, res)
 	}
@@ -80,9 +70,6 @@ func (res *GetAccountRes) FromModel(m *model.Account, msg string, err error) {
 			OwnerID:     m.OwnerID.String,
 			ParentID:    m.ParentID.String,
 			Email:       m.Email.String,
-			ShownName:   m.ShownName.String,
-			Lat:         fmt.Sprintf("%f", m.Geolocation.Point.Lat),
-			Lng:         fmt.Sprintf("%f", m.Geolocation.Point.Lng),
 		}
 	}
 	res.Msg = msg
@@ -109,8 +96,6 @@ func (req *UpdateAccountReq) ToModel() model.Account {
 		OwnerID:     db.ToNullString(req.OwnerID),
 		ParentID:    db.ToNullString(req.ParentID),
 		Email:       db.ToNullString(req.Email),
-		ShownName:   db.ToNullString(req.ShownName),
-		// Geolocation:    db.ToNullGeometry(req.Lat, req.Lng)
 	}
 }
 
@@ -123,9 +108,6 @@ func (res *UpdateAccountRes) FromModel(m *model.Account, msg string, err error) 
 			OwnerID:     m.OwnerID.String,
 			ParentID:    m.ParentID.String,
 			Email:       m.Email.String,
-			ShownName:   m.ShownName.String,
-			Lat:         fmt.Sprintf("%f", m.Geolocation.Point.Lat),
-			Lng:         fmt.Sprintf("%f", m.Geolocation.Point.Lng),
 		}
 	}
 	res.Msg = msg

@@ -90,6 +90,9 @@ deploy-prod:
 custom-build:
 	make mod tidy; go mod vendor; go build ./...
 
+gen-sample:
+	mw generate Sample --all --force
+
 current-conn:
 	kubectl config current-context
 

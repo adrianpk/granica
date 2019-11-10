@@ -10,9 +10,6 @@ type (
 		ParentID    string `json:"parentID"`
 		AccountType string `json:"accountType"`
 		Email       string `json:"email"`
-		ShownName   string `json:"shownName"`
-		Lat         string `json:"lat"`
-		Lng         string `json:"lng"`
 		StartsAt    string `json:"startsAt"`
 		EndsAt      string `json:"endsAt"`
 	}

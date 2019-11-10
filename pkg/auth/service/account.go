@@ -1,15 +1,16 @@
 package service
 
 import (
+	"gitlab.com/mikrowezel/backend/granica/internal/repo"
 	tp "gitlab.com/mikrowezel/backend/granica/pkg/auth/transport"
 )
 
 const (
-	createAccountErr = "cannot create resource"
-	getAllAccountErr = "cannot get resource list"
-	getAccountErr    = "cannot get resource"
-	updateAccountErr = "cannot update resource"
-	deleteAccountErr = "cannot delete resource"
+	createAccountErr = "cannot create account"
+	getAllAccountErr = "cannot get account list"
+	getAccountErr    = "cannot get account"
+	updateAccountErr = "cannot update account"
+	deleteAccountErr = "cannot delete account"
 )
 
 func (s *Service) CreateAccount(req tp.CreateAccountReq, res *tp.CreateAccountRes) error {
@@ -138,7 +139,7 @@ func (s *Service) DeleteAccount(req tp.DeleteAccountReq, res *tp.DeleteAccountRe
 		return err
 	}
 
-	err = repo.DeleteBySlug(req.Identifier.Slug)
+	err = repo.DeleteBySlug(req.Slug)
 	if err != nil {
 		res.FromModel(nil, updateAccountErr, err)
 		return err
@@ -153,4 +154,9 @@ func (s *Service) DeleteAccount(req tp.DeleteAccountReq, res *tp.DeleteAccountRe
 	// Output
 	res.FromModel(nil, "", nil)
 	return nil
+}
+
+// Misc
+func (s *Service) accountRepo() (*repo.AccountRepo, error) {
+	return s.repo.AccountRepoNewTx()
 }
