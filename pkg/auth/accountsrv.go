@@ -9,7 +9,7 @@ import (
 )
 
 // Account
-func (a *Auth) makeAccountAPIRouter(parent chi.Router) chi.Router {
+func (a *Auth) makeAccountJSONRESTRouter(parent chi.Router) chi.Router {
 	return parent.Route("/accounts", func(aar chi.Router) {
 		aar.Post("/", a.jsonep.CreateAccount)
 		aar.Get("/", a.jsonep.GetAccount)
