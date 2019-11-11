@@ -8,11 +8,24 @@ import (
 	"gitlab.com/mikrowezel/backend/granica/pkg/auth/jsonrest"
 )
 
+func (a *Auth) makeUserWebRouter(parent chi.Router) chi.Router {
+	return parent.Route("/users", func(uar chi.Router) {
+		uar.Post("/", a.jsonep.CreateUser)
+		uar.Get("/", a.jsonep.GetUsers)
+		uar.Route("/{username}", func(uarid chi.Router) {
+			uarid.Use(userCtx)
+			uarid.Get("/", a.jsonep.GetUser)
+			uarid.Put("/", a.jsonep.UpdateUser)
+			uarid.Delete("/", a.jsonep.DeleteUser)
+		})
+	})
+}
+
 // We usually use slug to avoid exposing database ID to the world.
 // But because but as this value is immutable and includes the
 // username selected when the user was created/registered we
 // prefer to use username as the external main identifier.
-func (a *Auth) makeUserAPIRouter(parent chi.Router) chi.Router {
+func (a *Auth) makeUserJSONRESTRouter(parent chi.Router) chi.Router {
 	return parent.Route("/users", func(uar chi.Router) {
 		uar.Post("/", a.jsonep.CreateUser)
 		uar.Get("/", a.jsonep.GetUsers)

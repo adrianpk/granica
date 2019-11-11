@@ -10,7 +10,10 @@ REV=$(eval git rev-parse HEAD)
 # Service
 export GRN_SVC_NAME="granica"
 export GRN_SVC_REVISION=$REV
-export GRN_SVC_PINGPORT=8081
+export GRN_SVC_PINGPORT=8090
+# Servers
+export GRN_WEB_SERVER_PORT=8080
+export GRN_JSONREST_SERVER_PORT=8081
 # Postgres
 export GRN_PG_SCHEMA="public"
 export GRN_PG_DATABASE="granica"

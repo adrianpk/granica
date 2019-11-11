@@ -2,7 +2,9 @@ package auth
 
 import (
 	"context"
+	"fmt"
 	"net/http"
+	"sync"
 
 	"gitlab.com/mikrowezel/backend/config"
 	"gitlab.com/mikrowezel/backend/granica/pkg/auth/jsonrest"
@@ -14,9 +16,10 @@ import (
 type (
 	Auth struct {
 		*svc.BaseWorker
-		service *service.Service
-		jsonep  *jsonrest.Endpoint
-		Server  http.Handler
+		service        *service.Service
+		jsonep         *jsonrest.Endpoint
+		WebServer      http.Handler
+		JSONRESTServer http.Handler
 	}
 )
 
@@ -31,7 +34,9 @@ func NewWorker(ctx context.Context, cfg *config.Config, log *logger.Logger, name
 		jsonep:     jsonrest.MakeEndpoint(ctx, cfg, log, service),
 	}
 
-	w.AddServer()
+	w.AddWebServer()
+	w.AddJSONRESTServer()
+
 	return w
 }
 
@@ -45,9 +50,38 @@ func (a *Auth) Init() bool {
 }
 
 func (a *Auth) Start() error {
-	p := a.Cfg().ValOrDef("server.port", ":8080")
-	a.Log().Info("Server initializing", "port", p)
-	err := http.ListenAndServe(p, a.Server)
+	var wg sync.WaitGroup
+
+	wg.Add(1)
+	go func() {
+		a.StartWeb()
+		wg.Done()
+	}()
+
+	wg.Add(1)
+	go func() {
+		a.StartJSONREST()
+		wg.Done()
+	}()
+
+	wg.Wait()
+	return nil
+}
+
+func (a *Auth) StartWeb() error {
+	p := a.Cfg().ValOrDef("web.server.port", "8080")
+	p = fmt.Sprintf(":%s", p)
+	a.Log().Info("Web server initializing", "port", p)
+	err := http.ListenAndServe(p, a.WebServer)
+	a.Log().Error(err)
+	return err
+}
+
+func (a *Auth) StartJSONREST() error {
+	p := a.Cfg().ValOrDef("jsonrest.server.port", "8081")
+	p = fmt.Sprintf(":%s", p)
+	a.Log().Info("JSON REST Server initializing", "port", p)
+	err := http.ListenAndServe(p, a.JSONRESTServer)
 	a.Log().Error(err)
 	return err
 }

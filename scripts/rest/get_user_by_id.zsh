@@ -2,7 +2,7 @@
 
 # Vars
 HOST="localhost"
-PORT="8080"
+PORT="8081"
 API_PATH="api"
 API_VER="v1"
 RES_PATH="users"
