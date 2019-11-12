@@ -2,10 +2,12 @@ package auth
 
 import (
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"github.com/markbates/pkger"
 )
 
 type textResponse string
@@ -70,9 +72,16 @@ func (a *Auth) makeHomeJSONRESTRouter() chi.Router {
 }
 
 func (a *Auth) addHomeWebRoutes(rt chi.Router) {
-	rt.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		tr := textResponse("Granica web server is running!")
-		rt.Get("/", tr.write)
+	dir := "/assets/web/public"
+	fs := http.FileServer(FileSystem{pkger.Dir(dir)})
+
+	rt.Get("/*", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := pkger.Stat(dir + r.RequestURI); os.IsNotExist(err) {
+			http.StripPrefix(r.RequestURI, fs).ServeHTTP(w, r)
+
+		} else {
+			fs.ServeHTTP(w, r)
+		}
 	})
 }
 

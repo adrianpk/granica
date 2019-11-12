@@ -38,6 +38,7 @@ const (
 
 // TODO: This is a work in progress and the implementation is still unclean.
 // - Common logic to all handlers will be extracted and generalized.
+// 	* Move to a mw library or same login in project using cli generator?
 // - Templates will be embedded (https://github.com/markbates/pkger)
 // - Error condition will load a flash message and render/redirec page as appropiate.
 // - Templates will be beautified using tailwind classes.
