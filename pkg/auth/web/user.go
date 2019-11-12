@@ -7,6 +7,31 @@ import (
 	tp "gitlab.com/mikrowezel/backend/granica/pkg/auth/transport"
 )
 
+type (
+	// WRes stands for wrapped response
+	WRes struct {
+		Data  interface{}
+		Flash []FlashData
+		Err   error
+	}
+
+	// Flash data to present in page
+	FlashData struct {
+		Type MsgType
+		Msg  string
+	}
+
+	// MsgType stands for message type
+	MsgType string
+)
+
+const (
+	InfoMT  MsgType = "info"
+	WarnMT  MsgType = "warn"
+	ErrorMT MsgType = "error"
+	DebugMT MsgType = "debug"
+)
+
 const (
 	UserCtxKey contextKey = "user"
 )
@@ -57,10 +82,39 @@ func (ep *Endpoint) GetUsers(w http.ResponseWriter, r *http.Request) {
 	//ep.Log().Info("Response object", "val", spew.Sdump(res))
 
 	// Execute templates
-	err = ts.Execute(w, res)
+	wr := ep.okRes(res)
+	err = ts.Execute(w, wr)
 	if err != nil {
 		ep.Log().Error(err)
 		ep.writeResponse(w, err.Error()) // FIX: Implement a redirect.
 		return
+	}
+}
+
+func (ep *Endpoint) okRes(data interface{}, msgs ...string) WRes {
+	fls := []FlashData{}
+	for _, m := range msgs {
+		fls = append(fls, ep.makeFlash(m, InfoMT))
+	}
+
+	return WRes{
+		Data:  data,
+		Flash: fls,
+		Err:   nil,
+	}
+}
+
+func (ep *Endpoint) wrap(data interface{}, msg string, msgType MsgType, err error) WRes {
+	return WRes{
+		Data:  data,
+		Flash: []FlashData{ep.makeFlash(msg, msgType)},
+		Err:   err,
+	}
+}
+
+func (ep *Endpoint) makeFlash(msg string, msgType MsgType) FlashData {
+	return FlashData{
+		Type: msgType,
+		Msg:  msg,
 	}
 }

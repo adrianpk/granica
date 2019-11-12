@@ -10,7 +10,7 @@
 			</tr>
 		</thead>
 		<tbody>
-			{{range $key, $user := .Users}}
+			{{range $key, $user := .Data.Users}}
 			<tr id="{{$user.Slug}}">
 				<td>
 					{{$user.Username}}
