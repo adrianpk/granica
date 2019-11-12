@@ -76,7 +76,7 @@ func ResPathInitDelete(rootPath string, r Identifiable) string {
 	return fmt.Sprintf("/%s/%s/init-delete", rootPath, r.GetSlug())
 }
 
-// ResPathID
-func ResPathID(rootPath string, r Identifiable) string {
+// ResPathSlug
+func ResPathSlug(rootPath string, r Identifiable) string {
 	return fmt.Sprintf("/%s/%s", rootPath, r.GetSlug())
 }

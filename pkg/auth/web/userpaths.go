@@ -9,8 +9,8 @@ func UserPath() string {
 }
 
 // UserPathEdit
-func UserPathEdit(model Identifiable) string {
-	return ResPathEdit(UserRoot, model)
+func UserPathEdit(res Identifiable) string {
+	return ResPathEdit(UserRoot, res)
 }
 
 // UserPathNew
@@ -19,11 +19,11 @@ func UserPathNew() string {
 }
 
 // UserPathInitDelete
-func UserPathInitDelete(model Identifiable) string {
-	return ResPathInitDelete(UserRoot, model)
+func UserPathInitDelete(res Identifiable) string {
+	return ResPathInitDelete(UserRoot, res)
 }
 
-// UserPathID
-func UserPathID(model Identifiable) string {
-	return ResPathID(UserRoot, model)
+// UserPathSlug
+func UserPathID(res Identifiable) string {
+	return ResPathSlug(UserRoot, res)
 }

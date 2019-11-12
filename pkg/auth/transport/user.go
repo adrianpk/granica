@@ -18,6 +18,10 @@ type (
 	Users []User
 )
 
+func (u *User) GetSlug() string {
+	return u.Slug
+}
+
 type (
 	// CreateUserReq input data.
 	CreateUserReq struct {
