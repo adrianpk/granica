@@ -29,6 +29,9 @@ clean:
 run:
 	./scripts/run.sh
 
+package-resources:
+	pkger -include /assets/web/public -o pkg/auth/web
+
 # Generators
 gen-resource:
 	mw generate all assets/gen/resource.yaml
