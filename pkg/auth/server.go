@@ -71,14 +71,14 @@ func (a *Auth) makeHomeJSONRESTRouter() chi.Router {
 
 func (a *Auth) addHomeWebRoutes(rt chi.Router) {
 	rt.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		tr := textResponse("Granica web servcer is running!")
+		tr := textResponse("Granica web server is running!")
 		rt.Get("/", tr.write)
 	})
 }
 
 func (a *Auth) addHomeJSONRESTRoutes(rt chi.Router) {
 	rt.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		tr := textResponse("Granica is running!")
+		tr := textResponse("Granica JSON REST API is running!")
 		rt.Get("/", tr.write)
 	})
 }

@@ -10,13 +10,13 @@ import (
 
 func (a *Auth) makeUserWebRouter(parent chi.Router) chi.Router {
 	return parent.Route("/users", func(uar chi.Router) {
-		uar.Post("/", a.jsonep.CreateUser)
-		uar.Get("/", a.jsonep.GetUsers)
+		//uar.Post("/", a.webep.CreateUser)
+		uar.Get("/", a.webep.GetUsers)
 		uar.Route("/{username}", func(uarid chi.Router) {
 			uarid.Use(userCtx)
-			uarid.Get("/", a.jsonep.GetUser)
-			uarid.Put("/", a.jsonep.UpdateUser)
-			uarid.Delete("/", a.jsonep.DeleteUser)
+			//uarid.Get("/", a.jsonep.GetUser)
+			//uarid.Put("/", a.jsonep.UpdateUser)
+			//uarid.Delete("/", a.jsonep.DeleteUser)
 		})
 	})
 }
