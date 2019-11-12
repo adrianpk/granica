@@ -74,7 +74,9 @@ func (a *Auth) Start() error {
 func (a *Auth) StartWeb() error {
 	p := a.Cfg().ValOrDef("web.server.port", "8080")
 	p = fmt.Sprintf(":%s", p)
+
 	a.Log().Info("Web server initializing", "port", p)
+
 	err := http.ListenAndServe(p, a.WebServer)
 	a.Log().Error(err)
 	return err
@@ -83,7 +85,9 @@ func (a *Auth) StartWeb() error {
 func (a *Auth) StartJSONREST() error {
 	p := a.Cfg().ValOrDef("jsonrest.server.port", "8081")
 	p = fmt.Sprintf(":%s", p)
+
 	a.Log().Info("JSON REST Server initializing", "port", p)
+
 	err := http.ListenAndServe(p, a.JSONRESTServer)
 	a.Log().Error(err)
 	return err
