@@ -32,6 +32,9 @@ run:
 package-resources:
 	pkger -include /assets/web/public -o pkg/auth/web
 
+list-package-resources:
+	pkger list -include /assets/web/public
+
 # Generators
 gen-resource:
 	mw generate all assets/gen/resource.yaml
