@@ -2,6 +2,8 @@
 
  Authentication and authorization service.
 
+<img src="docs/img/users_index.png" width="480">
+
 ## Dev branch
 
 * [new/wip at GitLab](https://gitlab.com/mikrowezel/backend/granica/tree/new/wip)
