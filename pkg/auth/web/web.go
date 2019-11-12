@@ -24,6 +24,12 @@ type (
 	contextKey string
 )
 
+type (
+	Identifiable interface {
+		GetSlug() string
+	}
+)
+
 func MakeEndpoint(ctx context.Context, cfg *config.Config, log *log.Logger, service *service.Service) *Endpoint {
 	return &Endpoint{
 		ctx:     ctx,

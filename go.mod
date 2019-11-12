@@ -6,8 +6,8 @@ require (
 	github.com/davecgh/go-spew v1.1.1
 	github.com/go-chi/chi v4.0.2+incompatible
 	github.com/jmoiron/sqlx v1.2.0
-	github.com/kr/pretty v0.1.0 // indirect
 	github.com/lib/pq v1.2.0
+	github.com/markbates/pkger v0.12.2
 	github.com/mattn/go-sqlite3 v1.10.0 // indirect
 	gitlab.com/mikrowezel/backend/config v0.0.0
 	gitlab.com/mikrowezel/backend/db v0.0.0-20191014125253-afa2a932cece

@@ -1,0 +1,26 @@
+<!-- Head -->
+{{define "head"}}
+{{$data := .Data}}
+User Index
+{{end}}
+<!-- Head -->
+
+<!-- Body -->
+{{define "body"}}
+{{$data := .}}
+
+<!-- Contextual bar -->
+{{template "ctxbar" .}}
+<!-- Contextual bar -->
+
+<!-- Header -->
+{{$title := "Users Index"}}
+{{template "header" $title}}
+<!-- Header -->
+
+<!-- List -->
+{{template "list" .}}
+<!-- List -->
+
+{{end}}
+<!-- Body -->
