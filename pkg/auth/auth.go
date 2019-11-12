@@ -9,6 +9,7 @@ import (
 	"gitlab.com/mikrowezel/backend/config"
 	"gitlab.com/mikrowezel/backend/granica/pkg/auth/jsonrest"
 	"gitlab.com/mikrowezel/backend/granica/pkg/auth/service"
+	"gitlab.com/mikrowezel/backend/granica/pkg/auth/web"
 	logger "gitlab.com/mikrowezel/backend/log"
 	svc "gitlab.com/mikrowezel/backend/service"
 )
@@ -17,6 +18,7 @@ type (
 	Auth struct {
 		*svc.BaseWorker
 		service        *service.Service
+		webep          *web.Endpoint
 		jsonep         *jsonrest.Endpoint
 		WebServer      http.Handler
 		JSONRESTServer http.Handler
@@ -31,6 +33,7 @@ func NewWorker(ctx context.Context, cfg *config.Config, log *logger.Logger, name
 	w := &Auth{
 		BaseWorker: svc.NewWorker(ctx, cfg, log, "granica-auth-worker"),
 		service:    service,
+		webep:      web.MakeEndpoint(ctx, cfg, log, service),
 		jsonep:     jsonrest.MakeEndpoint(ctx, cfg, log, service),
 	}
 
