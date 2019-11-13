@@ -43,6 +43,7 @@ $ make run
 ## Packages
 
 **Worker**
+
 [Auth](pkg/auth/readme.md)
 
 ## Helpers
