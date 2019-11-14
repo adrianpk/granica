@@ -23,17 +23,24 @@ Use `make grc-test` for colored output.
 ```shell
 $ make run
 ./scripts/run.sh
-7:48PM INF New handler name=migration-handler
-7:48PM INF New handler name=repo-handler
-7:48PM INF Dialing to Postgres host="host=localhost port=5432 user=######## password=######## dbname=granica sslmode=disable"
-7:48PM INF Postgres connection established
-7:48PM INF Repo initializated name=repo-handler
-2019/11/12 19:48:44 Migration 'enable_postgis' already applied.
-2019/11/12 19:48:44 Migration 'create_users_table' already applied.
-2019/11/12 19:48:44 Migration 'create_accounts_table' already applied.
-7:48PM INF Migrator initializated name=migration-handler
-7:48PM INF JSON REST Server initializing port=:8081
-7:48PM INF Web server initializing port=:8080
+granica: no process found
+5:49PM INF New handler name=migration-handler
+5:49PM INF New handler name=repo-handler
+5:49PM INF New template file path=gitlab.com/mikrowezel/backend/granica:/assets/web/template/layout/base.tmpl
+5:49PM INF New template file path=gitlab.com/mikrowezel/backend/granica:/assets/web/template/partial/_flash.tmpl
+5:49PM INF New template file path=gitlab.com/mikrowezel/backend/granica:/assets/web/template/user/_ctxbar.tmpl
+5:49PM INF New template file path=gitlab.com/mikrowezel/backend/granica:/assets/web/template/user/_header.tmpl
+5:49PM INF New template file path=gitlab.com/mikrowezel/backend/granica:/assets/web/template/user/_list.tmpl
+5:49PM INF New template file path=gitlab.com/mikrowezel/backend/granica:/assets/web/template/user/index.tmpl
+5:49PM INF Dialing to Postgres host="host=localhost port=5432 user=granica password=granica dbname=granica sslmode=disable"
+5:49PM INF Postgres connection established
+5:49PM INF Repo initializated name=repo-handler
+2019/11/14 17:49:22 Migration 'enable_postgis' already applied.
+2019/11/14 17:49:22 Migration 'create_users_table' already applied.
+2019/11/14 17:49:22 Migration 'create_accounts_table' already applied.
+5:49PM INF Migrator initializated name=migration-handler
+5:49PM INF JSON REST Server initializing port=:8081
+5:49PM INF Web server initializing port=:8080
 ```
 
 ## Deployment

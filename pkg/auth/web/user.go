@@ -64,16 +64,16 @@ func (ep *Endpoint) GetUsers(w http.ResponseWriter, r *http.Request) {
 
 	// Template paths
 	files := []string{
-		"./assets/web/resource/base.layout.tmpl",
-		"./assets/web/resource/flash.partial.tmpl",
-		"./assets/web/resource/user/index.page.tmpl",
-		"./assets/web/resource/user/header.partial.tmpl",
-		"./assets/web/resource/user/ctxbar.partial.tmpl",
-		"./assets/web/resource/user/list.partial.tmpl",
+		"./assets/web/template/layout/base.tmpl",
+		"./assets/web/template/partial/_flash.tmpl",
+		"./assets/web/template/user/index.tmpl",
+		"./assets/web/template/user/_header.tmpl",
+		"./assets/web/template/user/_ctxbar.tmpl",
+		"./assets/web/template/user/_list.tmpl",
 	}
 
 	// Parse templates
-	ts, err := template.New("base.layout.tmpl").Funcs(pathFxs).ParseFiles(files...)
+	ts, err := template.New("base.tmpl").Funcs(pathFxs).ParseFiles(files...)
 	if err != nil {
 		ep.Log().Error(err)
 		ep.writeResponse(w, err.Error()) // FIX: Implement a redirect.

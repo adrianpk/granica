@@ -5,20 +5,31 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 
+	"github.com/markbates/pkger"
 	"gitlab.com/mikrowezel/backend/config"
 	"gitlab.com/mikrowezel/backend/granica/pkg/auth/service"
 	"gitlab.com/mikrowezel/backend/log"
 )
 
-type Endpoint struct {
-	ctx     context.Context
-	cfg     *config.Config
-	log     *log.Logger
-	service *service.Service
-}
+type (
+	Endpoint struct {
+		ctx        context.Context
+		cfg        *config.Config
+		log        *log.Logger
+		service    *service.Service
+		tmpls      TemplateSet
+		tmplGroups TemplateGroups
+	}
+
+	TemplateSet    map[string]*template.Template
+	TemplateGroups map[string]map[string][]string
+)
 
 type (
 	contextKey string
@@ -31,12 +42,17 @@ type (
 )
 
 func MakeEndpoint(ctx context.Context, cfg *config.Config, log *log.Logger, service *service.Service) *Endpoint {
-	return &Endpoint{
+	e := Endpoint{
 		ctx:     ctx,
 		cfg:     cfg,
 		log:     log,
 		service: service,
 	}
+
+	e.collectTemplates()
+	e.classifyTemplates()
+
+	return &e
 }
 
 func (e *Endpoint) Ctx() context.Context {
@@ -49,6 +65,107 @@ func (e *Endpoint) Cfg() *config.Config {
 
 func (e *Endpoint) Log() *log.Logger {
 	return e.log
+}
+
+// collectTemplates embedded filesystem (pkger)
+// under '/assets/web/template'
+func (e *Endpoint) collectTemplates() error {
+	e.tmpls = make(TemplateSet)
+	templateDir := "/assets/web/template"
+
+	err := pkger.Walk(templateDir,
+		func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				e.Log().Error(err, "msg", "Cannot load template", "path", path)
+				return err
+			}
+
+			if filepath.Ext(path) == ".tmpl" {
+				list := filepath.SplitList(path)
+				base := fmt.Sprintf("%s:%s", list[0], templateDir)
+				p, _ := filepath.Rel(base, path)
+
+				e.Log().Info("Template file", "path", p)
+
+				e.tmpls[p] = template.New(base)
+				return nil
+			}
+
+			//e.Log().Warn("Not a valid template", "path", path)
+			return nil
+		})
+
+	if err != nil {
+		e.Log().Error(err, "msg", "Cannot load templates", "path")
+		return err
+	}
+
+	return nil
+}
+
+// classifyTemplates organizing them,
+// first by type (layout, partial and page)
+// and then by resource.
+func (e *Endpoint) classifyTemplates() {
+	all := make(map[string]map[string][]string)
+	last := ""
+	keys := e.tmplsKeys()
+
+	layoutDir := "layout"
+	layoutKey := "layout"
+	pageKey := "page"
+	partialKey := "partial"
+
+	for _, path := range keys {
+
+		e.Log().Info("Classifying...", "path", path)
+
+		fileDir := filepath.Dir(path)
+		fileName := filepath.Base(path)
+
+		if fileDir != last {
+
+			if _, ok := all[fileDir]; !ok {
+				all[fileDir] = make(map[string][]string)
+			}
+
+			if isValidTemplateFile(path) {
+				if isPartial(fileName) {
+					all[fileDir][partialKey] = append(all[fileDir][partialKey], path)
+
+				} else if isLayout(fileDir) {
+					all[layoutDir][layoutKey] = append(all[layoutDir][layoutKey], path)
+
+				} else {
+					all[fileDir][pageKey] = append(all[fileDir][pageKey], path)
+				}
+			}
+		}
+	}
+
+	//e.Log().Info(spew.Sdump(all))
+
+	e.tmplGroups = all
+}
+
+func (e *Endpoint) tmplsKeys() []string {
+	keys := make([]string, 0, len(e.tmpls))
+	for k, _ := range e.tmpls {
+		keys = append(keys, k)
+	}
+	return keys
+}
+
+func isValidTemplateFile(fileName string) bool {
+	return strings.HasSuffix(fileName, ".tmpl") && !strings.HasPrefix(fileName, ".")
+}
+
+func isPartial(fileName string) bool {
+	return strings.HasPrefix(fileName, "_")
+}
+
+func isLayout(fileDir string) bool {
+	return strings.HasPrefix(fileDir, "layout")
 }
 
 // Output
