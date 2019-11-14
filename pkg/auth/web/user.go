@@ -64,12 +64,12 @@ func (ep *Endpoint) GetUsers(w http.ResponseWriter, r *http.Request) {
 
 	// Template paths
 	files := []string{
-		"./assets/web/resource/layout/base.tmpl",
-		"./assets/web/resource/partial/_flash.tmpl",
-		"./assets/web/resource/user/index.tmpl",
-		"./assets/web/resource/user/_header.tmpl",
-		"./assets/web/resource/user/_ctxbar.tmpl",
-		"./assets/web/resource/user/_list.tmpl",
+		"./assets/web/template/layout/base.tmpl",
+		"./assets/web/template/partial/_flash.tmpl",
+		"./assets/web/template/user/index.tmpl",
+		"./assets/web/template/user/_header.tmpl",
+		"./assets/web/template/user/_ctxbar.tmpl",
+		"./assets/web/template/user/_list.tmpl",
 	}
 
 	// Parse templates
