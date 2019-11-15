@@ -117,7 +117,7 @@ func (e *Endpoint) collectTemplates() error {
 // first by type (layout, partial and page)
 // and then by resource.
 func (e *Endpoint) classifyTemplates() {
-	all := make(map[string]map[string][]string)
+	//all := make(TemplateGroups)
 	last := ""
 	keys := e.tmplsKeys()
 
