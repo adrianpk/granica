@@ -19,13 +19,11 @@ import (
 
 type (
 	Endpoint struct {
-		ctx        context.Context
-		cfg        *config.Config
-		log        *log.Logger
-		service    *service.Service
-		tmpls      TemplateSet
-		tmplGroups TemplateGroups
-		parsed     TemplateSet
+		ctx     context.Context
+		cfg     *config.Config
+		log     *log.Logger
+		service *service.Service
+		parsed  TemplateSet
 	}
 
 	TemplateSet    map[string]*template.Template
@@ -50,7 +48,7 @@ const (
 	partialKey  = "partial"
 )
 
-func MakeEndpoint(ctx context.Context, cfg *config.Config, log *log.Logger, service *service.Service) *Endpoint {
+func MakeEndpoint(ctx context.Context, cfg *config.Config, log *log.Logger, service *service.Service) (*Endpoint, error) {
 	e := Endpoint{
 		ctx:     ctx,
 		cfg:     cfg,
@@ -58,11 +56,14 @@ func MakeEndpoint(ctx context.Context, cfg *config.Config, log *log.Logger, serv
 		service: service,
 	}
 
-	e.collectTemplates()
-	e.classifyTemplates()
-	e.parseTemplates()
+	ts, err := e.collectTemplates()
+	if err != nil {
+		return &e, err
+	}
+	tg := e.classifyTemplates(ts)
+	e.parseTemplates(ts, tg)
 
-	return &e
+	return &e, nil
 }
 
 func (e *Endpoint) Ctx() context.Context {
@@ -79,8 +80,8 @@ func (e *Endpoint) Log() *log.Logger {
 
 // collectTemplates embedded filesystem (pkger)
 // under '/assets/web/template'
-func (e *Endpoint) collectTemplates() error {
-	e.tmpls = make(TemplateSet)
+func (e *Endpoint) collectTemplates() (TemplateSet, error) {
+	tmpls := make(TemplateSet)
 
 	err := pkger.Walk(templateDir,
 		func(path string, info os.FileInfo, err error) error {
@@ -96,7 +97,7 @@ func (e *Endpoint) collectTemplates() error {
 
 				e.Log().Info("Template file", "path", p)
 
-				e.tmpls[p] = template.New(base)
+				tmpls[p] = template.New(base)
 				return nil
 			}
 
@@ -107,19 +108,19 @@ func (e *Endpoint) collectTemplates() error {
 
 	if err != nil {
 		e.Log().Error(err, "msg", "Cannot load templates", "path")
-		return err
+		return tmpls, err
 	}
 
-	return nil
+	return tmpls, nil
 }
 
 // classifyTemplates organizing them,
 // first by type (layout, partial and page)
 // and then by resource.
-func (e *Endpoint) classifyTemplates() {
-	//all := make(TemplateGroups)
+func (e *Endpoint) classifyTemplates(ts TemplateSet) TemplateGroups {
+	all := make(TemplateGroups)
 	last := ""
-	keys := e.tmplsKeys()
+	keys := e.tmplsKeys(ts)
 
 	for _, path := range keys {
 		p := "./assets/web/template" + "/" + path
@@ -149,22 +150,22 @@ func (e *Endpoint) classifyTemplates() {
 		}
 	}
 
-	e.tmplGroups = all
+	return all
 }
 
-func (e *Endpoint) tmplsKeys() []string {
-	keys := make([]string, 0, len(e.tmpls))
-	for k, _ := range e.tmpls {
+func (e *Endpoint) tmplsKeys(ts TemplateSet) []string {
+	keys := make([]string, 0, len(ts))
+	for k, _ := range ts {
 		keys = append(keys, k)
 	}
 	return keys
 }
 
-func (e *Endpoint) parseTemplates() {
+func (e *Endpoint) parseTemplates(ts TemplateSet, tg TemplateGroups) {
 	e.parsed = make(TemplateSet)
-	layout := e.tmplGroups[layoutDir][layoutKey][0]
+	layout := tg[layoutDir][layoutKey][0]
 
-	for k, ts := range e.tmplGroups {
+	for k, ts := range tg {
 		pages := ts[pageKey]
 		partials := ts[partialKey]
 
