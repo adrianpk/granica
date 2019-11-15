@@ -25,6 +25,7 @@ type (
 		service    *service.Service
 		tmpls      TemplateSet
 		tmplGroups TemplateGroups
+		parsed     TemplateSet
 	}
 
 	TemplateSet    map[string]*template.Template
@@ -41,6 +42,14 @@ type (
 	}
 )
 
+const (
+	templateDir = "/assets/web/template"
+	layoutDir   = "layout"
+	layoutKey   = "layout"
+	pageKey     = "page"
+	partialKey  = "partial"
+)
+
 func MakeEndpoint(ctx context.Context, cfg *config.Config, log *log.Logger, service *service.Service) *Endpoint {
 	e := Endpoint{
 		ctx:     ctx,
@@ -51,6 +60,7 @@ func MakeEndpoint(ctx context.Context, cfg *config.Config, log *log.Logger, serv
 
 	e.collectTemplates()
 	e.classifyTemplates()
+	e.parseTemplates()
 
 	return &e
 }
@@ -71,7 +81,6 @@ func (e *Endpoint) Log() *log.Logger {
 // under '/assets/web/template'
 func (e *Endpoint) collectTemplates() error {
 	e.tmpls = make(TemplateSet)
-	templateDir := "/assets/web/template"
 
 	err := pkger.Walk(templateDir,
 		func(path string, info os.FileInfo, err error) error {
@@ -92,6 +101,7 @@ func (e *Endpoint) collectTemplates() error {
 			}
 
 			//e.Log().Warn("Not a valid template", "path", path)
+
 			return nil
 		})
 
@@ -111,14 +121,10 @@ func (e *Endpoint) classifyTemplates() {
 	last := ""
 	keys := e.tmplsKeys()
 
-	layoutDir := "layout"
-	layoutKey := "layout"
-	pageKey := "page"
-	partialKey := "partial"
-
 	for _, path := range keys {
+		p := "./assets/web/template" + "/" + path
 
-		e.Log().Info("Classifying...", "path", path)
+		//e.Log().Debug("Classifying", "path", path)
 
 		fileDir := filepath.Dir(path)
 		fileName := filepath.Base(path)
@@ -131,19 +137,17 @@ func (e *Endpoint) classifyTemplates() {
 
 			if isValidTemplateFile(path) {
 				if isPartial(fileName) {
-					all[fileDir][partialKey] = append(all[fileDir][partialKey], path)
+					all[fileDir][partialKey] = append(all[fileDir][partialKey], p)
 
 				} else if isLayout(fileDir) {
-					all[layoutDir][layoutKey] = append(all[layoutDir][layoutKey], path)
+					all[layoutDir][layoutKey] = append(all[layoutDir][layoutKey], p)
 
 				} else {
-					all[fileDir][pageKey] = append(all[fileDir][pageKey], path)
+					all[fileDir][pageKey] = append(all[fileDir][pageKey], p)
 				}
 			}
 		}
 	}
-
-	//e.Log().Info(spew.Sdump(all))
 
 	e.tmplGroups = all
 }
@@ -154,6 +158,52 @@ func (e *Endpoint) tmplsKeys() []string {
 		keys = append(keys, k)
 	}
 	return keys
+}
+
+func (e *Endpoint) parseTemplates() {
+	e.parsed = make(TemplateSet)
+	layout := e.tmplGroups[layoutDir][layoutKey][0]
+
+	for k, ts := range e.tmplGroups {
+		pages := ts[pageKey]
+		partials := ts[partialKey]
+
+		for _, t := range pages {
+			if k != layoutDir {
+				e.parseTemplate(t, partials, layout, pathFxs)
+			}
+		}
+	}
+}
+
+func (e *Endpoint) parseTemplate(page string, partials []string, layout string, funcs template.FuncMap) {
+	parse := "base.tmpl"
+	all := make([]string, 10)
+	all = append(all, page)
+	all = append(all, partials...)
+	all = append(all, layout)
+	trimSlice(&all)
+
+	t, err := template.New(parse).Funcs(funcs).ParseFiles(all...)
+	if err != nil {
+		e.Log().Error(err, "Error parsing template set", "page", page)
+	}
+
+	e.Log().Info("Template processed", "template", page)
+
+	e.parsed[page] = t
+}
+
+func trimSlice(slice *[]string) {
+	newSlice := make([]string, 0, len(*slice))
+	for _, val := range *slice {
+		switch val {
+		case "":
+		default:
+			newSlice = append(newSlice, val)
+		}
+	}
+	*slice = newSlice
 }
 
 func isValidTemplateFile(fileName string) bool {

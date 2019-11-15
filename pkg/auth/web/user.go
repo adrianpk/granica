@@ -1,7 +1,6 @@
 package web
 
 import (
-	"html/template"
 	"net/http"
 
 	tp "gitlab.com/mikrowezel/backend/granica/pkg/auth/transport"
@@ -62,28 +61,10 @@ func (ep *Endpoint) GetUsers(w http.ResponseWriter, r *http.Request) {
 	//// Output
 	//ep.writeResponse(w, res)
 
-	// Template paths
-	files := []string{
-		"./assets/web/template/layout/base.tmpl",
-		"./assets/web/template/partial/_flash.tmpl",
-		"./assets/web/template/user/index.tmpl",
-		"./assets/web/template/user/_header.tmpl",
-		"./assets/web/template/user/_ctxbar.tmpl",
-		"./assets/web/template/user/_list.tmpl",
-	}
-
-	// Parse templates
-	ts, err := template.New("base.tmpl").Funcs(pathFxs).ParseFiles(files...)
-	if err != nil {
-		ep.Log().Error(err)
-		ep.writeResponse(w, err.Error()) // FIX: Implement a redirect.
-		return
-	}
-
-	//ep.Log().Info("Response object", "val", spew.Sdump(res))
-
 	// Execute templates
 	wr := ep.okRes(res)
+
+	ts := ep.parsed["./assets/web/template/user/index.tmpl"]
 	err = ts.Execute(w, wr)
 	if err != nil {
 		ep.Log().Error(err)
