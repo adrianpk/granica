@@ -28,6 +28,7 @@ type (
 // NewWorker creates a new Auth worker instance.
 func NewWorker(ctx context.Context, cfg *config.Config, log *logger.Logger, name string) (*Auth, error) {
 	service := service.MakeService(ctx, cfg, log)
+
 	wep, err := web.MakeEndpoint(ctx, cfg, log, service)
 	if err != nil {
 		return nil, err
