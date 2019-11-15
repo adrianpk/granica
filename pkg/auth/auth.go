@@ -26,21 +26,25 @@ type (
 )
 
 // NewWorker creates a new Auth worker instance.
-func NewWorker(ctx context.Context, cfg *config.Config, log *logger.Logger, name string) *Auth {
-
+func NewWorker(ctx context.Context, cfg *config.Config, log *logger.Logger, name string) (*Auth, error) {
 	service := service.MakeService(ctx, cfg, log)
+
+	wep, err := web.MakeEndpoint(ctx, cfg, log, service)
+	if err != nil {
+		return nil, err
+	}
 
 	w := &Auth{
 		BaseWorker: svc.NewWorker(ctx, cfg, log, "granica-auth-worker"),
 		service:    service,
-		webep:      web.MakeEndpoint(ctx, cfg, log, service),
+		webep:      wep,
 		jsonep:     jsonrest.MakeEndpoint(ctx, cfg, log, service),
 	}
 
 	w.AddWebServer()
 	w.AddJSONRESTServer()
 
-	return w
+	return w, nil
 }
 
 func (a *Auth) Init() bool {

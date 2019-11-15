@@ -37,15 +37,17 @@ const (
 
 // TODO: This is a work in progress and the implementation is still unclean.
 // - Common logic to all handlers will be extracted and generalized.
-// 	* Move to a mw library or same login in project using cli generator?
+// 	* Move to a̶ ̶m̶w̶ ̶l̶i̶b̶r̶a̶r̶y̶ ̶o̶r̶  generate code in project using cli generator?
+//    At the moment I prefer an approach that limits the amount of dependenciesi
+//    even if it increases LOC of the project.
 // - Templates w̶i̶l̶l̶ ̶b̶e̶  are now embedded (https://github.com/markbates/pkger)
 // - Error condition will load a flash message and render/redirec page as appropiate.
-// - Templates will be beautified using tailwind classes.
-// - To consider: allow loading of templates from external filepathso
+// - T̶e̶m̶p̶l̶a̶t̶e̶s̶ ̶w̶i̶l̶l̶ ̶b̶e̶ ̶b̶e̶a̶u̶t̶i̶f̶i̶e̶d̶ ̶u̶s̶i̶n̶g̶ ̶t̶a̶i̶l̶w̶i̶n̶d̶ ̶c̶l̶a̶s̶s̶e̶s̶.
+// - To consider: allow loading of templates from external filepath.
 // 	* External / embedded configurable by envar.
-// - Finally, after a pattern emerges, all resources needed\
-// to generate endpoint handlers and templates will be automated
-// using mw-cli: https://gitlab.com/mikrowezel/backend/cli
+// - Finally, after a pattern emerges, all resources needed
+// 	 to generate endpoint handlers and templates will be automated
+//   using mw-cli: https://gitlab.com/mikrowezel/backend/cli
 func (ep *Endpoint) GetUsers(w http.ResponseWriter, r *http.Request) {
 	var req tp.GetUsersReq
 	var res tp.GetUsersRes

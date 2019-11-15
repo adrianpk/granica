@@ -25,29 +25,30 @@ func main() {
 	log := initLog(cfg)
 
 	ctx, cancel := context.WithCancel(context.Background())
-	go checkSigTerm(cancel)
+	checkStopEvents(ctx, cancel)
 
 	// Create service
 	s = newService(ctx, cfg, log, cancel)
 
-	// Add service handlers
-	// Migration
+	// Add Migration handler
 	mh, err := migration.NewHandler(ctx, cfg, log, "migration-handler")
 	s.AddHandler(mh)
 
-	// Repo
+	// Add Repo handler
 	rh, err := repo.NewHandler(ctx, cfg, log, "repo-handler")
 	s.AddHandler(rh)
 
 	// Set service worker
-	auth := auth.NewWorker(ctx, cfg, log, "auth-worker")
+	auth, err := auth.NewWorker(ctx, cfg, log, "auth-worker")
+	if err != nil {
+		exit(log, err)
+	}
 	s.SetWorker(auth)
 
 	// Initialize handlers and workers
 	err = s.Init()
 	if err != nil {
-		log.Error(err)
-		cancel()
+		exit(log, err)
 	}
 
 	// Start service
@@ -72,12 +73,25 @@ func initLog(cfg *config.Config) *log.Logger {
 	return log.NewDevLogger(ll, sn, sr)
 }
 
-// checkSigTerm - Listens to sigterm events.
-func checkSigTerm(cancel context.CancelFunc) {
+func exit(log *log.Logger, err error) {
+	log.Error(err)
+	os.Exit(1)
+}
+
+func checkStopEvents(ctx context.Context, cancel context.CancelFunc) {
+	go checkSigterm(cancel)
+	go checkCancel(ctx)
+}
+
+func checkSigterm(cancel context.CancelFunc) {
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
 	<-stop
-	s.Stop()
 	cancel()
-	os.Exit(0)
+}
+
+func checkCancel(ctx context.Context) {
+	<-ctx.Done()
+	s.Stop()
+	os.Exit(1)
 }
