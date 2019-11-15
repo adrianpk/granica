@@ -40,7 +40,10 @@ func main() {
 	s.AddHandler(rh)
 
 	// Set service worker
-	auth := auth.NewWorker(ctx, cfg, log, "auth-worker")
+	auth, err := auth.NewWorker(ctx, cfg, log, "auth-worker")
+	if err != nil {
+		log.Error(err)
+	}
 	s.SetWorker(auth)
 
 	// Initialize handlers and workers
