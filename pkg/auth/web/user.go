@@ -66,7 +66,7 @@ func (ep *Endpoint) GetUsers(w http.ResponseWriter, r *http.Request) {
 	// Execute templates
 	wr := ep.okRes(res)
 
-	ts := ep.parsed["./assets/web/template/user/index.tmpl"]
+	ts := ep.parsed["./assets/web/embed/template/user/index.tmpl"]
 	err = ts.Execute(w, wr)
 	if err != nil {
 		ep.Log().Error(err)
