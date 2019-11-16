@@ -9,6 +9,8 @@
 * [new/wip at GitLab](https://gitlab.com/mikrowezel/backend/granica/tree/new/wip)
 * [new/wip at GitHub](https://github.com/adrianpk/granica/tree/new/wip)
 
+Repository mirroring (GitLab -> GitHub) seems to work erratically from time to time and for that reason the latter and because of this the latter may not be showing the current state of development.
+
 ## Installation
 
 [To be completed]
