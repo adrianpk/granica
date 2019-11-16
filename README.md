@@ -13,7 +13,17 @@ Repository mirroring (GitLab -> GitHub) seems to work erratically from time to t
 
 ## Installation
 
-[To be completed]
+[TODO: Create database steps]
+
+```shell
+$ git clone https://gitlab.com/mikrowezel/backend/granica
+$ make package-resources
+$ make run
+```
+
+Because `pkg/auth/web/pkged.go` is a relatively large file but it can be easily regenerated using `make package-resources` am avoiding committing it to the repo, mainly because it causes some problem with GitHub mirroring process.
+
+[TODO: additional steps]
 
 **Test**
 ```shell
