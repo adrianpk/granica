@@ -72,7 +72,7 @@ func (a *Auth) makeHomeJSONRESTRouter() chi.Router {
 }
 
 func (a *Auth) addHomeWebRoutes(rt chi.Router) {
-	dir := "/assets/web/public"
+	dir := "/assets/web/embed/public"
 	fs := http.FileServer(FileSystem{pkger.Dir(dir)})
 
 	rt.Get("/*", func(w http.ResponseWriter, r *http.Request) {

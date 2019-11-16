@@ -1,13 +1,13 @@
 # Granica
 
- Authentication and authorization service.
+Authentication and authorization service.
 
 <img src="docs/img/users_index.png" width="480">
 
 ## Dev branch
 
-* [new/wip at GitLab](https://gitlab.com/mikrowezel/backend/granica/tree/new/wip)
-* [new/wip at GitHub](https://github.com/adrianpk/granica/tree/new/wip)
+- [new/wip at GitLab](https://gitlab.com/mikrowezel/backend/granica/tree/new/wip)
+- [new/wip at GitHub](https://github.com/adrianpk/granica/tree/new/wip)
 
 Repository mirroring (GitLab -> GitHub) seems to work erratically from time to time and for that reason the latter and because of this the latter may not be showing the current state of development.
 
@@ -17,21 +17,21 @@ Repository mirroring (GitLab -> GitHub) seems to work erratically from time to t
 
 ```shell
 $ git clone https://gitlab.com/mikrowezel/backend/granica
-$ make package-resources
 $ make run
 ```
-
-Because `pkg/auth/web/pkged.go` is a relatively large file but it can be easily regenerated using `make package-resources` am avoiding committing it to the repo, mainly because it causes some problem with GitHub mirroring process.
 
 [TODO: additional steps]
 
 **Test**
+
 ```shell
 $ make test
 ```
+
 Use `make grc-test` for colored output.
 
 **Run**
+
 ```shell
 $ make run
 ./scripts/run.sh
@@ -43,7 +43,7 @@ $ make run
 2:27AM INF Template file path=user/_header.tmpl
 2:27AM INF Template file path=user/_list.tmpl
 2:27AM INF Template file path=user/index.tmpl
-2:27AM INF Template processed template=./assets/web/template/user/index.tmpl
+2:27AM INF Template processed template=./assets/web/embed/template/user/index.tmpl
 2:27AM INF Dialing to Postgres host="host=localhost port=5432 user=granica password=granica dbname=granica sslmode=disable"
 2:27AM INF Postgres connection established
 2:27AM INF Repo initializated name=repo-handler

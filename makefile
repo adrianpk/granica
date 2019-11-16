@@ -30,7 +30,7 @@ run:
 	./scripts/run.sh
 
 package-resources:
-	pkger -include /assets/web -o pkg/auth/web
+	pkger -include /assets/web/embed -o pkg/auth/web
 
 list-package-resources:
 	pkger list -include /assets/web --json

@@ -41,7 +41,7 @@ type (
 )
 
 const (
-	templateDir = "/assets/web/template"
+	templateDir = "/assets/web/embed/template"
 	layoutDir   = "layout"
 	layoutKey   = "layout"
 	pageKey     = "page"
@@ -79,7 +79,7 @@ func (e *Endpoint) Log() *log.Logger {
 }
 
 // collectTemplates embedded filesystem (pkger)
-// under '/assets/web/template'
+// under '/assets/web/embed/template'
 func (e *Endpoint) collectTemplates() (TemplateSet, error) {
 	tmpls := make(TemplateSet)
 
@@ -123,7 +123,7 @@ func (e *Endpoint) classifyTemplates(ts TemplateSet) TemplateGroups {
 	keys := e.tmplsKeys(ts)
 
 	for _, path := range keys {
-		p := "./assets/web/template" + "/" + path
+		p := "./assets/web/embed/template" + "/" + path
 
 		//e.Log().Debug("Classifying", "path", path)
 
