@@ -2,4 +2,3 @@ bin
 # Emacs temp files
 .#*
 assets/web/node_modules/
-pkg/auth/web/pkged.go
