@@ -1,5 +1,7 @@
 package web
 
+import "gitlab.com/mikrowezel/backend/web"
+
 // UserRoot - User resource root path.
 var UserRoot = "users"
 
@@ -9,7 +11,7 @@ func UserPath() string {
 }
 
 // UserPathEdit
-func UserPathEdit(res Identifiable) string {
+func UserPathEdit(res web.Identifiable) string {
 	return ResPathEdit(UserRoot, res)
 }
 
@@ -19,11 +21,11 @@ func UserPathNew() string {
 }
 
 // UserPathInitDelete
-func UserPathInitDelete(res Identifiable) string {
+func UserPathInitDelete(res web.Identifiable) string {
 	return ResPathInitDelete(UserRoot, res)
 }
 
 // UserPathSlug
-func UserPathID(res Identifiable) string {
+func UserPathID(res web.Identifiable) string {
 	return ResPathSlug(UserRoot, res)
 }

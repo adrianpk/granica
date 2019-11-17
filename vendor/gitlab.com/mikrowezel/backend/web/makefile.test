@@ -1,0 +1,13 @@
+# Tests
+
+test-selected:
+	clear
+	make -f makefile.test test-mock
+	@make spacer
+
+## Auth
+
+### Mock
+test-mock:
+	go test -v -run TestMock -count=1 -timeout=5s  ./pkg/auth/service/user_test.go
+

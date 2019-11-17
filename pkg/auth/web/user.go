@@ -4,24 +4,7 @@ import (
 	"net/http"
 
 	tp "gitlab.com/mikrowezel/backend/granica/pkg/auth/transport"
-)
-
-type (
-	// WRes stands for wrapped response
-	WRes struct {
-		Data  interface{}
-		Flash []FlashData
-		Err   error
-	}
-
-	// Flash data to present in page
-	FlashData struct {
-		Type MsgType
-		Msg  string
-	}
-
-	// MsgType stands for message type
-	MsgType string
+	"gitlab.com/mikrowezel/backend/web"
 )
 
 const (
@@ -29,7 +12,7 @@ const (
 )
 
 const (
-	UserCtxKey contextKey = "user"
+	UserCtxKey web.ContextKey = "user"
 )
 
 // TODO: This is a work in progress and the implementation is still unclean.
@@ -53,21 +36,20 @@ func (ep *Endpoint) GetUsers(w http.ResponseWriter, r *http.Request) {
 	var res tp.GetUsersRes
 
 	// Service
-	err := ep.service.GetUsers(req, &res)
+	err := ep.Service().GetUsers(req, &res)
 	if err != nil {
 		ep.Log().Error(err)
-		ep.redirect(w, r, "/")
+		ep.Redirect(w, r, "/")
 		return
 	}
 
 	// Wrap response
-	wr := ep.okRes(res)
+	wr := ep.OKRes(res)
 
-	// Get template
-	key := ep.template(userRes, indexTmpl)
-	ts, ok := ep.templates[key]
-	if !ok {
-		ep.redirect(w, r, "/")
+	// Template
+	ts, err := ep.TemplateFor(userRes, web.IndexTmpl)
+	if err != nil {
+		ep.Redirect(w, r, "/")
 		return
 	}
 
@@ -75,72 +57,6 @@ func (ep *Endpoint) GetUsers(w http.ResponseWriter, r *http.Request) {
 	err = ts.Execute(w, wr)
 	if err != nil {
 		ep.Log().Error(err)
-		ep.redirect(w, r, "/")
+		ep.Redirect(w, r, "/")
 	}
-}
-
-// okRes builds an OK response including data and cero, one  or more messages.
-// All messages are assumed of type info therefore flashes will be also of this type.
-func (ep *Endpoint) okRes(data interface{}, msgs ...string) WRes {
-	fls := []FlashData{}
-	for _, m := range msgs {
-		fls = append(fls, ep.makeFlash(m, InfoMT))
-	}
-
-	return WRes{
-		Data:  data,
-		Flash: fls,
-		Err:   nil,
-	}
-}
-
-// multiRes builds a multiType response including data and cero, one  or more messages.
-// Generated flash messages will be created according to the values passed in the parameter map.
-// i.e.: map[string]MsgType{"Action processed": InfoMT, "Remember to update profile": WarnMT}
-func (ep *Endpoint) multiRes(data interface{}, msgs map[string]MsgType) WRes {
-	fls := []FlashData{}
-	for m, t := range msgs {
-		fls = append(fls, ep.makeFlash(m, t))
-	}
-
-	return WRes{
-		Data:  data,
-		Flash: fls,
-		Err:   nil,
-	}
-}
-
-// errRes builds an error response including data and cero, one  or more messages.
-// All messages are assumed of type error therefore flashes will be also of this type.
-func (ep *Endpoint) errRes(data interface{}, msgs ...string) WRes {
-	fls := []FlashData{}
-	for _, m := range msgs {
-		fls = append(fls, ep.makeFlash(m, ErrorMT))
-	}
-
-	return WRes{
-		Data:  data,
-		Flash: fls,
-		Err:   nil,
-	}
-}
-
-func (ep *Endpoint) wrap(data interface{}, msg string, msgType MsgType, err error) WRes {
-	return WRes{
-		Data:  data,
-		Flash: []FlashData{ep.makeFlash(msg, msgType)},
-		Err:   err,
-	}
-}
-
-func (ep *Endpoint) makeFlash(msg string, msgType MsgType) FlashData {
-	return FlashData{
-		Type: msgType,
-		Msg:  msg,
-	}
-}
-
-// Redirect to url.
-func (ep *Endpoint) redirect(w http.ResponseWriter, r *http.Request, url string) {
-	http.Redirect(w, r, url, 302)
 }

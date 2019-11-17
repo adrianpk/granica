@@ -2,6 +2,7 @@ package web
 
 import (
 	"fmt"
+	"gitlab.com/mikrowezel/backend/web"
 )
 
 // IndexPath returns index path under resource root path.
@@ -62,7 +63,7 @@ func ResPath(rootPath string) string {
 }
 
 // ResPathEdit
-func ResPathEdit(rootPath string, r Identifiable) string {
+func ResPathEdit(rootPath string, r web.Identifiable) string {
 	return fmt.Sprintf("/%s/%s/edit", rootPath, r.GetSlug())
 }
 
@@ -72,11 +73,11 @@ func ResPathNew(rootPath string) string {
 }
 
 // ResPathInitDelete
-func ResPathInitDelete(rootPath string, r Identifiable) string {
+func ResPathInitDelete(rootPath string, r web.Identifiable) string {
 	return fmt.Sprintf("/%s/%s/init-delete", rootPath, r.GetSlug())
 }
 
 // ResPathSlug
-func ResPathSlug(rootPath string, r Identifiable) string {
+func ResPathSlug(rootPath string, r web.Identifiable) string {
 	return fmt.Sprintf("/%s/%s", rootPath, r.GetSlug())
 }
