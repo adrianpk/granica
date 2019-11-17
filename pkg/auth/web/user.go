@@ -56,34 +56,66 @@ func (ep *Endpoint) GetUsers(w http.ResponseWriter, r *http.Request) {
 	err := ep.service.GetUsers(req, &res)
 	if err != nil {
 		ep.Log().Error(err)
-		ep.writeResponse(w, err.Error()) // FIX: Implement a redirect.
+		ep.redirect(w, r, "/")
 		return
 	}
 
-	//// Output
-	//ep.writeResponse(w, res)
-
-	// Execute templates
+	// Wrap response
 	wr := ep.okRes(res)
 
-	tmplKey := ep.makeTmplKey(userRes, indexTmpl)
-	ts, ok := ep.parsed[tmplKey]
+	// Get template
+	key := ep.template(userRes, indexTmpl)
+	ts, ok := ep.templates[key]
 	if !ok {
-		// do something
+		ep.redirect(w, r, "/")
+		return
 	}
 
+	// Write response
 	err = ts.Execute(w, wr)
 	if err != nil {
 		ep.Log().Error(err)
-		ep.writeResponse(w, err.Error()) // FIX: Implement a redirect.
-		return
+		ep.redirect(w, r, "/")
 	}
 }
 
+// okRes builds an OK response including data and cero, one  or more messages.
+// All messages are assumed of type info therefore flashes will be also of this type.
 func (ep *Endpoint) okRes(data interface{}, msgs ...string) WRes {
 	fls := []FlashData{}
 	for _, m := range msgs {
 		fls = append(fls, ep.makeFlash(m, InfoMT))
+	}
+
+	return WRes{
+		Data:  data,
+		Flash: fls,
+		Err:   nil,
+	}
+}
+
+// multiRes builds a multiType response including data and cero, one  or more messages.
+// Generated flash messages will be created according to the values passed in the parameter map.
+// i.e.: map[string]MsgType{"Action processed": InfoMT, "Remember to update profile": WarnMT}
+func (ep *Endpoint) multiRes(data interface{}, msgs map[string]MsgType) WRes {
+	fls := []FlashData{}
+	for m, t := range msgs {
+		fls = append(fls, ep.makeFlash(m, t))
+	}
+
+	return WRes{
+		Data:  data,
+		Flash: fls,
+		Err:   nil,
+	}
+}
+
+// errRes builds an error response including data and cero, one  or more messages.
+// All messages are assumed of type error therefore flashes will be also of this type.
+func (ep *Endpoint) errRes(data interface{}, msgs ...string) WRes {
+	fls := []FlashData{}
+	for _, m := range msgs {
+		fls = append(fls, ep.makeFlash(m, ErrorMT))
 	}
 
 	return WRes{
@@ -106,4 +138,9 @@ func (ep *Endpoint) makeFlash(msg string, msgType MsgType) FlashData {
 		Type: msgType,
 		Msg:  msg,
 	}
+}
+
+// Redirect to url.
+func (ep *Endpoint) redirect(w http.ResponseWriter, r *http.Request, url string) {
+	http.Redirect(w, r, url, 302)
 }

@@ -6,11 +6,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"math/rand"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
+	"github.com/gorilla/sessions"
 	"github.com/markbates/pkger"
 	"gitlab.com/mikrowezel/backend/config"
 	"gitlab.com/mikrowezel/backend/granica/pkg/auth/service"
@@ -19,11 +22,13 @@ import (
 
 type (
 	Endpoint struct {
-		ctx     context.Context
-		cfg     *config.Config
-		log     *log.Logger
-		service *service.Service
-		parsed  TemplateSet
+		ctx       context.Context
+		cfg       *config.Config
+		log       *log.Logger
+		service   *service.Service
+		templates TemplateSet
+		store     *sessions.CookieStore
+		storeKey  string
 	}
 
 	TemplateSet    map[string]*template.Template
@@ -67,6 +72,9 @@ func MakeEndpoint(ctx context.Context, cfg *config.Config, log *log.Logger, serv
 		service: service,
 	}
 
+	// Cookie store
+	e.makeCookieStore()
+
 	// Load
 	ts, err := e.loadTemplates()
 	if err != nil {
@@ -92,6 +100,46 @@ func (e *Endpoint) Cfg() *config.Config {
 
 func (e *Endpoint) Log() *log.Logger {
 	return e.log
+}
+
+func (e *Endpoint) makeCookieStore() {
+	k := e.Cfg().ValOrDef("web.cookiestore.key", "")
+	if k == "" {
+		k = e.genAES256Key()
+		e.Log().Debug("New cookie store random key", "value", k)
+		csEnVar := fmt.Sprintf("%s_COOKIESTORE_KEY", "GRN")
+		e.Log().Info("Set a custom cookie store key using a 32 char string stored as an envar", "envvar", csEnVar)
+	}
+
+	e.storeKey = k
+	e.Log().Debug("Cookie store key", "value", k)
+	sessions.NewCookieStore([]byte(k))
+}
+
+func (e *Endpoint) genAES256Key() string {
+	const allowed = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	const (
+		lenght    = 32
+		indexBits = 6                // 6 bits to represent a letter index
+		indexMask = 1<<indexBits - 1 // All 1-bits, as many as letterIdxBits
+		indexMax  = 63 / indexBits   // # of letter indices fitting in 63 bits
+	)
+	src := rand.NewSource(time.Now().UnixNano())
+	sb := strings.Builder{}
+	sb.Grow(32)
+	for i, cache, remain := lenght-1, src.Int63(), indexMax; i >= 0; {
+		if remain == 0 {
+			cache, remain = src.Int63(), indexMax
+		}
+		if idx := int(cache & indexMask); idx < len(allowed) {
+			sb.WriteByte(allowed[idx])
+			i--
+		}
+		cache >>= indexBits
+		remain--
+	}
+
+	return sb.String()
 }
 
 // loadTemplates from embedded filesystem (pkger)
@@ -179,7 +227,7 @@ func (e *Endpoint) tmplsKeys(ts TemplateSet) []string {
 
 // parseTemplates parses template sets for each resource.
 func (e *Endpoint) parseTemplates(ts TemplateSet, tg TemplateGroups) {
-	e.parsed = make(TemplateSet)
+	e.templates = make(TemplateSet)
 	layout := tg[layoutDir][layoutKey][0]
 
 	for k, ts := range tg {
@@ -212,7 +260,7 @@ func (e *Endpoint) parseTemplate(page string, partials []string, layout string, 
 
 	e.Log().Info("Parsed template set", "path", p)
 
-	e.parsed[page] = t
+	e.templates[page] = t
 }
 
 func trimSlice(slice *[]string) {
@@ -287,6 +335,6 @@ func formatRequest(r *http.Request) string {
 	return strings.Join(request, "\n")
 }
 
-func (ep *Endpoint) makeTmplKey(resource, template string) (tmplKey string) {
+func (ep *Endpoint) template(resource, template string) (tmplKey string) {
 	return fmt.Sprintf(".%s/%s/%s", templateDir, userRes, indexTmpl)
 }
