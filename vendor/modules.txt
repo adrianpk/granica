@@ -9,6 +9,10 @@ github.com/go-chi/chi
 github.com/go-chi/chi/middleware
 # github.com/golang/protobuf v1.3.2
 github.com/golang/protobuf/proto
+# github.com/gorilla/securecookie v1.1.1
+github.com/gorilla/securecookie
+# github.com/gorilla/sessions v1.2.0
+github.com/gorilla/sessions
 # github.com/heptiolabs/healthcheck v0.0.0-20180807145615-6ff867650f40
 github.com/heptiolabs/healthcheck
 # github.com/jmoiron/sqlx v1.2.0
@@ -20,14 +24,10 @@ github.com/lib/pq/oid
 github.com/lib/pq/scram
 # github.com/markbates/pkger v0.12.2
 github.com/markbates/pkger
-github.com/markbates/pkger/pkging/mem
 github.com/markbates/pkger/here
+github.com/markbates/pkger/internal/maps
 github.com/markbates/pkger/pkging
 github.com/markbates/pkger/pkging/stdos
-github.com/markbates/pkger/internal/maps
-github.com/markbates/pkger/pkging/embed
-github.com/markbates/pkger/internal/takeon/github.com/markbates/hepa
-github.com/markbates/pkger/internal/takeon/github.com/markbates/hepa/filters
 # github.com/matttproud/golang_protobuf_extensions v1.0.1
 github.com/matttproud/golang_protobuf_extensions/pbutil
 # github.com/prometheus/client_golang v1.1.0
@@ -37,16 +37,16 @@ github.com/prometheus/client_golang/prometheus/internal
 github.com/prometheus/client_model/go
 # github.com/prometheus/common v0.6.0
 github.com/prometheus/common/expfmt
-github.com/prometheus/common/model
 github.com/prometheus/common/internal/bitbucket.org/ww/goautoneg
+github.com/prometheus/common/model
 # github.com/prometheus/procfs v0.0.3
 github.com/prometheus/procfs
 github.com/prometheus/procfs/internal/fs
 # github.com/rs/zerolog v1.14.3
 github.com/rs/zerolog
-github.com/rs/zerolog/log
 github.com/rs/zerolog/internal/cbor
 github.com/rs/zerolog/internal/json
+github.com/rs/zerolog/log
 # github.com/satori/go.uuid v1.2.0
 github.com/satori/go.uuid
 # github.com/twinj/uuid v1.0.0
