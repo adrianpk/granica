@@ -1,6 +1,8 @@
 package web
 
 import (
+	"errors"
+	"html/template"
 	"net/http"
 
 	tp "gitlab.com/mikrowezel/backend/granica/pkg/auth/transport"
@@ -63,10 +65,9 @@ func (ep *Endpoint) GetUsers(w http.ResponseWriter, r *http.Request) {
 	// Wrap response
 	wr := ep.okRes(res)
 
-	// Get template
-	key := ep.template(userRes, indexTmpl)
-	ts, ok := ep.templates[key]
-	if !ok {
+	// Template
+	ts, err := ep.templateFor(userRes, indexTmpl)
+	if err != nil {
 		ep.redirect(w, r, "/")
 		return
 	}
@@ -77,6 +78,19 @@ func (ep *Endpoint) GetUsers(w http.ResponseWriter, r *http.Request) {
 		ep.Log().Error(err)
 		ep.redirect(w, r, "/")
 	}
+}
+
+func (ep *Endpoint) templateFor(res, name string) (*template.Template, error) {
+	key := ep.template(userRes, indexTmpl)
+
+	t, ok := ep.templates[key]
+	if !ok {
+		err := errors.New("canot get template")
+		ep.Log().Error(err, "resource", res, "template", name)
+		return nil, err
+	}
+
+	return t, nil
 }
 
 // okRes builds an OK response including data and cero, one  or more messages.
