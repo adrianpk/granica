@@ -1,7 +1,7 @@
 # Vars
 STG_TAG=stage
 PROD_TAG=v0.0.1
-IMAGE_NAME=mwgranica
+IMAGE_NAME=mw_granica
 
 # Misc
 BINARY_NAME=granica
