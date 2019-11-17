@@ -48,6 +48,17 @@ const (
 	partialKey  = "partial"
 )
 
+const (
+	indexTmpl = "index.tmpl"
+)
+
+const (
+	InfoMT  MsgType = "info"
+	WarnMT  MsgType = "warn"
+	ErrorMT MsgType = "error"
+	DebugMT MsgType = "debug"
+)
+
 func MakeEndpoint(ctx context.Context, cfg *config.Config, log *log.Logger, service *service.Service) (*Endpoint, error) {
 	e := Endpoint{
 		ctx:     ctx,
@@ -56,11 +67,16 @@ func MakeEndpoint(ctx context.Context, cfg *config.Config, log *log.Logger, serv
 		service: service,
 	}
 
-	ts, err := e.collectTemplates()
+	// Load
+	ts, err := e.loadTemplates()
 	if err != nil {
 		return &e, err
 	}
+
+	// Classify
 	tg := e.classifyTemplates(ts)
+
+	// Parse
 	e.parseTemplates(ts, tg)
 
 	return &e, nil
@@ -78,9 +94,9 @@ func (e *Endpoint) Log() *log.Logger {
 	return e.log
 }
 
-// collectTemplates embedded filesystem (pkger)
+// loadTemplates from embedded filesystem (pkger)
 // under '/assets/web/embed/template'
-func (e *Endpoint) collectTemplates() (TemplateSet, error) {
+func (e *Endpoint) loadTemplates() (TemplateSet, error) {
 	tmpls := make(TemplateSet)
 
 	err := pkger.Walk(templateDir,
@@ -95,7 +111,7 @@ func (e *Endpoint) collectTemplates() (TemplateSet, error) {
 				base := fmt.Sprintf("%s:%s", list[0], templateDir)
 				p, _ := filepath.Rel(base, path)
 
-				e.Log().Info("Template file", "path", p)
+				e.Log().Info("Reading template", "path", p)
 
 				tmpls[p] = template.New(base)
 				return nil
@@ -114,7 +130,7 @@ func (e *Endpoint) collectTemplates() (TemplateSet, error) {
 	return tmpls, nil
 }
 
-// classifyTemplates organizing them,
+// classifyTemplates grouping them,
 // first by type (layout, partial and page)
 // and then by resource.
 func (e *Endpoint) classifyTemplates(ts TemplateSet) TemplateGroups {
@@ -161,6 +177,7 @@ func (e *Endpoint) tmplsKeys(ts TemplateSet) []string {
 	return keys
 }
 
+// parseTemplates parses template sets for each resource.
 func (e *Endpoint) parseTemplates(ts TemplateSet, tg TemplateGroups) {
 	e.parsed = make(TemplateSet)
 	layout := tg[layoutDir][layoutKey][0]
@@ -190,7 +207,10 @@ func (e *Endpoint) parseTemplate(page string, partials []string, layout string, 
 		e.Log().Error(err, "Error parsing template set", "page", page)
 	}
 
-	e.Log().Info("Template processed", "template", page)
+	base := fmt.Sprintf(".%s", templateDir)
+	p, _ := filepath.Rel(base, page)
+
+	e.Log().Info("Parsed template set", "path", p)
 
 	e.parsed[page] = t
 }
@@ -265,4 +285,8 @@ func formatRequest(r *http.Request) string {
 	}
 	// Return the request as a string
 	return strings.Join(request, "\n")
+}
+
+func (ep *Endpoint) makeTmplKey(resource, template string) (tmplKey string) {
+	return fmt.Sprintf(".%s/%s/%s", templateDir, userRes, indexTmpl)
 }
