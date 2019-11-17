@@ -148,6 +148,7 @@ func (s *BaseService) AddHandler(h Handler) {
 func (s *BaseService) SetWorker(w Worker) {
 	w.SetHandlers(s.handlers)
 	s.worker = w
+
 }
 
 // Ctx returns service context.

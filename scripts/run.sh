@@ -14,6 +14,7 @@ export GRN_SVC_PINGPORT=8090
 # Servers
 export GRN_WEB_SERVER_PORT=8080
 export GRN_JSONREST_SERVER_PORT=8081
+export GRN_WEB_COOKIESTORE_KEY="pVuOO7ZPNBnqTb5o13JsBMOPcPAe4pxY"
 # Postgres
 export GRN_PG_SCHEMA="public"
 export GRN_PG_DATABASE="granica"

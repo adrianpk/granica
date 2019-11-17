@@ -112,6 +112,7 @@ spacer:
 get-deps:
 	go get -u "github.com/davecgh/go-spew"
 	go get -u "github.com/go-chi/chi"
+	go get -u "github.com/gorilla/sessions"
 	go get -u "github.com/jmoiron/sqlx"
 	go get -u "github.com/lib/pq"
 	go get -u "github.com/markbates/pkger"

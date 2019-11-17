@@ -6,11 +6,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"math/rand"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
+	"github.com/gorilla/sessions"
 	"github.com/markbates/pkger"
 	"gitlab.com/mikrowezel/backend/config"
 	"gitlab.com/mikrowezel/backend/granica/pkg/auth/service"
@@ -19,11 +22,13 @@ import (
 
 type (
 	Endpoint struct {
-		ctx     context.Context
-		cfg     *config.Config
-		log     *log.Logger
-		service *service.Service
-		parsed  TemplateSet
+		ctx       context.Context
+		cfg       *config.Config
+		log       *log.Logger
+		service   *service.Service
+		templates TemplateSet
+		store     *sessions.CookieStore
+		storeKey  string
 	}
 
 	TemplateSet    map[string]*template.Template
@@ -48,6 +53,17 @@ const (
 	partialKey  = "partial"
 )
 
+const (
+	indexTmpl = "index.tmpl"
+)
+
+const (
+	InfoMT  MsgType = "info"
+	WarnMT  MsgType = "warn"
+	ErrorMT MsgType = "error"
+	DebugMT MsgType = "debug"
+)
+
 func MakeEndpoint(ctx context.Context, cfg *config.Config, log *log.Logger, service *service.Service) (*Endpoint, error) {
 	e := Endpoint{
 		ctx:     ctx,
@@ -56,11 +72,19 @@ func MakeEndpoint(ctx context.Context, cfg *config.Config, log *log.Logger, serv
 		service: service,
 	}
 
-	ts, err := e.collectTemplates()
+	// Cookie store
+	e.makeCookieStore()
+
+	// Load
+	ts, err := e.loadTemplates()
 	if err != nil {
 		return &e, err
 	}
+
+	// Classify
 	tg := e.classifyTemplates(ts)
+
+	// Parse
 	e.parseTemplates(ts, tg)
 
 	return &e, nil
@@ -78,9 +102,49 @@ func (e *Endpoint) Log() *log.Logger {
 	return e.log
 }
 
-// collectTemplates embedded filesystem (pkger)
+func (e *Endpoint) makeCookieStore() {
+	k := e.Cfg().ValOrDef("web.cookiestore.key", "")
+	if k == "" {
+		k = e.genAES256Key()
+		e.Log().Debug("New cookie store random key", "value", k)
+		csEnVar := fmt.Sprintf("%s_COOKIESTORE_KEY", "GRN")
+		e.Log().Info("Set a custom cookie store key using a 32 char string stored as an envar", "envvar", csEnVar)
+	}
+
+	e.storeKey = k
+	e.Log().Debug("Cookie store key", "value", k)
+	sessions.NewCookieStore([]byte(k))
+}
+
+func (e *Endpoint) genAES256Key() string {
+	const allowed = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	const (
+		lenght    = 32
+		indexBits = 6                // 6 bits to represent a letter index
+		indexMask = 1<<indexBits - 1 // All 1-bits, as many as letterIdxBits
+		indexMax  = 63 / indexBits   // # of letter indices fitting in 63 bits
+	)
+	src := rand.NewSource(time.Now().UnixNano())
+	sb := strings.Builder{}
+	sb.Grow(32)
+	for i, cache, remain := lenght-1, src.Int63(), indexMax; i >= 0; {
+		if remain == 0 {
+			cache, remain = src.Int63(), indexMax
+		}
+		if idx := int(cache & indexMask); idx < len(allowed) {
+			sb.WriteByte(allowed[idx])
+			i--
+		}
+		cache >>= indexBits
+		remain--
+	}
+
+	return sb.String()
+}
+
+// loadTemplates from embedded filesystem (pkger)
 // under '/assets/web/embed/template'
-func (e *Endpoint) collectTemplates() (TemplateSet, error) {
+func (e *Endpoint) loadTemplates() (TemplateSet, error) {
 	tmpls := make(TemplateSet)
 
 	err := pkger.Walk(templateDir,
@@ -95,7 +159,7 @@ func (e *Endpoint) collectTemplates() (TemplateSet, error) {
 				base := fmt.Sprintf("%s:%s", list[0], templateDir)
 				p, _ := filepath.Rel(base, path)
 
-				e.Log().Info("Template file", "path", p)
+				e.Log().Info("Reading template", "path", p)
 
 				tmpls[p] = template.New(base)
 				return nil
@@ -114,7 +178,7 @@ func (e *Endpoint) collectTemplates() (TemplateSet, error) {
 	return tmpls, nil
 }
 
-// classifyTemplates organizing them,
+// classifyTemplates grouping them,
 // first by type (layout, partial and page)
 // and then by resource.
 func (e *Endpoint) classifyTemplates(ts TemplateSet) TemplateGroups {
@@ -161,8 +225,9 @@ func (e *Endpoint) tmplsKeys(ts TemplateSet) []string {
 	return keys
 }
 
+// parseTemplates parses template sets for each resource.
 func (e *Endpoint) parseTemplates(ts TemplateSet, tg TemplateGroups) {
-	e.parsed = make(TemplateSet)
+	e.templates = make(TemplateSet)
 	layout := tg[layoutDir][layoutKey][0]
 
 	for k, ts := range tg {
@@ -190,9 +255,12 @@ func (e *Endpoint) parseTemplate(page string, partials []string, layout string, 
 		e.Log().Error(err, "Error parsing template set", "page", page)
 	}
 
-	e.Log().Info("Template processed", "template", page)
+	base := fmt.Sprintf(".%s", templateDir)
+	p, _ := filepath.Rel(base, page)
 
-	e.parsed[page] = t
+	e.Log().Info("Parsed template set", "path", p)
+
+	e.templates[page] = t
 }
 
 func trimSlice(slice *[]string) {
@@ -265,4 +333,8 @@ func formatRequest(r *http.Request) string {
 	}
 	// Return the request as a string
 	return strings.Join(request, "\n")
+}
+
+func (ep *Endpoint) template(resource, template string) (tmplKey string) {
+	return fmt.Sprintf(".%s/%s/%s", templateDir, userRes, indexTmpl)
 }
