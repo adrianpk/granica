@@ -26,6 +26,6 @@ func UserPathInitDelete(res web.Identifiable) string {
 }
 
 // UserPathSlug
-func UserPathID(res web.Identifiable) string {
+func UserPathSlug(res web.Identifiable) string {
 	return ResPathSlug(UserRoot, res)
 }
