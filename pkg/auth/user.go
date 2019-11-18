@@ -10,7 +10,11 @@ import (
 
 func (a *Auth) makeUserWebRouter(parent chi.Router) chi.Router {
 	return parent.Route("/users", func(uar chi.Router) {
-		//uar.Post("/", a.webep.CreateUser)
+		uar.Get("/new", a.webep.InitCreateUser)
+		uar.Route("/new", func(uarid chi.Router) {
+			uarid.Get("/", a.webep.InitCreateUser)
+		})
+		uar.Post("/", a.webep.CreateUser)
 		uar.Get("/", a.webep.GetUsers)
 		uar.Route("/{username}", func(uarid chi.Router) {
 			uarid.Use(userCtx)

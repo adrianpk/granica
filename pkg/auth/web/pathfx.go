@@ -6,7 +6,7 @@ var pathFxs = template.FuncMap{
 	// User
 	"userPath":           UserPath,
 	"userPathEdit":       UserPathEdit,
-	"userPathID":         UserPathID,
+	"userPathSlug":       UserPathSlug,
 	"userPathInitDelete": UserPathInitDelete,
 	"userPathNew":        UserPathNew,
 }
