@@ -16,7 +16,26 @@ const (
 )
 
 func (ep *Endpoint) InitCreateUser(w http.ResponseWriter, r *http.Request) {
-	ep.Redirect(w, r, "http://google.com")
+	var req tp.CreateUserReq
+	var res tp.CreateUserRes
+
+	// Wrap response
+	wr := ep.OKRes(res)
+
+	// Template
+	ts, err := ep.TemplateFor(userRes, web.IndexTmpl)
+	if err != nil {
+		ep.Redirect(w, r, "/")
+		return
+	}
+
+	// Write response
+	err = ts.Execute(w, wr)
+	if err != nil {
+		ep.Log().Error(err)
+		ep.Redirect(w, r, "/")
+	}
+	//ep.Redirect(w, r, "http://google.com")
 }
 
 func (ep *Endpoint) CreateUser(w http.ResponseWriter, r *http.Request) {
