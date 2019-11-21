@@ -35,10 +35,6 @@ func (res *CreateUserRes) FromModel(m *model.User, msg string, err error) {
 			Lng:         fmt.Sprintf("%f", m.Geolocation.Point.Lng),
 		}
 	}
-	res.Msg = msg
-	if err != nil {
-		res.Error = err.Error()
-	}
 }
 
 func (res *GetUsersRes) FromModel(ms []model.User, msg string, err error) {
@@ -57,10 +53,6 @@ func (res *GetUsersRes) FromModel(ms []model.User, msg string, err error) {
 		resUsers = append(resUsers, res)
 	}
 	res.Users = resUsers
-	res.Msg = msg
-	if err != nil {
-		res.Error = err.Error()
-	}
 }
 
 func (req *GetUserReq) ToModel() model.User {
@@ -81,10 +73,6 @@ func (res *GetUserRes) FromModel(m *model.User, msg string, err error) {
 			Lat:         fmt.Sprintf("%f", m.Geolocation.Point.Lat),
 			Lng:         fmt.Sprintf("%f", m.Geolocation.Point.Lng),
 		}
-	}
-	res.Msg = msg
-	if err != nil {
-		res.Error = err.Error()
 	}
 }
 
@@ -122,15 +110,7 @@ func (res *UpdateUserRes) FromModel(m *model.User, msg string, err error) {
 			Lng:         fmt.Sprintf("%f", m.Geolocation.Point.Lng),
 		}
 	}
-	res.Msg = msg
-	if err != nil {
-		res.Error = err.Error()
-	}
 }
 
 func (res *DeleteUserRes) FromModel(m *model.User, msg string, err error) {
-	res.Msg = msg
-	if err != nil {
-		res.Error = err.Error()
-	}
 }
