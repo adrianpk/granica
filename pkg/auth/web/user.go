@@ -1,8 +1,10 @@
 package web
 
 import (
+	"fmt"
 	"net/http"
 
+	"gitlab.com/mikrowezel/backend/granica/internal/model"
 	tp "gitlab.com/mikrowezel/backend/granica/pkg/auth/transport"
 	"gitlab.com/mikrowezel/backend/web"
 )
@@ -16,8 +18,9 @@ const (
 )
 
 func (ep *Endpoint) InitCreateUser(w http.ResponseWriter, r *http.Request) {
-	a := ep.userCreateAction()
-	res := tp.CreateUserRes{Action: a}
+	res := &tp.CreateUserRes{}
+	res.FromModel(&model.User{}, "", nil)
+	res.Action = ep.userCreateAction()
 
 	// Wrap response
 	wr := ep.OKRes(r, res)

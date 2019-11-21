@@ -33,6 +33,7 @@ func (res *CreateUserRes) FromModel(m *model.User, msg string, err error) {
 			FamilyName:  m.FamilyName.String,
 			Lat:         fmt.Sprintf("%f", m.Geolocation.Point.Lat),
 			Lng:         fmt.Sprintf("%f", m.Geolocation.Point.Lng),
+			IsNew:       m.IsNew(),
 		}
 	}
 }
