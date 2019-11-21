@@ -9,34 +9,39 @@
             {{$csrf.csrfField}}
 
             <div class="mb-4">
-              <label class="block text-gray-700 text-sm font-bold mb-2" for="name">Password</block>
-              <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="password" name="password" type="password" placeholder="Min 8 characters" value="">
+              <label class="block text-gray-700 text-sm font-bold mb-2" for="name">Username</label>
+              <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="username" name="username" placeholder="Min. 4 characters" value=""/>
             </div>
 
             <div class="mb-4">
-              <label class="block text-gray-700 text-sm font-bold mb-2" for="name">Email</block>
-              <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="name" name="email" type="text" value={{$user.Email}}>
+              <label class="block text-gray-700 text-sm font-bold mb-2" for="name">Password</label>
+              <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="password" name="password" type="password" placeholder="Min 8 characters" value=""/>
             </div>
 
             <div class="mb-4">
-              <label class="block text-gray-700 text-sm font-bold mb-2" for="name">Email confirmation</block>
+              <label class="block text-gray-700 text-sm font-bold mb-2" for="name">Email</label>
+              <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="name" name="email" type="text" value="{{$user.Email}}"/>
+            </div>
+
+            <div class="mb-4">
+              <label class="block text-gray-700 text-sm font-bold mb-2" for="name">Email confirmation</label>
               <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="password-confirmation" name="password-confirmation" type="password" placeholder=""
-                 value={{$user.EmailConfirmation}}>
+                 value="{{$user.EmailConfirmation}}"/>
             </div>
 
             <div class="mb-4">
-              <label class="block text-gray-700 text-sm font-bold mb-2" for="name">Given Name</block>
-              <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="given-name" name="given-name" type="text" value={{$user.GivenName}}>
+              <label class="block text-gray-700 text-sm font-bold mb-2" for="name">Given Name</label>
+              <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="given-name" name="given-name" type="text" value="{{$user.GivenName}}"/>
             </div>
 
             <div class="mb-4">
-              <label class="block text-gray-700 text-sm font-bold mb-2" for="name">Middle Names</block>
-              <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="middle-names" name="middle-names" type="text" value={{$user.MiddleNames}}>
+              <label class="block text-gray-700 text-sm font-bold mb-2" for="name">Middle Names</label>
+              <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="middle-names" name="middle-names" type="text" value="{{$user.MiddleNames}}"/>
             </div>
 
             <div class="mb-4">
-              <label class="block text-gray-700 text-sm font-bold mb-2" for="name">Family Name</block>
-              <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="family-name" name="family-name" type="text" value={{$user.FamilyName}}>
+              <label class="block text-gray-700 text-sm font-bold mb-2" for="name">Family Name</label>
+              <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="family-name" name="family-name" type="text" value="{{$user.FamilyName}}"/>
             </div>
 
             <div class="">
