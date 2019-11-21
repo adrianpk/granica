@@ -4,6 +4,8 @@ Authentication and authorization service.
 
 <img src="docs/img/users_index.png" width="480">
 
+[Screenshots](docs/screenshots.md)
+
 ## Dev branch
 
 - [new/wip at GitLab](https://gitlab.com/mikrowezel/backend/granica/tree/new/wip)
@@ -33,24 +35,28 @@ Use `make grc-test` for colored output.
 ```shell
 $ make run
 ./scripts/run.sh
-2:27AM INF New handler name=migration-handler
-2:27AM INF New handler name=repo-handler
-2:27AM INF Template file path=layout/base.tmpl
-2:27AM INF Template file path=user/_ctxbar.tmpl
-2:27AM INF Template file path=user/_flash.tmpl
-2:27AM INF Template file path=user/_header.tmpl
-2:27AM INF Template file path=user/_list.tmpl
-2:27AM INF Template file path=user/index.tmpl
-2:27AM INF Template processed template=./assets/web/embed/template/user/index.tmpl
-2:27AM INF Dialing to Postgres host="host=localhost port=5432 user=granica password=granica dbname=granica sslmode=disable"
-2:27AM INF Postgres connection established
-2:27AM INF Repo initializated name=repo-handler
-2019/11/15 02:27:10 Migration 'enable_postgis' already applied.
-2019/11/15 02:27:10 Migration 'create_users_table' already applied.
-2019/11/15 02:27:10 Migration 'create_accounts_table' already applied.
-2:27AM INF Migrator initializated name=migration-handler
-2:27AM INF JSON REST Server initializing port=:8081
-2:27AM INF Web server initializing port=:8080
+5:31PM INF New handler name=migration-handler
+5:31PM INF New handler name=repo-handler
+5:31PM INF Cookie store key value=pVuOO7ZPNBnqTb5o13JsBMOPcPAe4pxY
+5:31PM INF Reading template path=layout/base.tmpl
+5:31PM INF Reading template path=user/_ctxbar.tmpl
+5:31PM INF Reading template path=user/_flash.tmpl
+5:31PM INF Reading template path=user/_form.tmpl
+5:31PM INF Reading template path=user/_header.tmpl
+5:31PM INF Reading template path=user/_list.tmpl
+5:31PM INF Reading template path=user/create.tmpl
+5:31PM INF Reading template path=user/index.tmpl
+5:31PM INF Parsed template set path=user/create.tmpl
+5:31PM INF Parsed template set path=user/index.tmpl
+5:31PM INF Dialing to Postgres host="host=localhost port=5432 user=dbuser password=dbpass dbname=granica sslmode=disable"
+5:31PM INF Postgres connection established
+5:31PM INF Repo initializated name=repo-handler
+2019/11/21 17:31:06 Migration 'enable_postgis' already applied.
+2019/11/21 17:31:06 Migration 'create_users_table' already applied.
+2019/11/21 17:31:06 Migration 'create_accounts_table' already applied.
+5:31PM INF Migrator initializated name=migration-handler
+5:31PM INF JSON REST Server initializing port=:8081
+5:31PM INF Web server initializing port=:8080
 ```
 
 ## Deployment

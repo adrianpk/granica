@@ -96,6 +96,11 @@ deploy-prod:
 custom-build:
 	make mod tidy; go mod vendor; go build ./...
 
+clean-and-run:
+	clear
+	make package-resources
+	make run
+
 gen-sample:
 	mw generate Sample --all --force
 
