@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"github.com/gorilla/csrf"
 	"github.com/markbates/pkger"
 )
 
@@ -57,6 +58,7 @@ func (a *Auth) makeHomeWebRouter() chi.Router {
 	hr.Use(middleware.RealIP)
 	hr.Use(middleware.Recoverer)
 	hr.Use(middleware.Timeout(60 * time.Second))
+	hr.Use(CSRFProtection)
 	a.addHomeWebRoutes(hr)
 	return hr
 }
@@ -97,4 +99,9 @@ func (a *Auth) makeAPIJSONRESTRouter(parent chi.Router) chi.Router {
 		tr := textResponse("API v1.0")
 		ar.Get("/", tr.write)
 	})
+}
+
+// CSRFProtection add cross-site request forgery protecction to the handler.
+func CSRFProtection(h http.Handler) http.Handler {
+	return csrf.Protect([]byte("32-byte-long-auth-key"), csrf.Secure(false))(h)
 }
