@@ -1,5 +1,9 @@
 package transport
 
+import (
+	"gitlab.com/mikrowezel/backend/web"
+)
+
 type (
 	// User request and response data.
 	User struct {
@@ -13,12 +17,13 @@ type (
 		FamilyName        string `json:"familyName"`
 		Lat               string `json:"lat"`
 		Lng               string `json:"lng"`
+		IsNew             bool
 	}
 
 	Users []User
 )
 
-func (u *User) GetSlug() string {
+func (u User) GetSlug() string {
 	return u.Slug
 }
 
@@ -31,8 +36,7 @@ type (
 	// CreateUserRes output data.
 	CreateUserRes struct {
 		User
-		Msg   string `json:"msg,omitempty"`
-		Error string `json:"err,omitempty"`
+		Action web.Action
 	}
 )
 
@@ -44,8 +48,6 @@ type (
 	// GetUsersRes output data.
 	GetUsersRes struct {
 		Users
-		Msg   string `json:"msg,omitempty"`
-		Error string `json:"err,omitempty"`
 	}
 )
 
@@ -58,8 +60,6 @@ type (
 	// GetUserRes output data.
 	GetUserRes struct {
 		User
-		Msg   string `json:"msg,omitempty"`
-		Error string `json:"err,omitempty"`
 	}
 )
 
@@ -73,8 +73,7 @@ type (
 	// UpdateUserRes output data.
 	UpdateUserRes struct {
 		User
-		Msg   string `json:"msg,omitempty"`
-		Error string `json:"err,omitempty"`
+		Action web.Action
 	}
 )
 
@@ -86,7 +85,5 @@ type (
 
 	// DeleteUserRes output data.
 	DeleteUserRes struct {
-		Msg   string `json:"msg,omitempty"`
-		Error string `json:"err,omitempty"`
 	}
 )
