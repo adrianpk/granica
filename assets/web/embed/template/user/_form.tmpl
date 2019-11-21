@@ -1,0 +1,84 @@
+{{define "form"}} {{$user := .Data.User}} {{$action := .Data.Action}} {{$csrf := .CSRF}}
+
+    <div class="w-2/3 mx-auto">
+        <div class="bg-white shadow-md rounded my-6">
+
+        <form accept-charset="UTF-8" action="{{$action.Target}}" method="POST">
+          <input name="_method" type="hidden" value="{{$action.Method}}">
+
+          {{$csrf.csrfField}}
+
+          <div class="field">
+            <label class="label" for="username">Username</label>
+            <input class="input is-primary" id="username" name="username" type="text" placeholder="Username" value="{{$user.Username}}">
+          </div>
+
+          <div class="field">
+            <label class="label" for="name">Password</label>
+            <input class="input is-primary" id="password" name="password" type="password" placeholder="Password" value="">
+          </div>
+
+          <div class="field">
+            <label class="label" for="name">Password confirmation</label>
+            <input class="input is-primary" id="password-confirmation" name="password-confirmation" type="password" type="password" placeholder="Passowrd confirmation"
+              value="">
+          </div>
+
+          <div class="field">
+            <label class="label" for="name">Email</label>
+            <input class="input is-primary" id="name" name="email" type="text" value={{$user.Email}}>
+          </div>
+
+          <div class="field">
+            <label class="label" for="name">Given Name</label>
+            <input class="input is-primary" id="given-name" name="given-name" type="text" value={{$user.GivenName}}>
+          </div>
+
+          <div class="field">
+            <label class="label" for="name">Middle Names</label>
+            <input class="input is-primary" id="middle-names" name="middle-names" type="text" value={{$user.MiddleNames}}>
+          </div>
+
+          <div class="field">
+            <label class="label" for="name">Family Name</label>
+            <input class="input is-primary" id="family-name" name="family-name" type="text" value={{$user.FamilyName}}>
+          </div>
+
+          <div class="is-grouped is-pulled-left">
+            {{if not $user.IsNew}}
+            <!-- Update -->
+            <div class="control">
+              <input class="button is-link" type="submit" value="Update">
+            </div>
+            <!-- Update -->
+            {{else}}
+            <!-- Save -->
+            <div class="control">
+              <input class="button is-link" type="submit" value="Save">
+            </div>
+            <!-- Save -->
+            {{end}}
+          </div>
+        </form>
+
+        <div class="">
+        {{$user.GetSlug}}
+        {{if not $user.IsNew}}
+          <!-- Init delete -->
+          <div class="control">
+            <a class="is-jsonly" data-confirm="Are you sure?" data-csrf="" data-method="delete" data-to="{{$user | userPathSlug}}"
+              href="#" rel="nofollow">Delete</a>
+          </div>
+          <div class="control">
+            <noscript>
+              <form accept-charset="UTF-8" action="{{$user | userPathInitDelete}}" method="POST">
+                <input class="" type="submit" value="Delete">
+              </form>
+            </noscript>
+          </div>
+          <!-- Init delete -->
+        {{end}}
+
+        </div>
+    </div>
+{{end}}
