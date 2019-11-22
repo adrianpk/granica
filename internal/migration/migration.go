@@ -58,6 +58,7 @@ func (h *Migrator) Init(s svc.Service) chan bool {
 		//return
 		//}
 
+		//err := h.RollbackAll()
 		err := h.Migrate()
 		if err != nil {
 			s.Log().Error(err, "Init Postgres Db handler error")
