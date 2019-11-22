@@ -9,8 +9,8 @@ func (m *mig) CreateAccountsTable() error {
 	st := `CREATE TABLE accounts
 	(
 		id UUID PRIMARY KEY,
-		tenant_id VARCHAR(128),
 		slug VARCHAR(36) UNIQUE,
+		tenant_id VARCHAR(128),
 		owner_id UUID REFERENCES users(id) ON DELETE CASCADE,
 		parent_id UUID,
 	  account_type VARCHAR(36),
