@@ -85,6 +85,10 @@ func (i *Identification) genSlug(prefix string) (slug string, err error) {
 	return strings.ToLower(fmt.Sprintf("%s-%s", prefix, l)), nil
 }
 
+func (i *Identification) IsNew() bool {
+	return i.ID == uuid.UUID{}
+}
+
 // SetCreateValues sets de ID and slug.
 func (i *Identification) SetCreateValues(slugPrefix string) error {
 	i.GenID()

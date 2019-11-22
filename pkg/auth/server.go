@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"context"
 	"net/http"
 	"os"
 	"time"
@@ -9,9 +10,16 @@ import (
 	"github.com/go-chi/chi/middleware"
 	"github.com/gorilla/csrf"
 	"github.com/markbates/pkger"
+	"gitlab.com/mikrowezel/backend/web"
+	"golang.org/x/text/language"
+	"golang.org/x/text/message"
 )
 
 type textResponse string
+
+var (
+	langMatcher = language.NewMatcher(message.DefaultCatalog.Languages())
+)
 
 func (t textResponse) write(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(t))
@@ -101,7 +109,30 @@ func (a *Auth) makeAPIJSONRESTRouter(parent chi.Router) chi.Router {
 	})
 }
 
+// Middleware
+
 // CSRFProtection add cross-site request forgery protecction to the handler.
 func CSRFProtection(h http.Handler) http.Handler {
 	return csrf.Protect([]byte("32-byte-long-auth-key"), csrf.Secure(false))(h)
+}
+
+// I18N
+func I18N(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// NOTE: Lang is read from a query string.
+		// TODO: Read lang from headers and/or value
+		// stored in cookie or user session.
+		l, ok := r.URL.Query()["lang"]
+
+		if !ok || len(l) < 1 {
+			l = append(l, language.English.String())
+		}
+
+		tag, _, _ := langMatcher.Match(language.MustParse(l[0]))
+
+		p := message.NewPrinter(tag)
+		ctx := context.WithValue(context.Background(), web.I18NorCtxKey, p)
+
+		next.ServeHTTP(w, r.WithContext(ctx))
+	}
 }

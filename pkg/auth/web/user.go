@@ -46,7 +46,7 @@ func (ep *Endpoint) CreateUser(w http.ResponseWriter, r *http.Request) {
 	// TODO: Form data validation
 
 	// Form to Req
-	err := web.NewDecoder().Decode(&req.User, r.Form)
+	err := web.FormToModel(r, &req.User)
 	res.Action = ep.userCreateAction()
 
 	// Template
