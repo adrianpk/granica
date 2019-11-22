@@ -1,9 +1,9 @@
 package web
 
 import (
-	"fmt"
 	"net/http"
 
+	//"github.com/davecgh/go-spew/spew"
 	"gitlab.com/mikrowezel/backend/granica/internal/model"
 	tp "gitlab.com/mikrowezel/backend/granica/pkg/auth/transport"
 	"gitlab.com/mikrowezel/backend/web"
@@ -38,20 +38,62 @@ func (ep *Endpoint) InitCreateUser(w http.ResponseWriter, r *http.Request) {
 		ep.Log().Error(err)
 		ep.Redirect(w, r, "/")
 	}
-	//ep.Redirect(w, r, "http://google.com")
 }
 
 func (ep *Endpoint) CreateUser(w http.ResponseWriter, r *http.Request) {
 	var req tp.CreateUserReq
 	var res tp.CreateUserRes
 
-	// Service
-	err := ep.service.CreateUser(req, &res)
+	// TODO: Form data validation
+
+	// Form to Req
+	err := web.NewDecoder().Decode(&req.User, r.Form)
+	//ep.Log().Debug("Resource", "values", spew.Sdump(res))
+
+	// Req to model
+	res.Action = ep.userCreateAction()
+
+	// Template
+	ts, err := ep.TemplateFor(userRes, web.CreateTmpl)
 	if err != nil {
-		ep.Log().Error(err)
 		ep.Redirect(w, r, "/")
 		return
 	}
+
+	if err != nil {
+		wr := ep.ErrRes(r, res, "Cannot create user")
+		ep.Log().Error(err)
+
+		// TODO: Use redirect instead.
+		// Cleaner and avoids extra nesting level
+		// Preserve form data using gorilla session
+		err = ts.Execute(w, wr)
+		if err != nil {
+			ep.Log().Error(err)
+			ep.Redirect(w, r, "/")
+		}
+		return
+	}
+
+	// Service
+	err = ep.service.CreateUser(req, &res)
+	if err != nil {
+		wr := ep.ErrRes(r, res, "Cannot create user")
+		ep.Log().Error(err)
+
+		err = ts.Execute(w, wr)
+		if err != nil {
+			ep.Log().Error(err)
+			ep.Redirect(w, r, "/")
+		}
+		return
+	}
+
+	// TODO: Flash message
+
+	// Wrap response
+	ep.Redirect(w, r, "/")
+
 }
 
 // GetUsers web endpoint.
