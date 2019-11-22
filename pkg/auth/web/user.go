@@ -3,7 +3,6 @@ package web
 import (
 	"net/http"
 
-	//"github.com/davecgh/go-spew/spew"
 	"gitlab.com/mikrowezel/backend/granica/internal/model"
 	tp "gitlab.com/mikrowezel/backend/granica/pkg/auth/transport"
 	"gitlab.com/mikrowezel/backend/web"
@@ -48,9 +47,6 @@ func (ep *Endpoint) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	// Form to Req
 	err := web.NewDecoder().Decode(&req.User, r.Form)
-	//ep.Log().Debug("Resource", "values", spew.Sdump(res))
-
-	// Req to model
 	res.Action = ep.userCreateAction()
 
 	// Template
@@ -61,12 +57,13 @@ func (ep *Endpoint) CreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err != nil {
-		wr := ep.ErrRes(r, res, "Cannot create user")
+		msg := web.I18NCreateErrMsg(r, userRes)
+		wr := ep.ErrRes(r, res, msg)
 		ep.Log().Error(err)
 
 		// TODO: Use redirect instead.
 		// Cleaner and avoids extra nesting level
-		// Preserve form data using gorilla session
+		// TODO: Preserve form data using gorilla session
 		err = ts.Execute(w, wr)
 		if err != nil {
 			ep.Log().Error(err)
