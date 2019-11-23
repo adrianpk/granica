@@ -128,10 +128,7 @@ func (a *Auth) I18N(next http.Handler) http.Handler {
 		bundle := a.I18NBundle()
 
 		l := i18n.NewLocalizer(bundle, lang, accept)
-
-		// ctx := context.WithValue(context.Background(), web.I18NorCtxKey, l)
 		ctx := context.WithValue(r.Context(), web.I18NorCtxKey, l)
-
 		next.ServeHTTP(w, r.WithContext(ctx))
 	}
 
