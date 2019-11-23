@@ -11,6 +11,10 @@ Authentication and authorization service.
 - [new/wip at GitLab](https://gitlab.com/mikrowezel/backend/granica/tree/new/wip)
 - [new/wip at GitHub](https://github.com/adrianpk/granica/tree/new/wip)
 
+## Changelog
+
+* [20191122](/docs/draft/changelog.md#20191123)
+
 ## Installation
 
 [TODO: Create database steps]

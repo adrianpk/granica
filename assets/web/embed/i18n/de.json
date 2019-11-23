@@ -1,0 +1,15 @@
+{
+"get_err_msg": "Der {{.Name}} kann nicht abgerufen werden",
+"get_all_err_msg": "{{.Name}}liste kann nicht abgerufen werden",
+"create_err_msg": "Es ist nicht möglich, den {{.Name}} anzulegen",
+"update_err_msg": "{{.Name}} kann nicht aktualisiert werden",
+"delete_err_msg": "{{.Name}} kann nicht gelöscht werden",
+
+"sample_message": "Beispielnachrich",
+"sample_count_message": {
+  "description": "Some variable count message",
+  "one": "Punkt {{.Name}} hat {{.Count}} Wert",
+  "many": "Punkt {{.Name}} hat {{.Count}} Werte",
+  "other": "Punkt {{.Name}} hat {{.Count}} Werte"
+  }
+}

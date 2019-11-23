@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"html/template"
 	"math/rand"
@@ -13,34 +14,46 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gorilla/csrf"
+	"github.com/gorilla/schema"
 	"github.com/gorilla/sessions"
 	"github.com/markbates/pkger"
+	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"gitlab.com/mikrowezel/backend/config"
-	"gitlab.com/mikrowezel/backend/granica/pkg/auth/service"
 	"gitlab.com/mikrowezel/backend/log"
+	"golang.org/x/text/message"
 )
 
 type (
 	Endpoint struct {
-		ctx         context.Context
-		cfg         *config.Config
-		log         *log.Logger
-		service     *service.Service
-		templates   TemplateSet
-		templatesFx template.FuncMap
-		store       *sessions.CookieStore
-		storeKey    string
+		ctx        context.Context
+		cfg        *config.Config
+		log        *log.Logger
+		templates  TemplateSet
+		templateFx template.FuncMap
+		store      *sessions.CookieStore
+		storeKey   string
 	}
 
 	TemplateSet    map[string]*template.Template
 	TemplateGroups map[string]map[string][]string
 )
 
+type Action struct {
+	Target string
+	Method string
+}
+
 type (
-	// WRes stands for wrapped response
-	WRes struct {
+	ContextKey string
+)
+
+type (
+	// WrappedRes stands for wrapped response
+	WrappedRes struct {
 		Data  interface{}
 		Flash []FlashData
+		CSRF  map[string]interface{}
 		Err   error
 	}
 
@@ -61,6 +74,14 @@ type (
 )
 
 const (
+	GetMethod    = "GET"
+	PostMethod   = "POST"
+	PutMethod    = "PUT"
+	PatchMethod  = "PATCH"
+	DeleteMethod = "DELETE"
+)
+
+const (
 	templateDir = "/assets/web/embed/template"
 	layoutDir   = "layout"
 	layoutKey   = "layout"
@@ -69,7 +90,11 @@ const (
 )
 
 const (
-	indexTmpl = "index.tmpl"
+	IndexTmpl   = "index.tmpl"
+	CreateTmpl  = "create.tmpl"
+	UpdateTmpl  = "update.tmpl"
+	ShowTmpl    = "show.tmpl"
+	InitDelTmpl = "initdel.tmpl"
 )
 
 const (
@@ -79,53 +104,83 @@ const (
 	DebugMT MsgType = "debug"
 )
 
-func MakeEndpoint(ctx context.Context, cfg *config.Config, log *log.Logger, service *service.Service) (*Endpoint, error) {
-	e := Endpoint{
-		ctx:     ctx,
-		cfg:     cfg,
-		log:     log,
-		service: service,
+const (
+	I18NorCtxKey ContextKey = "i18n"
+)
+
+const (
+	GetErrFmt    = "Cannot create %s."
+	GetAllErrFmt = "Cannot get list of %s."
+	CreateErrFmt = "Cannot get %s."
+	UpdateErrFmt = "Cannot update %s."
+	DeleteErrFmt = "Cannot delete %s."
+)
+
+func MakeEndpoint(ctx context.Context, cfg *config.Config, log *log.Logger, templateFx template.FuncMap) (*Endpoint, error) {
+	ep := Endpoint{
+		ctx:        ctx,
+		cfg:        cfg,
+		log:        log,
+		templateFx: templateFx,
 	}
 
 	// Cookie store
-	e.makeCookieStore()
+	ep.makeCookieStore()
 
 	// Load
-	ts, err := e.loadTemplates()
+	ts, err := ep.loadTemplates()
 	if err != nil {
-		return &e, err
+		return &ep, err
 	}
 
 	// Classify
-	tg := e.classifyTemplates(ts)
+	tg := ep.classifyTemplates(ts)
 
 	// Parse
-	e.parseTemplates(ts, tg)
+	ep.parseTemplates(ts, tg)
 
-	return &e, nil
+	return &ep, nil
 }
 
-func (e *Endpoint) Ctx() context.Context {
-	return e.ctx
+func (ep *Endpoint) Ctx() context.Context {
+	return ep.ctx
 }
 
-func (e *Endpoint) Cfg() *config.Config {
-	return e.cfg
+func (ep *Endpoint) Cfg() *config.Config {
+	return ep.cfg
 }
 
-func (e *Endpoint) Log() *log.Logger {
-	return e.log
+func (ep *Endpoint) Log() *log.Logger {
+	return ep.log
+}
+
+func (ep *Endpoint) Templates() TemplateSet {
+	return ep.templates
+}
+
+func (ep *Endpoint) TemplatesFx() template.FuncMap {
+	return ep.templateFx
+}
+
+func (ep *Endpoint) Store() *sessions.CookieStore {
+	return ep.store
+}
+
+func (wr *WrappedRes) addCSRF(r *http.Request) {
+	wr.CSRF = map[string]interface{}{
+		csrf.TemplateTag: csrf.TemplateField(r),
+	}
 }
 
 // loadTemplates from embedded filesystem (pkger)
 // under '/assets/web/embed/template'
-func (e *Endpoint) loadTemplates() (TemplateSet, error) {
+func (ep *Endpoint) loadTemplates() (TemplateSet, error) {
 	tmpls := make(TemplateSet)
 
 	err := pkger.Walk(templateDir,
 		func(path string, info os.FileInfo, err error) error {
 			if err != nil {
-				e.Log().Error(err, "msg", "Cannot load template", "path", path)
+				ep.Log().Error(err, "msg", "Cannot load template", "path", path)
 				return err
 			}
 
@@ -134,7 +189,7 @@ func (e *Endpoint) loadTemplates() (TemplateSet, error) {
 				base := fmt.Sprintf("%s:%s", list[0], templateDir)
 				p, _ := filepath.Rel(base, path)
 
-				e.Log().Info("Reading template", "path", p)
+				ep.Log().Info("Reading template", "path", p)
 
 				tmpls[p] = template.New(base)
 				return nil
@@ -146,7 +201,7 @@ func (e *Endpoint) loadTemplates() (TemplateSet, error) {
 		})
 
 	if err != nil {
-		e.Log().Error(err, "msg", "Cannot load templates", "path")
+		ep.Log().Error(err, "msg", "Cannot load templates", "path")
 		return tmpls, err
 	}
 
@@ -156,10 +211,10 @@ func (e *Endpoint) loadTemplates() (TemplateSet, error) {
 // classifyTemplates grouping them,
 // first by type (layout, partial and page)
 // and then by resource.
-func (e *Endpoint) classifyTemplates(ts TemplateSet) TemplateGroups {
+func (ep *Endpoint) classifyTemplates(ts TemplateSet) TemplateGroups {
 	all := make(TemplateGroups)
 	last := ""
-	keys := e.tmplsKeys(ts)
+	keys := ep.tmplsKeys(ts)
 
 	for _, path := range keys {
 		p := "./assets/web/embed/template" + "/" + path
@@ -192,7 +247,7 @@ func (e *Endpoint) classifyTemplates(ts TemplateSet) TemplateGroups {
 	return all
 }
 
-func (e *Endpoint) tmplsKeys(ts TemplateSet) []string {
+func (ep *Endpoint) tmplsKeys(ts TemplateSet) []string {
 	keys := make([]string, 0, len(ts))
 	for k, _ := range ts {
 		keys = append(keys, k)
@@ -201,8 +256,8 @@ func (e *Endpoint) tmplsKeys(ts TemplateSet) []string {
 }
 
 // parseTemplates parses template sets for each resource.
-func (e *Endpoint) parseTemplates(ts TemplateSet, tg TemplateGroups) {
-	e.templates = make(TemplateSet)
+func (ep *Endpoint) parseTemplates(ts TemplateSet, tg TemplateGroups) {
+	ep.templates = make(TemplateSet)
 	layout := tg[layoutDir][layoutKey][0]
 
 	for k, ts := range tg {
@@ -211,13 +266,13 @@ func (e *Endpoint) parseTemplates(ts TemplateSet, tg TemplateGroups) {
 
 		for _, t := range pages {
 			if k != layoutDir {
-				e.parseTemplate(t, partials, layout, e.templatesFx)
+				ep.parseTemplate(t, partials, layout, ep.templateFx)
 			}
 		}
 	}
 }
 
-func (e *Endpoint) parseTemplate(page string, partials []string, layout string, funcs template.FuncMap) {
+func (ep *Endpoint) parseTemplate(page string, partials []string, layout string, funcs template.FuncMap) {
 	parse := "base.tmpl"
 	all := make([]string, 10)
 	all = append(all, page)
@@ -227,15 +282,15 @@ func (e *Endpoint) parseTemplate(page string, partials []string, layout string, 
 
 	t, err := template.New(parse).Funcs(funcs).ParseFiles(all...)
 	if err != nil {
-		e.Log().Error(err, "Error parsing template set", "page", page)
+		ep.Log().Error(err, "Error parsing template set", "page", page)
 	}
 
 	base := fmt.Sprintf(".%s", templateDir)
 	p, _ := filepath.Rel(base, page)
 
-	e.Log().Info("Parsed template set", "path", p)
+	ep.Log().Info("Parsed template set", "path", p)
 
-	e.templates[page] = t
+	ep.templates[page] = t
 }
 
 func trimSlice(slice *[]string) {
@@ -311,21 +366,21 @@ func formatRequest(r *http.Request) string {
 }
 
 // Cookie store
-func (e *Endpoint) makeCookieStore() {
-	k := e.Cfg().ValOrDef("web.cookiestore.key", "")
+func (ep *Endpoint) makeCookieStore() {
+	k := ep.Cfg().ValOrDef("web.cookiestore.key", "")
 	if k == "" {
-		k = e.genAES256Key()
-		e.Log().Debug("New cookie store random key", "value", k)
+		k = ep.genAES256Key()
+		ep.Log().Debug("New cookie store random key", "value", k)
 		csEnVar := fmt.Sprintf("%s_COOKIESTORE_KEY", "GRN")
-		e.Log().Info("Set a custom cookie store key using a 32 char string stored as an envar", "envvar", csEnVar)
+		ep.Log().Info("Set a custom cookie store key using a 32 char string stored as an envar", "envvar", csEnVar)
 	}
 
-	e.storeKey = k
-	e.Log().Debug("Cookie store key", "value", k)
+	ep.storeKey = k
+	ep.Log().Debug("Cookie store key", "value", k)
 	sessions.NewCookieStore([]byte(k))
 }
 
-func (e *Endpoint) genAES256Key() string {
+func (ep *Endpoint) genAES256Key() string {
 	const allowed = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	const (
 		lenght    = 32
@@ -349,4 +404,247 @@ func (e *Endpoint) genAES256Key() string {
 	}
 
 	return sb.String()
+}
+
+// Templates
+
+func (ep *Endpoint) TemplateFor(res, name string) (*template.Template, error) {
+	key := ep.template(res, name)
+
+	t, ok := ep.templates[key]
+	if !ok {
+		err := errors.New("canot get template")
+		ep.Log().Error(err, "resource", res, "template", name)
+		return nil, err
+	}
+
+	return t, nil
+}
+
+func (ep *Endpoint) template(resource, template string) (tmplKey string) {
+	return fmt.Sprintf(".%s/%s/%s", templateDir, resource, template)
+}
+
+// I18N
+func I18NGetAllErrMsg(r *http.Request, resource string) string {
+	return I18NErrMsg(r, resource, GetAllErrFmt)
+}
+
+func I18NGetErrMsg(r *http.Request, resource string) string {
+	return I18NErrMsg(r, resource, GetErrFmt)
+}
+
+func I18NCreateErrMsg(r *http.Request, resource string) string {
+	return I18NErrMsg(r, resource, CreateErrFmt)
+}
+
+func I18NUpdateErrMsg(r *http.Request, resource string) string {
+	return I18NErrMsg(r, resource, UpdateErrFmt)
+}
+
+func I18NDeleteErrMsg(r *http.Request, resource string) string {
+	return I18NErrMsg(r, resource, DeleteErrFmt)
+}
+
+func I18NErrMsg(r *http.Request, resource, errFmt string) string {
+	return fmt.Sprintf(errFmt, resource)
+	mp, ok := GetI18NorDeprecated(r)
+	if ok {
+		return mp.Sprintf(errFmt, resource)
+	}
+
+	return fmt.Sprintf(errFmt, resource)
+}
+
+func GetI18NLocalizer(r *http.Request) (localizer *i18n.Localizer, ok bool) {
+	localizer, ok = r.Context().Value(I18NorCtxKey).(*i18n.Localizer)
+	return localizer, ok
+}
+
+func GetI18NorDeprecated(r *http.Request) (mp *message.Printer, ok bool) {
+	mp, ok = r.Context().Value(I18NorCtxKey).(*message.Printer)
+	return mp, ok
+}
+
+// Wrapped responses
+
+// OkRes builds an OK response including data and cero, one  or more messages.
+// All messages are assumed of type info therefore flashes will be also of this type.
+func (ep *Endpoint) OKRes(r *http.Request, data interface{}, msgs ...string) WrappedRes {
+	fls := []FlashData{}
+	for _, m := range msgs {
+		fls = append(fls, ep.MakeFlash(m, InfoMT))
+	}
+
+	wr := WrappedRes{
+		Data:  data,
+		Flash: fls,
+		Err:   nil,
+	}
+
+	wr.AddCSRF(r)
+
+	return wr
+}
+
+// MultiRes builds a multiType response including data and cero, one  or more messages.
+// Generated flash messages will be created according to the values passed in the parameter map.
+// i.e.: map[string]MsgType{"Action processed": InfoMT, "Remember to update profile": WarnMT}
+func (ep *Endpoint) MultiRes(r *http.Request, data interface{}, msgs map[string]MsgType) WrappedRes {
+	fls := []FlashData{}
+	for m, t := range msgs {
+		fls = append(fls, ep.MakeFlash(m, t))
+	}
+
+	wr := WrappedRes{
+		Data:  data,
+		Flash: fls,
+		Err:   nil,
+	}
+
+	wr.AddCSRF(r)
+
+	return wr
+}
+
+// ErrRes builds an error response including data and cero, one  or more messages.
+// All messages are assumed of type error therefore flashes will be also of this type.
+func (ep *Endpoint) ErrRes(r *http.Request, data interface{}, msgs ...string) WrappedRes {
+	fls := []FlashData{}
+	for _, m := range msgs {
+		fls = append(fls, ep.MakeFlash(m, ErrorMT))
+	}
+
+	wr := WrappedRes{
+		Data:  data,
+		Flash: fls,
+		Err:   nil,
+	}
+
+	wr.AddCSRF(r)
+
+	return wr
+}
+
+// Wrap response data.
+func (ep *Endpoint) Wrap(r *http.Request, data interface{}, msg string, msgType MsgType, err error) WrappedRes {
+	wr := WrappedRes{
+		Data:  data,
+		Flash: []FlashData{ep.MakeFlash(msg, msgType)},
+		Err:   err,
+	}
+
+	wr.AddCSRF(r)
+
+	return wr
+}
+
+// MakeFlash message.
+func (ep *Endpoint) MakeFlash(msg string, msgType MsgType) FlashData {
+	return FlashData{
+		Type: msgType,
+		Msg:  msg,
+	}
+}
+
+// Redirect to url.
+func (ep *Endpoint) Redirect(w http.ResponseWriter, r *http.Request, url string) {
+	http.Redirect(w, r, url, 302)
+}
+
+func (wr *WrappedRes) AddCSRF(r *http.Request) {
+	wr.CSRF = map[string]interface{}{
+		csrf.TemplateTag: csrf.TemplateField(r),
+	}
+}
+
+// Forms
+func FormToModel(r *http.Request, model interface{}) error {
+	return NewDecoder().Decode(model, r.Form)
+}
+
+// NewDecoder build a schema decoder
+// that put values from a map[string][]string into a struct.
+func NewDecoder() *schema.Decoder {
+	d := schema.NewDecoder()
+	d.IgnoreUnknownKeys(true)
+	return d
+}
+
+// Resource paths
+
+// Resource path functions
+// IndexPath returns index path under resource root path.
+func IndexPath() string {
+	return ""
+}
+
+// EditPath returns edit path under resource root path.
+func EditPath() string {
+	return "/{id}/edit"
+}
+
+// NewPath returns new path under resource root path.
+func NewPath() string {
+	return "/new"
+}
+
+// ShowPath returns show path under resource root path.
+func ShowPath() string {
+	return "/{id}"
+}
+
+// CreatePath returns create path under resource root path.
+func CreatePath() string {
+	return ""
+}
+
+// UpdatePath returns update path under resource root path.
+func UpdatePath() string {
+	return "/{id}"
+}
+
+// InitDeletePath returns init delete path under resource root path.
+func InitDeletePath() string {
+	return "/{id}/init-delete"
+}
+
+// DeletePath returns delete path under resource root path.
+func DeletePath() string {
+	return "/{id}"
+}
+
+// SignupPath returns signup path.
+func SignupPath() string {
+	return "/signup"
+}
+
+// LoginPath returns login path.
+func LoginPath() string {
+	return "/login"
+}
+
+// ResPath
+func ResPath(rootPath string) string {
+	return "/" + rootPath + IndexPath()
+}
+
+// ResPathEdit
+func ResPathEdit(rootPath string, r Identifiable) string {
+	return fmt.Sprintf("/%s/%s/edit", rootPath, r.GetSlug())
+}
+
+// ResPathNew
+func ResPathNew(rootPath string) string {
+	return fmt.Sprintf("/%s/new", rootPath)
+}
+
+// ResPathInitDelete
+func ResPathInitDelete(rootPath string, r Identifiable) string {
+	return fmt.Sprintf("/%s/%s/init-delete", rootPath, r.GetSlug())
+}
+
+// ResPathSlug
+func ResPathSlug(rootPath string, r Identifiable) string {
+	return fmt.Sprintf("/%s/%s", rootPath, r.GetSlug())
 }

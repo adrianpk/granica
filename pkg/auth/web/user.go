@@ -1,8 +1,10 @@
 package web
 
 import (
+	"fmt"
 	"net/http"
 
+	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"gitlab.com/mikrowezel/backend/granica/internal/model"
 	tp "gitlab.com/mikrowezel/backend/granica/pkg/auth/transport"
 	"gitlab.com/mikrowezel/backend/web"
@@ -46,7 +48,7 @@ func (ep *Endpoint) CreateUser(w http.ResponseWriter, r *http.Request) {
 	// TODO: Form data validation
 
 	// Form to Req
-	err := web.NewDecoder().Decode(&req.User, r.Form)
+	err := web.FormToModel(r, &req.User)
 	res.Action = ep.userCreateAction()
 
 	// Template
@@ -57,8 +59,8 @@ func (ep *Endpoint) CreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err != nil {
-		msg := web.I18NCreateErrMsg(r, userRes)
-		wr := ep.ErrRes(r, res, msg)
+		m := ep.errMsg(r, web.CreatePfx, userRes)
+		wr := ep.ErrRes(r, res, m)
 		ep.Log().Error(err)
 
 		// TODO: Use redirect instead.
@@ -139,10 +141,44 @@ func (ep *Endpoint) DeleteUser(w http.ResponseWriter, r *http.Request) {
 // Misc
 // userCreateAction
 func (ep *Endpoint) userCreateAction() web.Action {
-	return web.Action{Target: UserPath(), Method: "POST"}
+	return web.Action{Target: fmt.Sprintf("%s", UserPath()), Method: "POST"}
 }
 
 // userUpdateAction
 func (ep *Endpoint) userUpdateAction(resource string, model web.Identifiable) web.Action {
 	return web.Action{Target: UserPathSlug(model), Method: "PUT"}
+}
+
+// NOTE: Just only testing some implementation path.
+// Not sure if this is the best one.
+func (ep *Endpoint) errMsg(r *http.Request, action, resource string) string {
+	l, ok := web.GetI18NLocalizer(r)
+	if !ok {
+		// FIX: Do something: Return default message?
+		ep.Log().Warn("I18N localizer not available")
+	}
+
+	// Message
+	id := fmt.Sprintf("%s_err_msg", action)
+
+	t, lang, err := l.LocalizeWithTag(&i18n.LocalizeConfig{
+		MessageID: id,
+		TemplateData: map[string]string{
+			"Name": resource,
+		},
+	})
+
+	if err != nil {
+		ep.Log().Error(err)
+	}
+
+	ep.Log().Debug("Localized message", "value", t, "lang", lang)
+
+	return t
+}
+
+func (ep *Endpoint) localizeMessageID(l *i18n.Localizer, messageID string) (string, error) {
+	return l.Localize(&i18n.LocalizeConfig{
+		MessageID: messageID,
+	})
 }

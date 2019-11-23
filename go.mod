@@ -9,6 +9,7 @@ require (
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/lib/pq v1.2.0
 	github.com/markbates/pkger v0.12.2
+	github.com/nicksnyder/go-i18n/v2 v2.0.3
 	gitlab.com/mikrowezel/backend/config v0.0.0
 	gitlab.com/mikrowezel/backend/db v0.0.0-20191014125253-afa2a932cece
 	gitlab.com/mikrowezel/backend/db/postgres v0.0.0-20191014125253-afa2a932cece
