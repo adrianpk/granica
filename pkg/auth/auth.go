@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"sync"
 
+	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"gitlab.com/mikrowezel/backend/config"
 	"gitlab.com/mikrowezel/backend/granica/pkg/auth/jsonrest"
 	"gitlab.com/mikrowezel/backend/granica/pkg/auth/service"
@@ -18,6 +19,7 @@ type (
 	Auth struct {
 		*svc.BaseWorker
 		service        *service.Service
+		i18nBundle     *i18n.Bundle
 		webep          *web.Endpoint
 		jsonep         *jsonrest.Endpoint
 		WebServer      http.Handler

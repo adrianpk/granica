@@ -18,6 +18,7 @@ import (
 	"github.com/gorilla/schema"
 	"github.com/gorilla/sessions"
 	"github.com/markbates/pkger"
+	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"gitlab.com/mikrowezel/backend/config"
 	"gitlab.com/mikrowezel/backend/log"
 	"golang.org/x/text/message"
@@ -447,7 +448,7 @@ func I18NDeleteErrMsg(r *http.Request, resource string) string {
 
 func I18NErrMsg(r *http.Request, resource, errFmt string) string {
 	return fmt.Sprintf(errFmt, resource)
-	mp, ok := GetI18Nor(r)
+	mp, ok := GetI18NorDeprecated(r)
 	if ok {
 		return mp.Sprintf(errFmt, resource)
 	}
@@ -455,7 +456,12 @@ func I18NErrMsg(r *http.Request, resource, errFmt string) string {
 	return fmt.Sprintf(errFmt, resource)
 }
 
-func GetI18Nor(r *http.Request) (mp *message.Printer, ok bool) {
+func GetI18NLocalizer(r *http.Request) (localizer *i18n.Localizer, ok bool) {
+	localizer, ok = r.Context().Value(I18NorCtxKey).(*i18n.Localizer)
+	return localizer, ok
+}
+
+func GetI18NorDeprecated(r *http.Request) (mp *message.Printer, ok bool) {
 	mp, ok = r.Context().Value(I18NorCtxKey).(*message.Printer)
 	return mp, ok
 }

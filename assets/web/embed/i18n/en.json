@@ -1,0 +1,15 @@
+{
+"get_err_msg": "Cannot create {{.Name}}",
+"get_all_err_msg": "Cannot get {{.Name}} list'",
+"create_err_msg": "Cannot get {{.Name}}",
+"update_err_msg": "Cannot update {{.Name}}",
+"delete_err_msg": "Cannot delete {{.Name}}",
+
+"sample_message": "Sample message",
+"sample_count_message": {
+  "description": "Some variable count message",
+  "one": "Item {{.Name}} has {{.Count}} value",
+  "many": "{{.Name}} has {{.Count}} values",
+  "other": "{{.Name}} has {{.Count}} values"
+  }
+}

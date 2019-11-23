@@ -1,0 +1,15 @@
+{
+"get_err_msg": "No se puede obtener el {{.Name}}",
+"get_all_err_msg": "No se puede obtener el listado",
+"create_err_msg": "No es posible crear el {{.Name}}",
+"update_err_msg": "No es posible actualizar el {{.Name}}",
+"delete_err_msg": "No es posible borrar {{.Name}}",
+
+"sample_message": "Mensaje de prueba",
+"sample_count_message": {
+  "description": "Some variable count message",
+  "one": "El íitem {{.Name}} tiene {{.Count}} valor",
+  "many": "El ítem {{.Name}} tiene {{.Count}} valores",
+  "other": "El ítem {{.Name}} tiene {{.Count}} valores"
+  }
+}
