@@ -7,11 +7,11 @@ import (
 	"os"
 	"time"
 
+	"github.com/adrianpk/go-i18n/v2/i18n"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/gorilla/csrf"
 	"github.com/markbates/pkger"
-	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"gitlab.com/mikrowezel/backend/web"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
