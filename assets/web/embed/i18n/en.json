@@ -1,4 +1,5 @@
 {
+"cannot_proc_err_msg": "It is not possible to process the request at this time",
 "get_err_msg": "Cannot create user",
 "get_all_err_msg": "Cannot get user list'",
 "create_err_msg": "Cannot get user",
