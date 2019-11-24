@@ -1,6 +1,10 @@
 # Changelog
 
-## <a name="20192232"></a>20191123 - Internationalization.
+## <a name="20191124"></a>20191124 - Embedded translations
+
+Localization files now are mbedded in executable as any other resource.
+
+## <a name="20191123"></a>20191123 - Internationalization
 
 Not fully implemented but basically this is how it works.
 
