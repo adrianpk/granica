@@ -3,7 +3,7 @@ package web
 import (
 	"context"
 
-	"github.com/adriank/go-i18n/v2/i18n"
+	"github.com/adrianpk/go-i18n/v2/i18n"
 	"gitlab.com/mikrowezel/backend/config"
 	svc "gitlab.com/mikrowezel/backend/granica/pkg/auth/service"
 	"gitlab.com/mikrowezel/backend/log"

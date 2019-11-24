@@ -20,6 +20,8 @@ require (
 	gitlab.com/mikrowezel/backend/web v0.0.0-00010101000000-000000000000
 	golang.org/x/crypto v0.0.0-20191002192127-34f69633bfdc
 	golang.org/x/text v0.3.2
+	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.3.0 // indirect
+	gopkg.in/stretchr/testify.v1 v1.2.2 // indirect
 )
 
 replace gitlab.com/mikrowezel/backend/log => ../log

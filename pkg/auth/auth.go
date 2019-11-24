@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/adriank/go-i18n/v2/i18n"
+	"github.com/adrianpk/go-i18n/v2/i18n"
 	"gitlab.com/mikrowezel/backend/config"
 	"gitlab.com/mikrowezel/backend/granica/pkg/auth/jsonrest"
 	"gitlab.com/mikrowezel/backend/granica/pkg/auth/service"
