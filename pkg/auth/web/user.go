@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/adrianpk/go-i18n/v2/i18n"
+	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"gitlab.com/mikrowezel/backend/granica/internal/model"
 	tp "gitlab.com/mikrowezel/backend/granica/pkg/auth/transport"
 	"gitlab.com/mikrowezel/backend/web"
