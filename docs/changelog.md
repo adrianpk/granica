@@ -1,6 +1,14 @@
 # Changelog
 
-## <a name="20192232"></a>20191123 - Internationalization.
+## <a name="20191124"></a>20191124 - Embededded translations and form data session store
+
+* Localization files now are embedded in executable as any other resource.
+
+* Endpoint helpers to store, retrieve and clear form data accross requests.
+
+Mainly used to avoid having to fill forms again in case of submission errors.
+
+## <a name="20191123"></a>20191123 - Internationalization
 
 Not fully implemented but basically this is how it works.
 

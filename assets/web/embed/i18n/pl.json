@@ -1,9 +1,9 @@
 {
-"get_err_msg": "Nie można uzyskać {{.Name}}",
-"get_all_err_msg": "Nie można uzyskać listy",
-"create_err_msg": "Nie można utworzyć {{.Name}}",
-"update_err_msg": "Nie można zaktualizować {{.Name}}",
-"delete_err_msg": "Nie można usunąć {{.Name}}",
+"get_err_msg": "Nie można utworzyć użytkownika",
+"get_all_err_msg": "Nie można uzyskać listy użytkowników",
+"create_err_msg": "Nie można uzyskać użytkownikai",
+"update_err_msg": "Nie można zaktualizować użytkownika",
+"delete_err_msg": "Nie można usunąć użytkownikai",
 
 "sample_message": "Przykładowa wiadomość",
 "sample_count_message": {

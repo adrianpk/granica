@@ -8,7 +8,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/adrianpk/go-i18n/v2/i18n"
+	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/gorilla/csrf"
