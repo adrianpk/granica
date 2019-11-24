@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"os"
 	"time"
@@ -143,13 +144,33 @@ func (a *Auth) I18NBundle() *i18n.Bundle {
 		return a.i18nBundle
 	}
 
-	// Create it if still not loaded.
 	b := i18n.NewBundle(language.English)
 	b.RegisterUnmarshalFunc("json", json.Unmarshal)
-	b.MustLoadMessageFile("assets/web/embed/i18n/en.json")
-	b.MustLoadMessageFile("assets/web/embed/i18n/pl.json")
-	b.MustLoadMessageFile("assets/web/embed/i18n/de.json")
-	b.MustLoadMessageFile("assets/web/embed/i18n/es.json")
+
+	locales := []string{"en", "pl", "de", "es"}
+
+	for _, loc := range locales {
+		path := fmt.Sprintf("/assets/web/embed/i18n/%s.json", loc)
+
+		// Open pkger filer
+		f, err := pkger.Open(path)
+		if err != nil {
+			a.Log().Error(err, "path", path)
+		}
+		defer f.Close()
+
+		// Read file content
+		fs, err := f.Stat()
+		if err != nil {
+			a.Log().Error(err, "path", path)
+		}
+		fd := make([]byte, fs.Size())
+		f.Read(fd)
+
+		// Load into bundle
+		b.ParseMessageFileBytes(fd, path)
+		//b.LoadEmbeddedMessageFile(fd, path)
+	}
 
 	// Cache it
 	a.i18nBundle = b
