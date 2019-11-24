@@ -38,6 +38,19 @@ func (res *CreateUserRes) FromModel(m *model.User, msg string, err error) {
 	}
 }
 
+func (res *CreateUserRes) FromTransport(t *User, msg string, err error) {
+	if t != nil {
+		res.User = User{
+			Username:    t.Username,
+			Password:    "",
+			Email:       t.Email,
+			GivenName:   t.GivenName,
+			MiddleNames: t.MiddleNames,
+			FamilyName:  t.FamilyName,
+		}
+	}
+}
+
 func (res *GetUsersRes) FromModel(ms []model.User, msg string, err error) {
 	resUsers := []User{}
 	for _, m := range ms {

@@ -13,7 +13,7 @@ Authentication and authorization service.
 
 ## Changelog
 
-* [20191124 - Embededded translations](/docs/changelog.md#20191124)
+* [20191124 - Embededded translations and form data session store](/docs/changelog.md#20191124)
 * [20191123 - Internationalization](/docs/changelog.md#20191123)
 
 ## Installation

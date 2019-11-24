@@ -1,8 +1,12 @@
 # Changelog
 
-## <a name="20191124"></a>20191124 - Embedded translations
+## <a name="20191124"></a>20191124 - Embededded translations and form data session store
 
-Localization files now are mbedded in executable as any other resource.
+* Localization files now are embedded in executable as any other resource.
+
+* Endpoint helpers to store, retrieve and clear form data accross requests.
+
+Mainly used to avoid having to fill forms again in case of submission errors.
 
 ## <a name="20191123"></a>20191123 - Internationalization
 
