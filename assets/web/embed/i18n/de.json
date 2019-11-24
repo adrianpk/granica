@@ -1,9 +1,9 @@
 {
-"get_err_msg": "Der {{.Name}} kann nicht abgerufen werden",
-"get_all_err_msg": "{{.Name}}liste kann nicht abgerufen werden",
-"create_err_msg": "Es ist nicht möglich, den {{.Name}} anzulegen",
-"update_err_msg": "{{.Name}} kann nicht aktualisiert werden",
-"delete_err_msg": "{{.Name}} kann nicht gelöscht werden",
+"get_err_msg": "Benutzer kann nicht erstellt werden",
+"get_all_err_msg": "Benutzerliste kann nicht abgerufen werden",
+"create_err_msg": "Benutzer kann nicht abgerufen werden",
+"update_err_msg": "Benutzer kann nicht aktualisiert werden",
+"delete_err_msg": "Benutzer kann nicht gelöscht werden",
 
 "sample_message": "Beispielnachrich",
 "sample_count_message": {

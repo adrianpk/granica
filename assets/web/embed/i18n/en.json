@@ -1,9 +1,9 @@
 {
-"get_err_msg": "Cannot create {{.Name}}",
-"get_all_err_msg": "Cannot get {{.Name}} list'",
-"create_err_msg": "Cannot get {{.Name}}",
-"update_err_msg": "Cannot update {{.Name}}",
-"delete_err_msg": "Cannot delete {{.Name}}",
+"get_err_msg": "Cannot create user",
+"get_all_err_msg": "Cannot get user list'",
+"create_err_msg": "Cannot get user",
+"update_err_msg": "Cannot update user",
+"delete_err_msg": "Cannot delete user ",
 
 "sample_message": "Sample message",
 "sample_count_message": {
@@ -13,3 +13,4 @@
   "other": "{{.Name}} has {{.Count}} values"
   }
 }
+

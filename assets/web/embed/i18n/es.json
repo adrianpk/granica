@@ -1,9 +1,9 @@
 {
-"get_err_msg": "No se puede obtener el {{.Name}}",
-"get_all_err_msg": "No se puede obtener el listado",
-"create_err_msg": "No es posible crear el {{.Name}}",
-"update_err_msg": "No es posible actualizar el {{.Name}}",
-"delete_err_msg": "No es posible borrar {{.Name}}",
+"get_err_msg": "No se puede obtener el usuario",
+"get_all_err_msg": "No se puede obtener la lista de usuarioso",
+"create_err_msg": "No es posible crear el usuario",
+"update_err_msg": "No es posible actualizar el usuario",
+"delete_err_msg": "No es posible borrar usuario",
 
 "sample_message": "Mensaje de prueba",
 "sample_count_message": {

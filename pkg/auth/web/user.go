@@ -163,9 +163,9 @@ func (ep *Endpoint) errMsg(r *http.Request, action, resource string) string {
 
 	t, lang, err := l.LocalizeWithTag(&i18n.LocalizeConfig{
 		MessageID: id,
-		TemplateData: map[string]string{
-			"Name": resource,
-		},
+		//TemplateData: map[string]string{
+		//"Name": resource,
+		//},
 	})
 
 	if err != nil {
