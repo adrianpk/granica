@@ -17,6 +17,7 @@ But at the same time it is also a way to find a modular and systematized foundat
 
 ## Changelog
 
+* [20191126 - Simplified flash messages handling](/docs/changelog.md#20191126)
 * [20191124 - Embedded translations and form data session store](/docs/changelog.md#20191124)
 * [20191123 - Internationalization](/docs/changelog.md#20191123)
 
