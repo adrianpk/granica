@@ -1,5 +1,10 @@
 # Changelog
 
+
+## <a name="20191126"></a>20191126 - Simplified flash messages handling
+
+* Wrapped response now takes care to append new messages from current action to pending ones stored by other actions before a redirect.
+
 ## <a name="20191124"></a>20191124 - Embedded translations and form data session store
 
 * Localization files now are embedded in executable as any other resource.
