@@ -2,6 +2,10 @@
 
 Authentication and authorization service.
 
+The final intention of this project is to build a complete authentication and authorization system that can be easily deployed as a microservice.
+
+But at the same time it is also a way to find a modular and systematized foundation to build microservices and micromonoliths; therefore, as a pattern emerges some features, if not alli, will serve to update a series of libraries and a [command-line interface](https://gitlab.com/mikrowezel/backend/cli) that will allow to automate as much as possible the generation of Go-based services while trying not to detach too much from the particular idiosyncrasy of this platform.
+
 <img src="docs/img/users_index.png" width="480">
 
 [Screenshots](docs/screenshots.md)
