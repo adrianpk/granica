@@ -1,6 +1,6 @@
 # Changelog
 
-## <a name="20191124"></a>20191124 - Embededded translations and form data session store
+## <a name="20191124"></a>20191124 - Embedded translations and form data session store
 
 * Localization files now are embedded in executable as any other resource.
 

@@ -1,10 +1,11 @@
 {
 "cannot_proc_err_msg": "It is not possible to process the request at this time",
-"get_err_msg": "Cannot create user",
-"get_all_err_msg": "Cannot get user list'",
-"create_err_msg": "Cannot get user",
-"update_err_msg": "Cannot update user",
-"delete_err_msg": "Cannot delete user ",
+
+"get_user_err_msg": "Cannot create user",
+"get_all_users_err_msg": "Cannot get user list'",
+"create_user_err_msg": "Cannot get user",
+"update_user_err_msg": "Cannot update user",
+"delete_user_err_msg": "Cannot delete user ",
 
 "sample_message": "Sample message",
 "sample_count_message": {

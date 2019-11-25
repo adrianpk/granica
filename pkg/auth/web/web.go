@@ -35,5 +35,6 @@ func MakeEndpoint(ctx context.Context, cfg *config.Config, log *log.Logger, s *s
 }
 
 func registerGobTypes() {
+	gob.Register(web.FlashData{})
 	gob.Register(tp.User{})
 }
