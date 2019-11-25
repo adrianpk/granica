@@ -19,14 +19,25 @@ const (
 )
 
 const (
-	createUserKey = "create-user"
-	updateUserKey = "update-user"
+	// Defined in 'assets/web/embed/i18n/xx.json'
+	// Where xx is: de, en, es, pl, etc...
+	CannotProcErrID  = "cannot_proc_err_msg"
+	CreateUserErrID  = "create_user_err_msg"
+	GetAllUsersErrID = "get_all_users_err_msg"
+	GetUserErrID     = "get_user_err_msg"
+	UpdateUserErrID  = "update_user_err_msg"
+	DeleteUserErrID  = "delete_user_err_msg"
+)
+
+const (
+	createUserActKey = "create-user"
+	updateUserActKey = "update-user"
 )
 
 func (ep *Endpoint) InitCreateUser(w http.ResponseWriter, r *http.Request) {
 	// Retrieve stored form data if exists
 	// It avoids filling in the form again after submissions errors.
-	userFD := ep.restoreUserFD(r, createUserKey)
+	userFD := ep.restoreUserFD(r, createUserActKey)
 
 	// Req & Res
 	res := &tp.CreateUserRes{}
@@ -39,8 +50,8 @@ func (ep *Endpoint) InitCreateUser(w http.ResponseWriter, r *http.Request) {
 	// Template
 	ts, err := ep.TemplateFor(userRes, web.CreateTmpl)
 	if err != nil {
-		m := ep.errMsg(r, web.CannotProcErr, userRes)
-		ep.storeErrorFlash(r, w, m)
+		m := ep.localizeMsg(r, CannotProcErrID)
+		ep.storeFlash(r, w, m, web.ErrorMT)
 		ep.Redirect(w, r, UserPath())
 		ep.Log().Error(err)
 		return
@@ -49,8 +60,8 @@ func (ep *Endpoint) InitCreateUser(w http.ResponseWriter, r *http.Request) {
 	// Write response
 	err = ts.Execute(w, wr)
 	if err != nil {
-		m := ep.errMsg(r, web.CannotProcErr, userRes)
-		ep.storeErrorFlash(r, w, m)
+		m := ep.localizeMsg(r, CannotProcErrID)
+		ep.storeFlash(r, w, m, web.ErrorMT)
 		ep.Redirect(w, r, UserPath())
 		ep.Log().Error(err)
 		return
@@ -65,7 +76,7 @@ func (ep *Endpoint) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	// Store form data if exists
 	// It avoids filling in the form again after submissions errors.
-	ep.storeUserFD(r, w, createUserKey, req.User)
+	ep.storeUserFD(r, w, createUserActKey, req.User)
 
 	// Form to Req
 	err := web.FormToModel(r, &req.User)
@@ -77,14 +88,19 @@ func (ep *Endpoint) CreateUser(w http.ResponseWriter, r *http.Request) {
 	// Service
 	err = ep.service.CreateUser(req, &res)
 	if err != nil {
-		m := ep.errMsg(r, web.CreateErr, userRes)
-		ep.storeErrorFlash(r, w, m)
+		m := ep.localizeMsg(r, CreateUserErrID)
+		ep.storeFlash(r, w, m, web.ErrorMT)
 		ep.Redirect(w, r, UserPathNew())
 		ep.Log().Error(err)
 		return
 	}
 
-	ep.clearUserFD(r, w, createUserKey)
+	// Operation succed: form data can be cleared.
+	ep.clearUserFD(r, w, createUserActKey)
+
+	// Flash message
+	ep.storeFlash(r, w, "Sample message", web.InfoMT)
+
 	ep.Redirect(w, r, "/")
 }
 
@@ -142,22 +158,16 @@ func (ep *Endpoint) userUpdateAction(resource string, model web.Identifiable) we
 	return web.Action{Target: UserPathSlug(model), Method: "PUT"}
 }
 
-// Flash messages
-func (ep *Endpoint) errMsg(r *http.Request, errType, resource string) string {
+// Localization - I18N
+func (ep *Endpoint) localizeMsg(r *http.Request, msgID string) string {
 	l, ok := web.GetI18NLocalizer(r)
 	if !ok {
 		// FIX: Do something: Return default message?
 		ep.Log().Warn("I18N localizer not available")
 	}
 
-	// Message
-	id := fmt.Sprintf("%s_err_msg", errType)
-
 	t, lang, err := l.LocalizeWithTag(&i18n.LocalizeConfig{
-		MessageID: id,
-		//TemplateData: map[string]string{
-		//"Name": resource,
-		//},
+		MessageID: msgID,
 	})
 
 	if err != nil {
@@ -176,7 +186,7 @@ func (ep *Endpoint) localizeMessageID(l *i18n.Localizer, messageID string) (stri
 }
 
 // Flash
-func (ep *Endpoint) storeErrorFlash(r *http.Request, w http.ResponseWriter, message string) (ok bool) {
+func (ep *Endpoint) storeFlash(r *http.Request, w http.ResponseWriter, message string, ft web.MsgType) (ok bool) {
 	ep.Log().Debug("*Endpoint.storeErrorFlash not implemented")
 	return false
 }
