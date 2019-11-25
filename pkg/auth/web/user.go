@@ -35,11 +35,10 @@ func (ep *Endpoint) InitCreateUser(w http.ResponseWriter, r *http.Request) {
 	// It avoids filling in the form again after submissions errors.
 	userForm := ep.RestoreUserForm(r, web.CreateUserStoreKey)
 
-	// Retrieve flash data if exists
-	f := ep.RestoreFlash(r)
-	if !f.IsEmpty() {
-		// Just only logging at the moment
-		ep.Log().Debug("Session flash data", "value", spew.Sdump(f))
+	// Restore previous flash data if exists
+	pf := ep.RestoreFlash(r)
+	if len(pf) > 0 {
+		ep.Log().Debug("Flash data", "current", spew.Sdump(pf))
 	}
 
 	// Req & Res
@@ -112,6 +111,12 @@ func (ep *Endpoint) GetUsers(w http.ResponseWriter, r *http.Request) {
 	var req tp.GetUsersReq
 	var res tp.GetUsersRes
 
+	// Retrieve prev flash data if exists
+	pf := ep.RestoreFlash(r)
+	if pf.IsEmpty() {
+		ep.Log().Debug("Flash data", "current", spew.Sdump(pf))
+	}
+
 	// Service
 	err := ep.service.GetUsers(req, &res)
 	if err != nil {
@@ -181,7 +186,11 @@ func (ep *Endpoint) localizeMessageID(l *i18n.Localizer, messageID string) (stri
 func (ep *Endpoint) StoreFlash(r *http.Request, w http.ResponseWriter, message string, mt web.MsgType) (ok bool) {
 	s := ep.GetSession(r)
 
-	s.Values[web.FlashStoreKey] = ep.MakeFlash(message, mt)
+	// Append to current ones
+	f := ep.RestoreFlash(r)
+	f = append(f, ep.MakeFlashItem(message, mt))
+
+	s.Values[web.FlashStoreKey] = f
 	err := s.Save(r, w)
 	if err != nil {
 		ep.Log().Error(err)
@@ -191,18 +200,18 @@ func (ep *Endpoint) StoreFlash(r *http.Request, w http.ResponseWriter, message s
 	return false
 }
 
-func (ep *Endpoint) RestoreFlash(r *http.Request) web.FlashData {
+func (ep *Endpoint) RestoreFlash(r *http.Request) web.Flash {
 	s := ep.GetSession(r)
 	v := s.Values[web.FlashStoreKey]
 
-	user, ok := v.(web.FlashData)
+	user, ok := v.(web.Flash)
 	if ok {
 		ep.Log().Debug("Stored flash", "value", spew.Sdump(user))
-		return web.FlashData{}
+		return web.MakeFlash()
 	}
 
 	ep.Log().Info("No stored flash", "key", web.FlashStoreKey)
-	return web.FlashData{}
+	return web.MakeFlash()
 }
 
 func (ep *Endpoint) ClearFlash(r *http.Request, w http.ResponseWriter, message string, mt web.MsgType) (ok bool) {
