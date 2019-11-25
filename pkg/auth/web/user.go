@@ -46,6 +46,9 @@ func (ep *Endpoint) InitCreateUser(w http.ResponseWriter, r *http.Request) {
 	res.FromTransport(&userForm, "", nil)
 	res.Action = ep.userCreateAction()
 
+	// TEMP: Just for use test
+	pf = pf.AddItem(ep.MakeFlashItem("Appended to previous", web.InfoMT))
+
 	// Wrap response
 	wr := ep.OKRes(r, res)
 
@@ -100,7 +103,7 @@ func (ep *Endpoint) CreateUser(w http.ResponseWriter, r *http.Request) {
 	// Operation succed: form data can be cleared.
 	ep.ClearUserForm(r, w, web.CreateUserStoreKey)
 
-	// Flash message
+	// Flash message (sample test)
 	ep.StoreFlash(r, w, "Sample message", web.InfoMT)
 
 	ep.Redirect(w, r, "/")
@@ -200,18 +203,18 @@ func (ep *Endpoint) StoreFlash(r *http.Request, w http.ResponseWriter, message s
 	return false
 }
 
-func (ep *Endpoint) RestoreFlash(r *http.Request) web.Flash {
+func (ep *Endpoint) RestoreFlash(r *http.Request) web.FlashSet {
 	s := ep.GetSession(r)
 	v := s.Values[web.FlashStoreKey]
 
-	user, ok := v.(web.Flash)
+	user, ok := v.(web.FlashSet)
 	if ok {
 		ep.Log().Debug("Stored flash", "value", spew.Sdump(user))
-		return web.MakeFlash()
+		return web.MakeFlashSet()
 	}
 
 	ep.Log().Info("No stored flash", "key", web.FlashStoreKey)
-	return web.MakeFlash()
+	return web.MakeFlashSet()
 }
 
 func (ep *Endpoint) ClearFlash(r *http.Request, w http.ResponseWriter, message string, mt web.MsgType) (ok bool) {
