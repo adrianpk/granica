@@ -1,5 +1,8 @@
 # Changelog
 
+## <a name="20191127"></a>20191127 - Simplified error handling
+
+* Common and repetitive operations on handler errors are now generalized in a single one.
 
 ## <a name="20191126"></a>20191126 - Simplified flash messages handling
 

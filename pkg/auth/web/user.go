@@ -1,6 +1,7 @@
 package web
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -21,17 +22,19 @@ const (
 const (
 	// Defined in 'assets/web/embed/i18n/xx.json'
 	// Where xx is: de, en, es, pl.
-	// TODO: Make it possible to use all available locales.
+	// TODO: Make it possible to use all locales.
+	// Info
 	UserCreatedInfoID = "user_created_info_msg"
 	UserUpdatedInfoID = "user_updated_info_msg"
 	UserDeletedInfoID = "user_deleted_info_msg"
-	CannotProcErrID   = "cannot_proc_err_msg"
-	CreateUserErrID   = "create_user_err_msg"
-	GetAllUsersErrID  = "get_all_users_err_msg"
-	ShowUserErrID     = "show_user_err_msg"
-	EditUserErrID     = "edit_user_err_msg"
-	UpdateUserErrID   = "update_user_err_msg"
-	DeleteUserErrID   = "delete_user_err_msg"
+	// Error
+	CannotProcErrID  = "cannot_proc_err_msg"
+	CreateUserErrID  = "create_user_err_msg"
+	GetAllUsersErrID = "get_all_users_err_msg"
+	ShowUserErrID    = "show_user_err_msg"
+	EditUserErrID    = "edit_user_err_msg"
+	UpdateUserErrID  = "update_user_err_msg"
+	DeleteUserErrID  = "delete_user_err_msg"
 )
 
 func (ep *Endpoint) NewUser(w http.ResponseWriter, r *http.Request) {
@@ -50,18 +53,14 @@ func (ep *Endpoint) NewUser(w http.ResponseWriter, r *http.Request) {
 	// Template
 	ts, err := ep.TemplateFor(userRes, web.NewTmpl)
 	if err != nil {
-		m := ep.localizeMsg(r, CannotProcErrID)
-		ep.RedirectWithFlash(w, r, UserPath(), m, web.ErrorMT)
-		ep.Log().Error(err)
+		ep.handleError(w, r, UserPath(), CannotProcErrID, err)
 		return
 	}
 
 	// Write response
 	err = ts.Execute(w, wr)
 	if err != nil {
-		m := ep.localizeMsg(r, CannotProcErrID)
-		ep.RedirectWithFlash(w, r, UserPath(), m, web.ErrorMT)
-		ep.Log().Error(err)
+		ep.handleError(w, r, UserPath(), CannotProcErrID, err)
 		return
 	}
 }
@@ -78,16 +77,14 @@ func (ep *Endpoint) CreateUser(w http.ResponseWriter, r *http.Request) {
 	// Form to Req
 	err := ep.FormToModel(r, &req.User)
 	if err != nil {
-		ep.Redirect(w, r, UserPathNew())
+		ep.handleError(w, r, UserPath(), CannotProcErrID, err)
 		return
 	}
 
 	// Service
 	err = ep.service.CreateUser(req, &res)
 	if err != nil {
-		m := ep.localizeMsg(r, CreateUserErrID)
-		ep.RedirectWithFlash(w, r, UserPathNew(), m, web.ErrorMT)
-		ep.Log().Error(err)
+		ep.handleError(w, r, UserPathNew(), CreateUserErrID, err)
 		return
 	}
 
@@ -103,14 +100,10 @@ func (ep *Endpoint) IndexUsers(w http.ResponseWriter, r *http.Request) {
 	var req tp.GetUsersReq
 	var res tp.GetUsersRes
 
-	ep.Log().Debug("IndexUsers")
-
 	// Service
 	err := ep.service.GetUsers(req, &res)
 	if err != nil {
-		m := ep.localizeMsg(r, CannotProcErrID)
-		ep.RedirectWithFlash(w, r, UserPath(), m, web.ErrorMT)
-		ep.Log().Error(err)
+		ep.handleError(w, r, "/", GetAllUsersErrID, err)
 		return
 	}
 
@@ -120,18 +113,14 @@ func (ep *Endpoint) IndexUsers(w http.ResponseWriter, r *http.Request) {
 	// Template
 	ts, err := ep.TemplateFor(userRes, web.IndexTmpl)
 	if err != nil {
-		m := ep.localizeMsg(r, CannotProcErrID)
-		ep.RedirectWithFlash(w, r, UserPath(), m, web.ErrorMT)
-		ep.Log().Error(err)
+		ep.handleError(w, r, "/", GetAllUsersErrID, err)
 		return
 	}
 
 	// Write response
 	err = ts.Execute(w, wr)
 	if err != nil {
-		m := ep.localizeMsg(r, CannotProcErrID)
-		ep.RedirectWithFlash(w, r, UserPath(), m, web.ErrorMT)
-		ep.Log().Error(err)
+		ep.handleError(w, r, "/", GetAllUsersErrID, err)
 		return
 	}
 }
@@ -141,14 +130,11 @@ func (ep *Endpoint) EditUser(w http.ResponseWriter, r *http.Request) {
 	var req tp.GetUserReq
 	var res tp.GetUserRes
 
-	ep.Log().Debug("EditUser")
-
 	ctx := r.Context()
 	username, ok := ctx.Value(UserCtxKey).(string)
 	if !ok {
-		m := ep.localizeMsg(r, EditUserErrID)
-		ep.RedirectWithFlash(w, r, UserPath(), m, web.ErrorMT)
-		ep.Log().Warn("No username provided")
+		err := errors.New("no username provided")
+		ep.handleError(w, r, UserPath(), EditUserErrID, err)
 		return
 	}
 
@@ -161,9 +147,7 @@ func (ep *Endpoint) EditUser(w http.ResponseWriter, r *http.Request) {
 	// Service
 	err := ep.service.GetUser(req, &res)
 	if err != nil {
-		m := ep.localizeMsg(r, CannotProcErrID)
-		ep.RedirectWithFlash(w, r, UserPath(), m, web.ErrorMT)
-		ep.Log().Error(err)
+		ep.handleError(w, r, UserPath(), EditUserErrID, err)
 		return
 	}
 
@@ -173,18 +157,14 @@ func (ep *Endpoint) EditUser(w http.ResponseWriter, r *http.Request) {
 	// Template
 	ts, err := ep.TemplateFor(userRes, web.EditTmpl)
 	if err != nil {
-		m := ep.localizeMsg(r, CannotProcErrID)
-		ep.RedirectWithFlash(w, r, UserPath(), m, web.ErrorMT)
-		ep.Log().Error(err)
+		ep.handleError(w, r, UserPath(), EditUserErrID, err)
 		return
 	}
 
 	// Write response
 	err = ts.Execute(w, wr)
 	if err != nil {
-		m := ep.localizeMsg(r, CannotProcErrID)
-		ep.RedirectWithFlash(w, r, UserPath(), m, web.ErrorMT)
-		ep.Log().Error(err)
+		ep.handleError(w, r, UserPath(), EditUserErrID, err)
 		return
 	}
 }
@@ -199,9 +179,8 @@ func (ep *Endpoint) ShowUser(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	username, ok := ctx.Value(UserCtxKey).(string)
 	if !ok {
-		m := ep.localizeMsg(r, ShowUserErrID)
-		ep.RedirectWithFlash(w, r, UserPath(), m, web.ErrorMT)
-		ep.Log().Warn("No username provided")
+		err := errors.New("no username provided")
+		ep.handleError(w, r, UserPath(), ShowUserErrID, err)
 		return
 	}
 
@@ -214,9 +193,7 @@ func (ep *Endpoint) ShowUser(w http.ResponseWriter, r *http.Request) {
 	// Service
 	err := ep.service.GetUser(req, &res)
 	if err != nil {
-		m := ep.localizeMsg(r, CannotProcErrID)
-		ep.RedirectWithFlash(w, r, UserPath(), m, web.ErrorMT)
-		ep.Log().Error(err)
+		ep.handleError(w, r, UserPath(), ShowUserErrID, err)
 		return
 	}
 
@@ -226,18 +203,14 @@ func (ep *Endpoint) ShowUser(w http.ResponseWriter, r *http.Request) {
 	// Template
 	ts, err := ep.TemplateFor(userRes, web.IndexTmpl)
 	if err != nil {
-		m := ep.localizeMsg(r, CannotProcErrID)
-		ep.RedirectWithFlash(w, r, UserPath(), m, web.ErrorMT)
-		ep.Log().Error(err)
+		ep.handleError(w, r, UserPath(), ShowUserErrID, err)
 		return
 	}
 
 	// Write response
 	err = ts.Execute(w, wr)
 	if err != nil {
-		m := ep.localizeMsg(r, CannotProcErrID)
-		ep.RedirectWithFlash(w, r, UserPath(), m, web.ErrorMT)
-		ep.Log().Error(err)
+		ep.handleError(w, r, UserPath(), ShowUserErrID, err)
 		return
 	}
 }
@@ -321,4 +294,10 @@ func (ep *Endpoint) userCreateAction() web.Action {
 // userUpdateAction
 func (ep *Endpoint) userUpdateAction(resource string, model web.Identifiable) web.Action {
 	return web.Action{Target: UserPathSlug(model), Method: "PUT"}
+}
+
+func (ep *Endpoint) handleError(w http.ResponseWriter, r *http.Request, redirPath, msgID string, err error) {
+	m := ep.localizeMsg(r, msgID)
+	ep.RedirectWithFlash(w, r, redirPath, m, web.ErrorMT)
+	ep.Log().Error(err)
 }
