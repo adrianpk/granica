@@ -22,12 +22,15 @@ const (
 	// Defined in 'assets/web/embed/i18n/xx.json'
 	// Where xx is: de, en, es, pl.
 	// TODO: Make it possible to use all available locales.
-	CannotProcErrID  = "cannot_proc_err_msg"
-	CreateUserErrID  = "create_user_err_msg"
-	GetAllUsersErrID = "get_all_users_err_msg"
-	GetUserErrID     = "get_user_err_msg"
-	UpdateUserErrID  = "update_user_err_msg"
-	DeleteUserErrID  = "delete_user_err_msg"
+	UserCreatedInfoID = "user_created_info_msg"
+	UserUpdatedInfoID = "user_updated_info_msg"
+	UserDeletedInfoID = "user_deleted_info_msg"
+	CannotProcErrID   = "cannot_proc_err_msg"
+	CreateUserErrID   = "create_user_err_msg"
+	GetAllUsersErrID  = "get_all_users_err_msg"
+	GetUserErrID      = "get_user_err_msg"
+	UpdateUserErrID   = "update_user_err_msg"
+	DeleteUserErrID   = "delete_user_err_msg"
 )
 
 func (ep *Endpoint) InitCreateUser(w http.ResponseWriter, r *http.Request) {
@@ -88,13 +91,11 @@ func (ep *Endpoint) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Operation succed: form data can be cleared.
+	// Operation succeded: form data can be cleared.
 	ep.ClearUserForm(r, w, web.CreateUserStoreKey)
 
-	// Flash message (sample test)
-	ep.StoreFlash(r, w, "[sample-msg] User created", web.InfoMT)
-
-	ep.Redirect(w, r, UserPath())
+	m := ep.localizeMsg(r, UserCreatedInfoID)
+	ep.RedirectWithFlash(w, r, UserPath(), m, web.InfoMT)
 }
 
 // GetUsers web endpoint.
