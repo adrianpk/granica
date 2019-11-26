@@ -33,7 +33,7 @@ const (
 	DeleteUserErrID   = "delete_user_err_msg"
 )
 
-func (ep *Endpoint) InitCreateUser(w http.ResponseWriter, r *http.Request) {
+func (ep *Endpoint) NewUser(w http.ResponseWriter, r *http.Request) {
 	// Retrieve stored form data if exists
 	// It avoids filling in the form again after submissions errors.
 	userForm := ep.RestoreUserForm(r, web.CreateUserStoreKey)
@@ -98,16 +98,10 @@ func (ep *Endpoint) CreateUser(w http.ResponseWriter, r *http.Request) {
 	ep.RedirectWithFlash(w, r, UserPath(), m, web.InfoMT)
 }
 
-// GetUsers web endpoint.
-func (ep *Endpoint) GetUsers(w http.ResponseWriter, r *http.Request) {
+// IndexUsers web endpoint.
+func (ep *Endpoint) IndexUsers(w http.ResponseWriter, r *http.Request) {
 	var req tp.GetUsersReq
 	var res tp.GetUsersRes
-
-	// Retrieve prev flash data if exists
-	pf := ep.RestoreFlash(r)
-	if pf.IsEmpty() {
-		ep.Log().Debug("Flash data", "current", spew.Sdump(pf))
-	}
 
 	// Service
 	err := ep.service.GetUsers(req, &res)
@@ -140,8 +134,76 @@ func (ep *Endpoint) GetUsers(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// GetUser web endpoint.
-func (ep *Endpoint) GetUser(w http.ResponseWriter, r *http.Request) {
+// EditUser web endpoint.
+func (ep *Endpoint) EditUser(w http.ResponseWriter, r *http.Request) {
+	var req tp.GetUserReq
+	var res tp.GetUserRes
+
+	// Service
+	err := ep.service.GetUser(req, &res)
+	if err != nil {
+		m := ep.localizeMsg(r, CannotProcErrID)
+		ep.RedirectWithFlash(w, r, UserPath(), m, web.ErrorMT)
+		ep.Log().Error(err)
+		return
+	}
+
+	// Wrap response
+	wr := ep.OKRes(r, res, "")
+
+	// Template
+	ts, err := ep.TemplateFor(userRes, web.IndexTmpl)
+	if err != nil {
+		m := ep.localizeMsg(r, CannotProcErrID)
+		ep.RedirectWithFlash(w, r, UserPath(), m, web.ErrorMT)
+		ep.Log().Error(err)
+		return
+	}
+
+	// Write response
+	err = ts.Execute(w, wr)
+	if err != nil {
+		m := ep.localizeMsg(r, CannotProcErrID)
+		ep.RedirectWithFlash(w, r, UserPath(), m, web.ErrorMT)
+		ep.Log().Error(err)
+		return
+	}
+}
+
+// ShowUser web endpoint.
+func (ep *Endpoint) ShowUser(w http.ResponseWriter, r *http.Request) {
+	var req tp.GetUserReq
+	var res tp.GetUserRes
+
+	// Service
+	err := ep.service.GetUser(req, &res)
+	if err != nil {
+		m := ep.localizeMsg(r, CannotProcErrID)
+		ep.RedirectWithFlash(w, r, UserPath(), m, web.ErrorMT)
+		ep.Log().Error(err)
+		return
+	}
+
+	// Wrap response
+	wr := ep.OKRes(r, res, "")
+
+	// Template
+	ts, err := ep.TemplateFor(userRes, web.IndexTmpl)
+	if err != nil {
+		m := ep.localizeMsg(r, CannotProcErrID)
+		ep.RedirectWithFlash(w, r, UserPath(), m, web.ErrorMT)
+		ep.Log().Error(err)
+		return
+	}
+
+	// Write response
+	err = ts.Execute(w, wr)
+	if err != nil {
+		m := ep.localizeMsg(r, CannotProcErrID)
+		ep.RedirectWithFlash(w, r, UserPath(), m, web.ErrorMT)
+		ep.Log().Error(err)
+		return
+	}
 }
 
 // UpdateUser web endpoint.
