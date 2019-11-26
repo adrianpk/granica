@@ -66,7 +66,7 @@ func (ep *Endpoint) GetUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Service
-	req.Username = username
+	req.Identifier.Username = username
 	err := ep.service.GetUser(req, &res)
 	if err != nil {
 		ep.Log().Error(err)

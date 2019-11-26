@@ -5,19 +5,21 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi"
-	"gitlab.com/mikrowezel/backend/granica/pkg/auth/jsonrest"
+	"gitlab.com/mikrowezel/backend/granica/pkg/auth/web"
 )
 
 func (a *Auth) makeUserWebRouter(parent chi.Router) chi.Router {
 	return parent.Route("/users", func(uar chi.Router) {
-		uar.Get("/new", a.webep.InitCreateUser)
+		uar.Get("/", a.webep.IndexUsers)
+		uar.Get("/new", a.webep.NewUser)
 		uar.Post("/", a.webep.CreateUser)
-		uar.Get("/", a.webep.GetUsers)
 		uar.Route("/{username}", func(uarid chi.Router) {
 			uarid.Use(userCtx)
-			//uarid.Get("/", a.jsonep.GetUser)
-			//uarid.Put("/", a.jsonep.UpdateUser)
-			//uarid.Delete("/", a.jsonep.DeleteUser)
+			uarid.Get("/", a.webep.ShowUser)
+			uarid.Get("/edit", a.webep.EditUser)
+			uarid.Patch("/", a.webep.UpdateUser)
+			uarid.Put("/", a.webep.UpdateUser)
+			uarid.Delete("/", a.webep.DeleteUser)
 		})
 	})
 }
@@ -42,7 +44,7 @@ func (a *Auth) makeUserJSONRESTRouter(parent chi.Router) chi.Router {
 func userCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		username := chi.URLParam(r, "username")
-		ctx := context.WithValue(r.Context(), jsonrest.UserCtxKey, username)
+		ctx := context.WithValue(r.Context(), web.UserCtxKey, username)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

@@ -1,6 +1,7 @@
 package web
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -21,16 +22,22 @@ const (
 const (
 	// Defined in 'assets/web/embed/i18n/xx.json'
 	// Where xx is: de, en, es, pl.
-	// TODO: Make it possible to use all available locales.
+	// TODO: Make it possible to use all locales.
+	// Info
+	UserCreatedInfoID = "user_created_info_msg"
+	UserUpdatedInfoID = "user_updated_info_msg"
+	UserDeletedInfoID = "user_deleted_info_msg"
+	// Error
 	CannotProcErrID  = "cannot_proc_err_msg"
 	CreateUserErrID  = "create_user_err_msg"
 	GetAllUsersErrID = "get_all_users_err_msg"
-	GetUserErrID     = "get_user_err_msg"
+	ShowUserErrID    = "show_user_err_msg"
+	EditUserErrID    = "edit_user_err_msg"
 	UpdateUserErrID  = "update_user_err_msg"
 	DeleteUserErrID  = "delete_user_err_msg"
 )
 
-func (ep *Endpoint) InitCreateUser(w http.ResponseWriter, r *http.Request) {
+func (ep *Endpoint) NewUser(w http.ResponseWriter, r *http.Request) {
 	// Retrieve stored form data if exists
 	// It avoids filling in the form again after submissions errors.
 	userForm := ep.RestoreUserForm(r, web.CreateUserStoreKey)
@@ -41,25 +48,19 @@ func (ep *Endpoint) InitCreateUser(w http.ResponseWriter, r *http.Request) {
 	res.Action = ep.userCreateAction()
 
 	// Wrap response
-	wr := ep.OKRes(r, res, "[sample-msg] Init user creation")
+	wr := ep.OKRes(r, res, "")
 
 	// Template
-	ts, err := ep.TemplateFor(userRes, web.CreateTmpl)
+	ts, err := ep.TemplateFor(userRes, web.NewTmpl)
 	if err != nil {
-		m := ep.localizeMsg(r, CannotProcErrID)
-		ep.StoreFlash(r, w, m, web.ErrorMT)
-		ep.Redirect(w, r, UserPath())
-		ep.Log().Error(err)
+		ep.handleError(w, r, UserPath(), CannotProcErrID, err)
 		return
 	}
 
 	// Write response
 	err = ts.Execute(w, wr)
 	if err != nil {
-		m := ep.localizeMsg(r, CannotProcErrID)
-		ep.StoreFlash(r, w, m, web.ErrorMT)
-		ep.Redirect(w, r, UserPath())
-		ep.Log().Error(err)
+		ep.handleError(w, r, UserPath(), CannotProcErrID, err)
 		return
 	}
 }
@@ -71,51 +72,38 @@ func (ep *Endpoint) CreateUser(w http.ResponseWriter, r *http.Request) {
 	// TODO: Form data validation
 
 	// Store form data if exists
-	// It avoids filling in the form again amter submissions errors.
 	ep.StoreUserForm(r, w, web.CreateUserStoreKey, req.User)
 
 	// Form to Req
-	err := web.FormToModel(r, &req.User)
+	err := ep.FormToModel(r, &req.User)
 	if err != nil {
-		ep.Redirect(w, r, UserPathNew())
+		ep.handleError(w, r, UserPath(), CannotProcErrID, err)
 		return
 	}
 
 	// Service
 	err = ep.service.CreateUser(req, &res)
 	if err != nil {
-		m := ep.localizeMsg(r, CreateUserErrID)
-		ep.StoreFlash(r, w, m, web.ErrorMT)
-		ep.Redirect(w, r, UserPathNew())
-		ep.Log().Error(err)
+		ep.handleError(w, r, UserPathNew(), CreateUserErrID, err)
 		return
 	}
 
-	// Operation succed: form data can be cleared.
+	// Operation succeded: form data can be cleared.
 	ep.ClearUserForm(r, w, web.CreateUserStoreKey)
 
-	// Flash message (sample test)
-	ep.StoreFlash(r, w, "[sample-msg] User created", web.InfoMT)
-
-	ep.Redirect(w, r, UserPath())
+	m := ep.localizeMsg(r, UserCreatedInfoID)
+	ep.RedirectWithFlash(w, r, UserPath(), m, web.InfoMT)
 }
 
-// GetUsers web endpoint.
-func (ep *Endpoint) GetUsers(w http.ResponseWriter, r *http.Request) {
+// IndexUsers web endpoint.
+func (ep *Endpoint) IndexUsers(w http.ResponseWriter, r *http.Request) {
 	var req tp.GetUsersReq
 	var res tp.GetUsersRes
-
-	// Retrieve prev flash data if exists
-	pf := ep.RestoreFlash(r)
-	if pf.IsEmpty() {
-		ep.Log().Debug("Flash data", "current", spew.Sdump(pf))
-	}
 
 	// Service
 	err := ep.service.GetUsers(req, &res)
 	if err != nil {
-		ep.Log().Error(err)
-		ep.Redirect(w, r, "/")
+		ep.handleError(w, r, "/", GetAllUsersErrID, err)
 		return
 	}
 
@@ -125,20 +113,106 @@ func (ep *Endpoint) GetUsers(w http.ResponseWriter, r *http.Request) {
 	// Template
 	ts, err := ep.TemplateFor(userRes, web.IndexTmpl)
 	if err != nil {
-		ep.Redirect(w, r, "/")
+		ep.handleError(w, r, "/", GetAllUsersErrID, err)
 		return
 	}
 
 	// Write response
 	err = ts.Execute(w, wr)
 	if err != nil {
-		ep.Log().Error(err)
-		ep.Redirect(w, r, "/")
+		ep.handleError(w, r, "/", GetAllUsersErrID, err)
+		return
 	}
 }
 
-// GetUser web endpoint.
-func (ep *Endpoint) GetUser(w http.ResponseWriter, r *http.Request) {
+// EditUser web endpoint.
+func (ep *Endpoint) EditUser(w http.ResponseWriter, r *http.Request) {
+	var req tp.GetUserReq
+	var res tp.GetUserRes
+
+	ctx := r.Context()
+	username, ok := ctx.Value(UserCtxKey).(string)
+	if !ok {
+		err := errors.New("no username provided")
+		ep.handleError(w, r, UserPath(), EditUserErrID, err)
+		return
+	}
+
+	req = tp.GetUserReq{
+		tp.Identifier{
+			Username: username,
+		},
+	}
+
+	// Service
+	err := ep.service.GetUser(req, &res)
+	if err != nil {
+		ep.handleError(w, r, UserPath(), EditUserErrID, err)
+		return
+	}
+
+	// Wrap response
+	wr := ep.OKRes(r, res, "")
+
+	// Template
+	ts, err := ep.TemplateFor(userRes, web.EditTmpl)
+	if err != nil {
+		ep.handleError(w, r, UserPath(), EditUserErrID, err)
+		return
+	}
+
+	// Write response
+	err = ts.Execute(w, wr)
+	if err != nil {
+		ep.handleError(w, r, UserPath(), EditUserErrID, err)
+		return
+	}
+}
+
+// ShowUser web endpoint.
+func (ep *Endpoint) ShowUser(w http.ResponseWriter, r *http.Request) {
+	var req tp.GetUserReq
+	var res tp.GetUserRes
+
+	ep.Log().Debug("ShowUser")
+
+	ctx := r.Context()
+	username, ok := ctx.Value(UserCtxKey).(string)
+	if !ok {
+		err := errors.New("no username provided")
+		ep.handleError(w, r, UserPath(), ShowUserErrID, err)
+		return
+	}
+
+	req = tp.GetUserReq{
+		tp.Identifier{
+			Username: username,
+		},
+	}
+
+	// Service
+	err := ep.service.GetUser(req, &res)
+	if err != nil {
+		ep.handleError(w, r, UserPath(), ShowUserErrID, err)
+		return
+	}
+
+	// Wrap response
+	wr := ep.OKRes(r, res, "")
+
+	// Template
+	ts, err := ep.TemplateFor(userRes, web.IndexTmpl)
+	if err != nil {
+		ep.handleError(w, r, UserPath(), ShowUserErrID, err)
+		return
+	}
+
+	// Write response
+	err = ts.Execute(w, wr)
+	if err != nil {
+		ep.handleError(w, r, UserPath(), ShowUserErrID, err)
+		return
+	}
 }
 
 // UpdateUser web endpoint.
@@ -220,4 +294,10 @@ func (ep *Endpoint) userCreateAction() web.Action {
 // userUpdateAction
 func (ep *Endpoint) userUpdateAction(resource string, model web.Identifiable) web.Action {
 	return web.Action{Target: UserPathSlug(model), Method: "PUT"}
+}
+
+func (ep *Endpoint) handleError(w http.ResponseWriter, r *http.Request, redirPath, msgID string, err error) {
+	m := ep.localizeMsg(r, msgID)
+	ep.RedirectWithFlash(w, r, redirPath, m, web.ErrorMT)
+	ep.Log().Error(err)
 }
