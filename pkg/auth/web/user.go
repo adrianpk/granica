@@ -174,8 +174,6 @@ func (ep *Endpoint) ShowUser(w http.ResponseWriter, r *http.Request) {
 	var req tp.GetUserReq
 	var res tp.GetUserRes
 
-	ep.Log().Debug("ShowUser")
-
 	ctx := r.Context()
 	username, ok := ctx.Value(UserCtxKey).(string)
 	if !ok {
