@@ -28,7 +28,8 @@ const (
 	CannotProcErrID   = "cannot_proc_err_msg"
 	CreateUserErrID   = "create_user_err_msg"
 	GetAllUsersErrID  = "get_all_users_err_msg"
-	GetUserErrID      = "get_user_err_msg"
+	ShowUserErrID     = "show_user_err_msg"
+	EditUserErrID     = "edit_user_err_msg"
 	UpdateUserErrID   = "update_user_err_msg"
 	DeleteUserErrID   = "delete_user_err_msg"
 )
@@ -44,10 +45,10 @@ func (ep *Endpoint) NewUser(w http.ResponseWriter, r *http.Request) {
 	res.Action = ep.userCreateAction()
 
 	// Wrap response
-	wr := ep.OKRes(r, res, "[sample-msg] Init user creation")
+	wr := ep.OKRes(r, res, "")
 
 	// Template
-	ts, err := ep.TemplateFor(userRes, web.CreateTmpl)
+	ts, err := ep.TemplateFor(userRes, web.NewTmpl)
 	if err != nil {
 		m := ep.localizeMsg(r, CannotProcErrID)
 		ep.RedirectWithFlash(w, r, UserPath(), m, web.ErrorMT)
@@ -72,11 +73,10 @@ func (ep *Endpoint) CreateUser(w http.ResponseWriter, r *http.Request) {
 	// TODO: Form data validation
 
 	// Store form data if exists
-	// It avoids filling in the form again amter submissions errors.
 	ep.StoreUserForm(r, w, web.CreateUserStoreKey, req.User)
 
 	// Form to Req
-	err := web.FormToModel(r, &req.User)
+	err := ep.FormToModel(r, &req.User)
 	if err != nil {
 		ep.Redirect(w, r, UserPathNew())
 		return
@@ -102,6 +102,8 @@ func (ep *Endpoint) CreateUser(w http.ResponseWriter, r *http.Request) {
 func (ep *Endpoint) IndexUsers(w http.ResponseWriter, r *http.Request) {
 	var req tp.GetUsersReq
 	var res tp.GetUsersRes
+
+	ep.Log().Debug("IndexUsers")
 
 	// Service
 	err := ep.service.GetUsers(req, &res)
@@ -139,6 +141,23 @@ func (ep *Endpoint) EditUser(w http.ResponseWriter, r *http.Request) {
 	var req tp.GetUserReq
 	var res tp.GetUserRes
 
+	ep.Log().Debug("EditUser")
+
+	ctx := r.Context()
+	username, ok := ctx.Value(UserCtxKey).(string)
+	if !ok {
+		m := ep.localizeMsg(r, EditUserErrID)
+		ep.RedirectWithFlash(w, r, UserPath(), m, web.ErrorMT)
+		ep.Log().Warn("No username provided")
+		return
+	}
+
+	req = tp.GetUserReq{
+		tp.Identifier{
+			Username: username,
+		},
+	}
+
 	// Service
 	err := ep.service.GetUser(req, &res)
 	if err != nil {
@@ -152,7 +171,7 @@ func (ep *Endpoint) EditUser(w http.ResponseWriter, r *http.Request) {
 	wr := ep.OKRes(r, res, "")
 
 	// Template
-	ts, err := ep.TemplateFor(userRes, web.IndexTmpl)
+	ts, err := ep.TemplateFor(userRes, web.EditTmpl)
 	if err != nil {
 		m := ep.localizeMsg(r, CannotProcErrID)
 		ep.RedirectWithFlash(w, r, UserPath(), m, web.ErrorMT)
@@ -174,6 +193,23 @@ func (ep *Endpoint) EditUser(w http.ResponseWriter, r *http.Request) {
 func (ep *Endpoint) ShowUser(w http.ResponseWriter, r *http.Request) {
 	var req tp.GetUserReq
 	var res tp.GetUserRes
+
+	ep.Log().Debug("ShowUser")
+
+	ctx := r.Context()
+	username, ok := ctx.Value(UserCtxKey).(string)
+	if !ok {
+		m := ep.localizeMsg(r, ShowUserErrID)
+		ep.RedirectWithFlash(w, r, UserPath(), m, web.ErrorMT)
+		ep.Log().Warn("No username provided")
+		return
+	}
+
+	req = tp.GetUserReq{
+		tp.Identifier{
+			Username: username,
+		},
+	}
 
 	// Service
 	err := ep.service.GetUser(req, &res)

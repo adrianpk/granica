@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi"
-	"gitlab.com/mikrowezel/backend/granica/pkg/auth/jsonrest"
+	"gitlab.com/mikrowezel/backend/granica/pkg/auth/web"
 )
 
 func (a *Auth) makeUserWebRouter(parent chi.Router) chi.Router {
@@ -44,7 +44,7 @@ func (a *Auth) makeUserJSONRESTRouter(parent chi.Router) chi.Router {
 func userCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		username := chi.URLParam(r, "username")
-		ctx := context.WithValue(r.Context(), jsonrest.UserCtxKey, username)
+		ctx := context.WithValue(r.Context(), web.UserCtxKey, username)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
