@@ -1,6 +1,10 @@
 {
 "cannot_proc_err_msg": "It is not possible to process the request at this time",
 
+"user_created_info_msg": "User created",
+"user_updated_info_msg": "User updated",
+"user_deleted_info_msg": "User deleted",
+
 "get_user_err_msg": "Cannot create user",
 "get_all_users_err_msg": "Cannot get user list'",
 "create_user_err_msg": "Cannot get user",

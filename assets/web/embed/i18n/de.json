@@ -1,5 +1,10 @@
 {
 "cannot_proc_err_msg": "Es ist derzeit nicht möglich, die Anfrage zu bearbeiten",
+
+"user_created_info_msg": "Benutzer erstellt",
+"user_updated_info_msg": "Benutzer aktualisiert",
+"user_deleted_info_msg": "Benutzer gelöscht",
+
 "get_err_msg": "Benutzer kann nicht erstellt werden",
 "get_all_err_msg": "Benutzerliste kann nicht abgerufen werden",
 "create_err_msg": "Benutzer kann nicht abgerufen werden",

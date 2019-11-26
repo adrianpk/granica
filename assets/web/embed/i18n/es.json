@@ -1,5 +1,10 @@
 {
 "cannot_proc_err_msg": "W tej chwili nie można przetworzyć request ek",
+
+"user_created_info_msg": "Usuario ha sido creado",
+"user_updated_info_msg": "Usuario ha sido actualizado",
+"user_deleted_info_msg": "Usuario ha sido borrado",
+
 "get_err_msg": "No se puede obtener el usuario",
 "get_all_err_msg": "No se puede obtener la lista de usuarioso",
 "create_err_msg": "No es posible crear el usuario",

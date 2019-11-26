@@ -1,4 +1,8 @@
 {
+"user_created_info_msg": "Utworzony przez użytkownika",
+"user_updated_info_msg": "Użytkownik zaktualizowany",
+"user_deleted_info_msg": "Użytkownik usunięty",
+
 "get_err_msg": "Nie można utworzyć użytkownika",
 "get_all_err_msg": "Nie można uzyskać listy użytkowników",
 "create_err_msg": "Nie można uzyskać użytkownikai",
