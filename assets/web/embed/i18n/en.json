@@ -5,9 +5,9 @@
 "user_updated_info_msg": "User updated",
 "user_deleted_info_msg": "User deleted",
 
-"get_user_err_msg": "Cannot create user",
+"create_user_err_msg": "Cannot create user",
 "get_all_users_err_msg": "Cannot get user list'",
-"create_user_err_msg": "Cannot get user",
+"get_user_err_msg": "Cannot get user",
 "update_user_err_msg": "Cannot update user",
 "delete_user_err_msg": "Cannot delete user ",
 
