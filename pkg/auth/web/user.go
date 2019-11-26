@@ -47,8 +47,7 @@ func (ep *Endpoint) InitCreateUser(w http.ResponseWriter, r *http.Request) {
 	ts, err := ep.TemplateFor(userRes, web.CreateTmpl)
 	if err != nil {
 		m := ep.localizeMsg(r, CannotProcErrID)
-		ep.StoreFlash(r, w, m, web.ErrorMT)
-		ep.Redirect(w, r, UserPath())
+		ep.RedirectWithFlash(w, r, UserPath(), m, web.ErrorMT)
 		ep.Log().Error(err)
 		return
 	}
@@ -57,8 +56,7 @@ func (ep *Endpoint) InitCreateUser(w http.ResponseWriter, r *http.Request) {
 	err = ts.Execute(w, wr)
 	if err != nil {
 		m := ep.localizeMsg(r, CannotProcErrID)
-		ep.StoreFlash(r, w, m, web.ErrorMT)
-		ep.Redirect(w, r, UserPath())
+		ep.RedirectWithFlash(w, r, UserPath(), m, web.ErrorMT)
 		ep.Log().Error(err)
 		return
 	}
@@ -85,8 +83,7 @@ func (ep *Endpoint) CreateUser(w http.ResponseWriter, r *http.Request) {
 	err = ep.service.CreateUser(req, &res)
 	if err != nil {
 		m := ep.localizeMsg(r, CreateUserErrID)
-		ep.StoreFlash(r, w, m, web.ErrorMT)
-		ep.Redirect(w, r, UserPathNew())
+		ep.RedirectWithFlash(w, r, UserPathNew(), m, web.ErrorMT)
 		ep.Log().Error(err)
 		return
 	}
@@ -114,8 +111,9 @@ func (ep *Endpoint) GetUsers(w http.ResponseWriter, r *http.Request) {
 	// Service
 	err := ep.service.GetUsers(req, &res)
 	if err != nil {
+		m := ep.localizeMsg(r, CannotProcErrID)
+		ep.RedirectWithFlash(w, r, UserPath(), m, web.ErrorMT)
 		ep.Log().Error(err)
-		ep.Redirect(w, r, "/")
 		return
 	}
 
@@ -125,15 +123,19 @@ func (ep *Endpoint) GetUsers(w http.ResponseWriter, r *http.Request) {
 	// Template
 	ts, err := ep.TemplateFor(userRes, web.IndexTmpl)
 	if err != nil {
-		ep.Redirect(w, r, "/")
+		m := ep.localizeMsg(r, CannotProcErrID)
+		ep.RedirectWithFlash(w, r, UserPath(), m, web.ErrorMT)
+		ep.Log().Error(err)
 		return
 	}
 
 	// Write response
 	err = ts.Execute(w, wr)
 	if err != nil {
+		m := ep.localizeMsg(r, CannotProcErrID)
+		ep.RedirectWithFlash(w, r, UserPath(), m, web.ErrorMT)
 		ep.Log().Error(err)
-		ep.Redirect(w, r, "/")
+		return
 	}
 }
 
