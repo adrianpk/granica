@@ -11,7 +11,10 @@
 "update_err_msg": "No es posible actualizar el usuario",
 "delete_err_msg": "No es posible borrar usuario",
 
-"user_index_txt": "Índice de usuarios",
+"user_index": "Índice de usuarios",
+"new_user": "Nuevo usuario",
+"edit_user": "Editar usuario",
+"show_user": "Mostrar usuario",
 
 "sample_message": "Mensaje de prueba",
 "sample_count_message": {

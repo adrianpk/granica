@@ -9,7 +9,10 @@
 "update_err_msg": "Nie można zaktualizować użytkownika",
 "delete_err_msg": "Nie można usunąć użytkownikai",
 
-"user_index_txt": "Indeks użytkownikówi",
+"user_index": "Indeks użytkownikówi",
+"new_user": "Nowy użytkownik",
+"edit_user": "Edytuj użytkownika",
+"show_user": "Pokaż użytkownika",
 
 "sample_message": "Przykładowa wiadomość",
 "sample_count_message": {
