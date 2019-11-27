@@ -31,8 +31,7 @@ const (
 	CannotProcErrID  = "cannot_proc_err_msg"
 	CreateUserErrID  = "create_user_err_msg"
 	GetAllUsersErrID = "get_all_users_err_msg"
-	ShowUserErrID    = "show_user_err_msg"
-	EditUserErrID    = "edit_user_err_msg"
+	GetUserErrID     = "get_user_err_msg"
 	UpdateUserErrID  = "update_user_err_msg"
 	DeleteUserErrID  = "delete_user_err_msg"
 )
@@ -134,7 +133,7 @@ func (ep *Endpoint) EditUser(w http.ResponseWriter, r *http.Request) {
 	username, ok := ctx.Value(UserCtxKey).(string)
 	if !ok {
 		err := errors.New("no username provided")
-		ep.handleError(w, r, UserPath(), EditUserErrID, err)
+		ep.handleError(w, r, UserPath(), GetUserErrID, err)
 		return
 	}
 
@@ -147,9 +146,12 @@ func (ep *Endpoint) EditUser(w http.ResponseWriter, r *http.Request) {
 	// Service
 	err := ep.service.GetUser(req, &res)
 	if err != nil {
-		ep.handleError(w, r, UserPath(), EditUserErrID, err)
+		ep.handleError(w, r, UserPath(), GetUserErrID, err)
 		return
 	}
+
+	// Set action
+	res.Action = ep.userUpdateAction(userRes, res)
 
 	// Wrap response
 	wr := ep.OKRes(r, res, "")
@@ -157,14 +159,14 @@ func (ep *Endpoint) EditUser(w http.ResponseWriter, r *http.Request) {
 	// Template
 	ts, err := ep.TemplateFor(userRes, web.EditTmpl)
 	if err != nil {
-		ep.handleError(w, r, UserPath(), EditUserErrID, err)
+		ep.handleError(w, r, UserPath(), GetUserErrID, err)
 		return
 	}
 
 	// Write response
 	err = ts.Execute(w, wr)
 	if err != nil {
-		ep.handleError(w, r, UserPath(), EditUserErrID, err)
+		ep.handleError(w, r, UserPath(), GetUserErrID, err)
 		return
 	}
 }
@@ -178,7 +180,7 @@ func (ep *Endpoint) ShowUser(w http.ResponseWriter, r *http.Request) {
 	username, ok := ctx.Value(UserCtxKey).(string)
 	if !ok {
 		err := errors.New("no username provided")
-		ep.handleError(w, r, UserPath(), ShowUserErrID, err)
+		ep.handleError(w, r, UserPath(), GetUserErrID, err)
 		return
 	}
 
@@ -191,7 +193,7 @@ func (ep *Endpoint) ShowUser(w http.ResponseWriter, r *http.Request) {
 	// Service
 	err := ep.service.GetUser(req, &res)
 	if err != nil {
-		ep.handleError(w, r, UserPath(), ShowUserErrID, err)
+		ep.handleError(w, r, UserPath(), GetUserErrID, err)
 		return
 	}
 
@@ -199,16 +201,16 @@ func (ep *Endpoint) ShowUser(w http.ResponseWriter, r *http.Request) {
 	wr := ep.OKRes(r, res, "")
 
 	// Template
-	ts, err := ep.TemplateFor(userRes, web.IndexTmpl)
+	ts, err := ep.TemplateFor(userRes, web.ShowTmpl)
 	if err != nil {
-		ep.handleError(w, r, UserPath(), ShowUserErrID, err)
+		ep.handleError(w, r, UserPath(), GetUserErrID, err)
 		return
 	}
 
 	// Write response
 	err = ts.Execute(w, wr)
 	if err != nil {
-		ep.handleError(w, r, UserPath(), ShowUserErrID, err)
+		ep.handleError(w, r, UserPath(), GetUserErrID, err)
 		return
 	}
 }
