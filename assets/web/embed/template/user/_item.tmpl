@@ -1,0 +1,29 @@
+{{define "item"}} {{$user := .Data.User}} {{$action := .Data.Action}} {{$csrf := .CSRF}}
+
+    <div class="w-2/3 mx-auto">
+      <div class="bg-white shadow-md rounded my-6">
+        <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+
+            <div class="mb-4">
+              <label class="block text-gray-700 text-sm font-bold mb-2" for="username">Username</label>
+              <label class="appearance-none w-full py-2 px-3 text-gray-900" id="username"/>
+                {{$user.Username}}
+              </label>
+            </div>
+
+            <div class="mb-4">
+              <label class="block text-gray-700 text-sm font-bold mb-2" for="email">Email</label>
+              <label class="appearance-none w-full py-2 px-3 text-gray-900" id="email"/>
+                {{$user.Email}}
+              </label>
+            </div>
+
+            <div class="mb-4">
+              <label class="block text-gray-700 text-sm font-bold mb-2" for="email">Name</label>
+              <label class="appearance-none w-full py-2 px-3 text-gray-900" id="email"/>
+                {{$user.GivenName}} {{$user.MiddleNames}} {{$user.FamilyName}}
+              </label>
+            </div>
+        </div>
+      </div>
+{{end}}

@@ -1,18 +1,24 @@
 # Changelog
 
+## <a name="20191128"></a>20191128 - Page text localization
+
+Service web pages can now present a localized version of its texts depending on the regional configuration of the browser that accesses the service.
+
+The service use the same translation files under '/assets/web/embed/i18n' to create language bundles.
+
 ## <a name="20191127"></a>20191127 - Simplified error handling
 
-* Common and repetitive operations on handler errors are now generalized in a single one.
+Common and repetitive operations on handler errors are now generalized in a single one.
 
 ## <a name="20191126"></a>20191126 - Simplified flash messages handling
 
-* Wrapped response now takes care to append new messages from current action to pending ones stored by other actions before a redirect.
+Wrapped response now takes care to append new messages from current action to pending ones stored by other actions before a redirect.
 
 ## <a name="20191124"></a>20191124 - Embedded translations and form data session store
 
-* Localization files now are embedded in executable as any other resource.
+Localization files now are embedded in executable as any other resource.
 
-* Endpoint helpers to store, retrieve and clear form data accross requests.
+Endpoint helpers to store, retrieve and clear form data accross requests.
 
 Mainly used to avoid having to fill forms again in case of submission errors.
 

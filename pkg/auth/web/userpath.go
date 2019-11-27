@@ -1,6 +1,8 @@
 package web
 
-import "gitlab.com/mikrowezel/backend/web"
+import (
+	"gitlab.com/mikrowezel/backend/web"
+)
 
 // UserRoot - User resource root path.
 var UserRoot = "users"

@@ -60,6 +60,7 @@ type (
 	// GetUserRes output data.
 	GetUserRes struct {
 		User
+		Action web.Action
 	}
 )
 

@@ -17,6 +17,7 @@ But at the same time it is also a way to find a modular and systematized foundat
 
 ## Changelog
 
+* [20191128 - Page texts localization](/docs/changelog.md#20191128)
 * [20191127 - Simplified error handling](/docs/changelog.md#20191127)
 * [20191126 - Simplified flash messages handling](/docs/changelog.md#20191126)
 * [20191124 - Embedded translations and form data session store](/docs/changelog.md#20191124)
@@ -63,7 +64,7 @@ $ make run
 12:07AM INF Parsed template set path=user/show.tmpl
 12:07AM INF Parsed template set path=user/edit.tmpl
 12:07AM INF Parsed template set path=user/index.tmpl
-12:07AM INF Dialing to Postgres host="host=localhost port=5432 user=granica password=granica dbname=granica sslmode=disable"
+12:07AM INF Dialing to Postgres host="host=localhost port=5432 user=xxxxxxxx password=xxxxxxxx dbname=granica sslmode=disable"
 12:07AM INF Postgres connection established
 12:07AM INF Repo initializated name=repo-handler
 2019/11/27 00:07:01 Migration 'enable_postgis' already applied.

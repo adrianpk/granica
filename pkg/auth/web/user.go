@@ -31,8 +31,7 @@ const (
 	CannotProcErrID  = "cannot_proc_err_msg"
 	CreateUserErrID  = "create_user_err_msg"
 	GetAllUsersErrID = "get_all_users_err_msg"
-	ShowUserErrID    = "show_user_err_msg"
-	EditUserErrID    = "edit_user_err_msg"
+	GetUserErrID     = "get_user_err_msg"
 	UpdateUserErrID  = "update_user_err_msg"
 	DeleteUserErrID  = "delete_user_err_msg"
 )
@@ -56,6 +55,8 @@ func (ep *Endpoint) NewUser(w http.ResponseWriter, r *http.Request) {
 		ep.handleError(w, r, UserPath(), CannotProcErrID, err)
 		return
 	}
+
+	// Localizer
 
 	// Write response
 	err = ts.Execute(w, wr)
@@ -134,7 +135,7 @@ func (ep *Endpoint) EditUser(w http.ResponseWriter, r *http.Request) {
 	username, ok := ctx.Value(UserCtxKey).(string)
 	if !ok {
 		err := errors.New("no username provided")
-		ep.handleError(w, r, UserPath(), EditUserErrID, err)
+		ep.handleError(w, r, UserPath(), GetUserErrID, err)
 		return
 	}
 
@@ -147,9 +148,12 @@ func (ep *Endpoint) EditUser(w http.ResponseWriter, r *http.Request) {
 	// Service
 	err := ep.service.GetUser(req, &res)
 	if err != nil {
-		ep.handleError(w, r, UserPath(), EditUserErrID, err)
+		ep.handleError(w, r, UserPath(), GetUserErrID, err)
 		return
 	}
+
+	// Set action
+	res.Action = ep.userUpdateAction(userRes, res)
 
 	// Wrap response
 	wr := ep.OKRes(r, res, "")
@@ -157,14 +161,14 @@ func (ep *Endpoint) EditUser(w http.ResponseWriter, r *http.Request) {
 	// Template
 	ts, err := ep.TemplateFor(userRes, web.EditTmpl)
 	if err != nil {
-		ep.handleError(w, r, UserPath(), EditUserErrID, err)
+		ep.handleError(w, r, UserPath(), GetUserErrID, err)
 		return
 	}
 
 	// Write response
 	err = ts.Execute(w, wr)
 	if err != nil {
-		ep.handleError(w, r, UserPath(), EditUserErrID, err)
+		ep.handleError(w, r, UserPath(), GetUserErrID, err)
 		return
 	}
 }
@@ -174,13 +178,11 @@ func (ep *Endpoint) ShowUser(w http.ResponseWriter, r *http.Request) {
 	var req tp.GetUserReq
 	var res tp.GetUserRes
 
-	ep.Log().Debug("ShowUser")
-
 	ctx := r.Context()
 	username, ok := ctx.Value(UserCtxKey).(string)
 	if !ok {
 		err := errors.New("no username provided")
-		ep.handleError(w, r, UserPath(), ShowUserErrID, err)
+		ep.handleError(w, r, UserPath(), GetUserErrID, err)
 		return
 	}
 
@@ -193,7 +195,7 @@ func (ep *Endpoint) ShowUser(w http.ResponseWriter, r *http.Request) {
 	// Service
 	err := ep.service.GetUser(req, &res)
 	if err != nil {
-		ep.handleError(w, r, UserPath(), ShowUserErrID, err)
+		ep.handleError(w, r, UserPath(), GetUserErrID, err)
 		return
 	}
 
@@ -201,16 +203,16 @@ func (ep *Endpoint) ShowUser(w http.ResponseWriter, r *http.Request) {
 	wr := ep.OKRes(r, res, "")
 
 	// Template
-	ts, err := ep.TemplateFor(userRes, web.IndexTmpl)
+	ts, err := ep.TemplateFor(userRes, web.ShowTmpl)
 	if err != nil {
-		ep.handleError(w, r, UserPath(), ShowUserErrID, err)
+		ep.handleError(w, r, UserPath(), GetUserErrID, err)
 		return
 	}
 
 	// Write response
 	err = ts.Execute(w, wr)
 	if err != nil {
-		ep.handleError(w, r, UserPath(), ShowUserErrID, err)
+		ep.handleError(w, r, UserPath(), GetUserErrID, err)
 		return
 	}
 }
@@ -224,11 +226,11 @@ func (ep *Endpoint) DeleteUser(w http.ResponseWriter, r *http.Request) {
 }
 
 // Localization - I18N
+
 func (ep *Endpoint) localizeMsg(r *http.Request, msgID string) string {
-	l, ok := web.GetI18NLocalizer(r)
-	if !ok {
-		// FIX: Do something: Return default message?
-		ep.Log().Warn("I18N localizer not available")
+	l, err := ep.Localizer(r)
+	if err != nil {
+		ep.Log().Error(err)
 	}
 
 	t, lang, err := l.LocalizeWithTag(&i18n.LocalizeConfig{
@@ -242,6 +244,15 @@ func (ep *Endpoint) localizeMsg(r *http.Request, msgID string) string {
 	ep.Log().Debug("Localized message", "value", t, "lang", lang)
 
 	return t
+}
+
+func (ep *Endpoint) Localizer(r *http.Request) (l *i18n.Localizer, err error) {
+	l, ok := web.GetI18NLocalizer(r)
+	if !ok {
+		return nil, errors.New("no localizer available")
+	}
+
+	return l, nil
 }
 
 func (ep *Endpoint) localizeMessageID(l *i18n.Localizer, messageID string) (string, error) {
