@@ -2,7 +2,7 @@
 
 ## <a name="20191128"></a>20191128 - Page text localization
 
-Service web pages can now present a localized version of its texts depending on the regional configuration of the browser that accesses the service.
+Service web pages can now present a localized version of their texts depending on the regional configuration of the browser that accesses the service.
 
 The service use the same translation files under '/assets/web/embed/i18n' to create language bundles.
 
