@@ -11,6 +11,8 @@
 "update_err_msg": "No es posible actualizar el usuario",
 "delete_err_msg": "No es posible borrar usuario",
 
+"user_index_txt": "Índice de usuarios",
+
 "sample_message": "Mensaje de prueba",
 "sample_count_message": {
   "description": "Some variable count message",

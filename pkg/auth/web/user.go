@@ -56,6 +56,8 @@ func (ep *Endpoint) NewUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Localizer
+
 	// Write response
 	err = ts.Execute(w, wr)
 	if err != nil {
@@ -224,11 +226,11 @@ func (ep *Endpoint) DeleteUser(w http.ResponseWriter, r *http.Request) {
 }
 
 // Localization - I18N
+
 func (ep *Endpoint) localizeMsg(r *http.Request, msgID string) string {
-	l, ok := web.GetI18NLocalizer(r)
-	if !ok {
-		// FIX: Do something: Return default message?
-		ep.Log().Warn("I18N localizer not available")
+	l, err := ep.Localizer(r)
+	if err != nil {
+		ep.Log().Error(err)
 	}
 
 	t, lang, err := l.LocalizeWithTag(&i18n.LocalizeConfig{
@@ -242,6 +244,15 @@ func (ep *Endpoint) localizeMsg(r *http.Request, msgID string) string {
 	ep.Log().Debug("Localized message", "value", t, "lang", lang)
 
 	return t
+}
+
+func (ep *Endpoint) Localizer(r *http.Request) (l *i18n.Localizer, err error) {
+	l, ok := web.GetI18NLocalizer(r)
+	if !ok {
+		return nil, errors.New("no localizer available")
+	}
+
+	return l, nil
 }
 
 func (ep *Endpoint) localizeMessageID(l *i18n.Localizer, messageID string) (string, error) {

@@ -9,6 +9,8 @@
 "update_err_msg": "Nie można zaktualizować użytkownika",
 "delete_err_msg": "Nie można usunąć użytkownikai",
 
+"user_index_txt": "Indeks użytkownikówi",
+
 "sample_message": "Przykładowa wiadomość",
 "sample_count_message": {
   "description": "Some variable count message",

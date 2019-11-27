@@ -11,6 +11,8 @@
 "update_user_err_msg": "Cannot update user",
 "delete_user_err_msg": "Cannot delete user ",
 
+"user_index_txt": "User Index",
+
 "sample_message": "Sample message",
 "sample_count_message": {
   "description": "Some variable count message",
