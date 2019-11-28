@@ -132,17 +132,13 @@ func (ep *Endpoint) EditUser(w http.ResponseWriter, r *http.Request) {
 	var res tp.GetUserRes
 
 	// Identifier
-	username, err := ep.getIdentifier(r)
+	id, err := ep.getIdentifier(r)
 	if err != nil {
 		ep.handleError(w, r, UserPath(), GetUserErrID, err)
 		return
 	}
 
-	req = tp.GetUserReq{
-		tp.Identifier{
-			Username: username,
-		},
-	}
+	req = tp.GetUserReq{id}
 
 	// Service
 	err = ep.service.GetUser(req, &res)
@@ -178,17 +174,13 @@ func (ep *Endpoint) ShowUser(w http.ResponseWriter, r *http.Request) {
 	var res tp.GetUserRes
 
 	// Identifier
-	username, err := ep.getIdentifier(r)
+	id, err := ep.getIdentifier(r)
 	if err != nil {
 		ep.handleError(w, r, UserPath(), GetUserErrID, err)
 		return
 	}
 
-	req = tp.GetUserReq{
-		tp.Identifier{
-			Username: username,
-		},
-	}
+	req = tp.GetUserReq{id}
 
 	// Service
 	err = ep.service.GetUser(req, &res)
@@ -226,18 +218,13 @@ func (ep *Endpoint) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	ep.StoreUserForm(r, w, web.UpdateUserStoreKey, req.User)
 
 	// Identifier
-	username, err := ep.getIdentifier(r)
+	id, err := ep.getIdentifier(r)
 	if err != nil {
 		ep.handleError(w, r, UserPath(), GetUserErrID, err)
 		return
 	}
 
-	req = tp.UpdateUserReq{
-		tp.Identifier{
-			Username: username,
-		},
-		tp.User{},
-	}
+	req = tp.UpdateUserReq{id, tp.User{}}
 
 	// Form to Req
 	err = ep.FormToModel(r, &req.User)
@@ -327,15 +314,6 @@ func (ep *Endpoint) localize(r *http.Request, msgID string) string {
 	return t
 }
 
-//func (ep *Endpoint) Localizer(r *http.Request) (l *i18n.Localizer, err error) {
-//l, ok := web.GetI18NLocalizer(r)
-//if !ok {
-//return nil, errors.New("no localizer available")
-//}
-
-//return l, nil
-//}
-
 func (ep *Endpoint) localizeMessageID(l *i18n.Localizer, messageID string) (string, error) {
 	return l.Localize(&i18n.LocalizeConfig{
 		MessageID: messageID,
@@ -378,15 +356,17 @@ func (ep *Endpoint) ClearUserForm(r *http.Request, w http.ResponseWriter, key st
 }
 
 // Misc
-//
-func (ep *Endpoint) getIdentifier(r *http.Request) (username string, err error) {
+func (ep *Endpoint) getIdentifier(r *http.Request) (identifier tp.Identifier, err error) {
 	ctx := r.Context()
 	username, ok := ctx.Value(UserCtxKey).(string)
 	if !ok {
 		err := errors.New("no username provided")
-		return "", err
+		return tp.Identifier{}, err
 	}
-	return username, nil
+
+	return tp.Identifier{
+		Username: username,
+	}, nil
 }
 
 // userCreateAction
