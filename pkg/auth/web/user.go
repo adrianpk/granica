@@ -92,7 +92,7 @@ func (ep *Endpoint) CreateUser(w http.ResponseWriter, r *http.Request) {
 	// Operation succeded: form data can be cleared.
 	ep.ClearUserForm(r, w, web.CreateUserStoreKey)
 
-	m := ep.localizeMsg(r, UserCreatedInfoID)
+	m := ep.localize(r, UserCreatedInfoID)
 	ep.RedirectWithFlash(w, r, UserPath(), m, web.InfoMT)
 }
 
@@ -131,10 +131,9 @@ func (ep *Endpoint) EditUser(w http.ResponseWriter, r *http.Request) {
 	var req tp.GetUserReq
 	var res tp.GetUserRes
 
-	ctx := r.Context()
-	username, ok := ctx.Value(UserCtxKey).(string)
-	if !ok {
-		err := errors.New("no username provided")
+	// Identifier
+	username, err := ep.getIdentifier(r)
+	if err != nil {
 		ep.handleError(w, r, UserPath(), GetUserErrID, err)
 		return
 	}
@@ -146,7 +145,7 @@ func (ep *Endpoint) EditUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Service
-	err := ep.service.GetUser(req, &res)
+	err = ep.service.GetUser(req, &res)
 	if err != nil {
 		ep.handleError(w, r, UserPath(), GetUserErrID, err)
 		return
@@ -178,10 +177,9 @@ func (ep *Endpoint) ShowUser(w http.ResponseWriter, r *http.Request) {
 	var req tp.GetUserReq
 	var res tp.GetUserRes
 
-	ctx := r.Context()
-	username, ok := ctx.Value(UserCtxKey).(string)
-	if !ok {
-		err := errors.New("no username provided")
+	// Identifier
+	username, err := ep.getIdentifier(r)
+	if err != nil {
 		ep.handleError(w, r, UserPath(), GetUserErrID, err)
 		return
 	}
@@ -193,7 +191,7 @@ func (ep *Endpoint) ShowUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Service
-	err := ep.service.GetUser(req, &res)
+	err = ep.service.GetUser(req, &res)
 	if err != nil {
 		ep.handleError(w, r, UserPath(), GetUserErrID, err)
 		return
@@ -219,18 +217,100 @@ func (ep *Endpoint) ShowUser(w http.ResponseWriter, r *http.Request) {
 
 // UpdateUser web endpoint.
 func (ep *Endpoint) UpdateUser(w http.ResponseWriter, r *http.Request) {
+	var req tp.UpdateUserReq
+	var res tp.UpdateUserRes
+
+	// TODO: Form data validation
+
+	// Store form data if exists
+	ep.StoreUserForm(r, w, web.UpdateUserStoreKey, req.User)
+
+	// Identifier
+	username, err := ep.getIdentifier(r)
+	if err != nil {
+		ep.handleError(w, r, UserPath(), GetUserErrID, err)
+		return
+	}
+
+	req = tp.UpdateUserReq{
+		tp.Identifier{
+			Username: username,
+		},
+		tp.User{},
+	}
+
+	// Form to Req
+	err = ep.FormToModel(r, &req.User)
+	if err != nil {
+		ep.handleError(w, r, UserPath(), CannotProcErrID, err)
+		return
+	}
+
+	// Service
+	err = ep.service.UpdateUser(req, &res)
+	if err != nil {
+		ep.handleError(w, r, UserPathNew(), CreateUserErrID, err)
+		return
+	}
+
+	// Operation succeded: form data can be cleared.
+	ep.ClearUserForm(r, w, web.UpdateUserStoreKey)
+
+	m := ep.localize(r, UserUpdatedInfoID)
+	ep.RedirectWithFlash(w, r, UserPath(), m, web.InfoMT)
 }
 
 // DeleteUser web endpoint.
 func (ep *Endpoint) DeleteUser(w http.ResponseWriter, r *http.Request) {
+	var req tp.DeleteUserReq
+	var res tp.DeleteUserRes
+
+	ctx := r.Context()
+	username, ok := ctx.Value(UserCtxKey).(string)
+	if !ok {
+		err := errors.New("no username provided")
+		ep.handleError(w, r, UserPath(), GetUserErrID, err)
+		return
+	}
+
+	req = tp.DeleteUserReq{
+		tp.Identifier{
+			Username: username,
+		},
+	}
+
+	// Service
+	err := ep.service.DeleteUser(req, &res)
+	if err != nil {
+		ep.handleError(w, r, UserPath(), GetUserErrID, err)
+		return
+	}
+
+	// Wrap response
+	wr := ep.OKRes(r, res, "")
+
+	// Template
+	ts, err := ep.TemplateFor(userRes, web.ShowTmpl)
+	if err != nil {
+		ep.handleError(w, r, UserPath(), GetUserErrID, err)
+		return
+	}
+
+	// Write response
+	err = ts.Execute(w, wr)
+	if err != nil {
+		ep.handleError(w, r, UserPath(), GetUserErrID, err)
+		return
+	}
 }
 
 // Localization - I18N
 
-func (ep *Endpoint) localizeMsg(r *http.Request, msgID string) string {
-	l, err := ep.Localizer(r)
-	if err != nil {
-		ep.Log().Error(err)
+func (ep *Endpoint) localize(r *http.Request, msgID string) string {
+	l := ep.Localizer(r)
+	if l == nil {
+		ep.Log().Warn("No localizer available")
+		return msgID
 	}
 
 	t, lang, err := l.LocalizeWithTag(&i18n.LocalizeConfig{
@@ -239,6 +319,7 @@ func (ep *Endpoint) localizeMsg(r *http.Request, msgID string) string {
 
 	if err != nil {
 		ep.Log().Error(err)
+		return msgID
 	}
 
 	ep.Log().Debug("Localized message", "value", t, "lang", lang)
@@ -246,14 +327,14 @@ func (ep *Endpoint) localizeMsg(r *http.Request, msgID string) string {
 	return t
 }
 
-func (ep *Endpoint) Localizer(r *http.Request) (l *i18n.Localizer, err error) {
-	l, ok := web.GetI18NLocalizer(r)
-	if !ok {
-		return nil, errors.New("no localizer available")
-	}
+//func (ep *Endpoint) Localizer(r *http.Request) (l *i18n.Localizer, err error) {
+//l, ok := web.GetI18NLocalizer(r)
+//if !ok {
+//return nil, errors.New("no localizer available")
+//}
 
-	return l, nil
-}
+//return l, nil
+//}
 
 func (ep *Endpoint) localizeMessageID(l *i18n.Localizer, messageID string) (string, error) {
 	return l.Localize(&i18n.LocalizeConfig{
@@ -297,6 +378,17 @@ func (ep *Endpoint) ClearUserForm(r *http.Request, w http.ResponseWriter, key st
 }
 
 // Misc
+//
+func (ep *Endpoint) getIdentifier(r *http.Request) (username string, err error) {
+	ctx := r.Context()
+	username, ok := ctx.Value(UserCtxKey).(string)
+	if !ok {
+		err := errors.New("no username provided")
+		return "", err
+	}
+	return username, nil
+}
+
 // userCreateAction
 func (ep *Endpoint) userCreateAction() web.Action {
 	return web.Action{Target: fmt.Sprintf("%s", UserPath()), Method: "POST"}
@@ -308,7 +400,7 @@ func (ep *Endpoint) userUpdateAction(resource string, model web.Identifiable) we
 }
 
 func (ep *Endpoint) handleError(w http.ResponseWriter, r *http.Request, redirPath, msgID string, err error) {
-	m := ep.localizeMsg(r, msgID)
+	m := ep.localize(r, msgID)
 	ep.RedirectWithFlash(w, r, redirPath, m, web.ErrorMT)
 	ep.Log().Error(err)
 }
