@@ -11,7 +11,10 @@
 "update_err_msg": "Benutzer kann nicht aktualisiert werden",
 "delete_err_msg": "Benutzer kann nicht gelöscht werden",
 
-"user_index_txt": "Benutzerindex",
+"user_index": "Benutzerindex",
+"new_user": "Neuer Benutzer",
+"edit_user": "Benutzer bearbeiten",
+"show_user": "Benutzer anzeigen",
 
 "sample_message": "Beispielnachrich",
 "sample_count_message": {

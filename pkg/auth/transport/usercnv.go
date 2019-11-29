@@ -2,8 +2,9 @@ package transport
 
 import (
 	"fmt"
-
+	"github.com/satori/go.uuid"
 	"gitlab.com/mikrowezel/backend/db"
+	m "gitlab.com/mikrowezel/backend/model"
 
 	"gitlab.com/mikrowezel/backend/granica/internal/model"
 )
@@ -51,10 +52,11 @@ func (res *CreateUserRes) FromTransport(t *User, msg string, err error) {
 	}
 }
 
-func (res *GetUsersRes) FromModel(ms []model.User, msg string, err error) {
+func (res *IndexUsersRes) FromModel(ms []model.User, msg string, err error) {
 	resUsers := []User{}
 	for _, m := range ms {
 		res := User{
+			Slug:        m.Slug.String,
 			Username:    m.Username.String,
 			Password:    "",
 			Email:       m.Email.String,
@@ -71,13 +73,18 @@ func (res *GetUsersRes) FromModel(ms []model.User, msg string, err error) {
 
 func (req *GetUserReq) ToModel() model.User {
 	return model.User{
-		Username: db.ToNullString(req.Identifier.Username),
+		Identification: m.Identification{
+			ID:       uuid.UUID{},
+			TenantID: db.ToNullString(""),
+			Slug:     db.ToNullString(req.Identifier.Slug),
+		},
 	}
 }
 
 func (res *GetUserRes) FromModel(m *model.User, msg string, err error) {
 	if m != nil {
 		res.User = User{
+			Slug:        m.Slug.String,
 			Username:    m.Username.String,
 			Password:    "",
 			Email:       m.Email.String,
@@ -90,15 +97,14 @@ func (res *GetUserRes) FromModel(m *model.User, msg string, err error) {
 	}
 }
 
-//func (a *Auth) makeUpdateUserResJSON(m *model.User, msg string, err error) ([]byte, error) {
-//res := UpdateUserRes{}
-//res.FromModel(m, msg, err)
-//return a.toJSON(res.User)
-//}
-
 // ToModel creates a User model from transport values.
 func (req *UpdateUserReq) ToModel() model.User {
 	return model.User{
+		Identification: m.Identification{
+			ID:       uuid.UUID{},
+			TenantID: db.ToNullString(""),
+			Slug:     db.ToNullString(req.User.Slug),
+		},
 		Username:          db.ToNullString(req.User.Username),
 		Password:          req.Password,
 		Email:             db.ToNullString(req.Email),

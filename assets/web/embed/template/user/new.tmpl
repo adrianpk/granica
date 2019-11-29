@@ -1,6 +1,6 @@
 <!-- Head -->
 {{define "head"}}
-Edit User
+{{"new_user" | .Loc.Localize}}
 {{end}}
 <!-- Head -->
 
@@ -13,7 +13,7 @@ Edit User
 <!-- Contextual bar -->
 
 <!-- Header -->
-{{$title := "New User"}}
+{{$title := "new_user" | .Loc.Localize}}
 {{template "header" $title}}
 <!-- Header -->
 

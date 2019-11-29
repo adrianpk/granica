@@ -11,7 +11,10 @@
 "update_user_err_msg": "Cannot update user",
 "delete_user_err_msg": "Cannot delete user ",
 
-"user_index_txt": "User Index",
+"user_index": "User Index",
+"new_user": "New User",
+"edit_user": "Edit User",
+"show_user": "Show User",
 
 "sample_message": "Sample message",
 "sample_count_message": {

@@ -1,6 +1,6 @@
 <!-- Head -->
 {{define "head"}}
-Show User
+{{"user_index" | .Loc.Localize}}
 {{end}}
 <!-- Head -->
 
@@ -13,7 +13,7 @@ Show User
 <!-- Contextual bar -->
 
 <!-- Header -->
-{{$title := "Show User"}}
+{{$title := "show_user" | .Loc.Localize}}
 {{template "header" $title}}
 <!-- Header -->
 

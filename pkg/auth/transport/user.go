@@ -41,12 +41,12 @@ type (
 )
 
 type (
-	// GetUsersReq input data.
-	GetUsersReq struct {
+	// IndexUsersReq input data.
+	IndexUsersReq struct {
 	}
 
-	// GetUsersRes output data.
-	GetUsersRes struct {
+	// IndexUsersRes output data.
+	IndexUsersRes struct {
 		Users
 	}
 )
