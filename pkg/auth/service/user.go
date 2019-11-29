@@ -41,7 +41,7 @@ func (s *Service) CreateUser(req tp.CreateUserReq, res *tp.CreateUserRes) error 
 	return nil
 }
 
-func (s *Service) GetUsers(req tp.GetUsersReq, res *tp.GetUsersRes) error {
+func (s *Service) IndexUsers(req tp.IndexUsersReq, res *tp.IndexUsersRes) error {
 	// Repo
 	repo, err := s.userRepo()
 	if err != nil {
@@ -67,6 +67,34 @@ func (s *Service) GetUsers(req tp.GetUsersReq, res *tp.GetUsersRes) error {
 }
 
 func (s *Service) GetUser(req tp.GetUserReq, res *tp.GetUserRes) error {
+	// Model
+	u := req.ToModel()
+
+	// Repo
+	repo, err := s.userRepo()
+	if err != nil {
+		res.FromModel(nil, getUserErr, err)
+		return err
+	}
+
+	u, err = repo.GetBySlug(u.Slug.String)
+	if err != nil {
+		res.FromModel(nil, getUserErr, err)
+		return err
+	}
+
+	err = repo.Commit()
+	if err != nil {
+		res.FromModel(nil, getUserErr, err)
+		return err
+	}
+
+	// Output
+	res.FromModel(&u, "", nil)
+	return nil
+}
+
+func (s *Service) GetUserByUsername(req tp.GetUserReq, res *tp.GetUserRes) error {
 	// Model
 	u := req.ToModel()
 
@@ -103,7 +131,7 @@ func (s *Service) UpdateUser(req tp.UpdateUserReq, res *tp.UpdateUserRes) error 
 	}
 
 	// Get user
-	current, err := repo.GetByUsername(req.Identifier.Username)
+	current, err := repo.GetBySlug(req.Identifier.Slug)
 	if err != nil {
 		res.FromModel(nil, updateUserErr, err)
 		return err
@@ -145,7 +173,7 @@ func (s *Service) DeleteUser(req tp.DeleteUserReq, res *tp.DeleteUserRes) error 
 		return err
 	}
 
-	err = repo.DeleteByUsername(req.Username)
+	err = repo.DeleteByUsername(req.Slug)
 	if err != nil {
 		res.FromModel(nil, updateUserErr, err)
 		return err

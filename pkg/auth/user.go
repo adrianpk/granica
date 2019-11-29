@@ -13,7 +13,7 @@ func (a *Auth) makeUserWebRouter(parent chi.Router) chi.Router {
 		uar.Get("/", a.webep.IndexUsers)
 		uar.Get("/new", a.webep.NewUser)
 		uar.Post("/", a.webep.CreateUser)
-		uar.Route("/{username}", func(uarid chi.Router) {
+		uar.Route("/{slug}", func(uarid chi.Router) {
 			uarid.Use(userCtx)
 			uarid.Get("/", a.webep.ShowUser)
 			uarid.Get("/edit", a.webep.EditUser)
@@ -31,10 +31,11 @@ func (a *Auth) makeUserWebRouter(parent chi.Router) chi.Router {
 func (a *Auth) makeUserJSONRESTRouter(parent chi.Router) chi.Router {
 	return parent.Route("/users", func(uar chi.Router) {
 		uar.Post("/", a.jsonep.CreateUser)
-		uar.Get("/", a.jsonep.GetUsers)
-		uar.Route("/{username}", func(uarid chi.Router) {
+		uar.Get("/", a.jsonep.IndexUsers)
+		uar.Route("/{slug}", func(uarid chi.Router) {
 			uarid.Use(userCtx)
 			uarid.Get("/", a.jsonep.GetUser)
+			uarid.Patch("/", a.jsonep.UpdateUser)
 			uarid.Put("/", a.jsonep.UpdateUser)
 			uarid.Delete("/", a.jsonep.DeleteUser)
 		})
@@ -43,8 +44,8 @@ func (a *Auth) makeUserJSONRESTRouter(parent chi.Router) chi.Router {
 
 func userCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		username := chi.URLParam(r, "username")
-		ctx := context.WithValue(r.Context(), web.UserCtxKey, username)
+		slug := chi.URLParam(r, "slug")
+		ctx := context.WithValue(r.Context(), web.UserCtxKey, slug)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

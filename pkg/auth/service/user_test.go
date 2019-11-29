@@ -128,8 +128,8 @@ func TestCreateUser(t *testing.T) {
 	}
 }
 
-// TestAllGetUsers tests get all users.
-func TestAllGetUsers(t *testing.T) {
+// TestAllIndexUsers tests get all users.
+func TestAllIndexUsers(t *testing.T) {
 	// Prerequisites
 	_, err := createSampleUsers()
 	if err != nil {
@@ -137,9 +137,9 @@ func TestAllGetUsers(t *testing.T) {
 	}
 
 	// Setup
-	req := tp.GetUsersReq{}
+	req := tp.IndexUsersReq{}
 
-	var res tp.GetUsersRes
+	var res tp.IndexUsersRes
 
 	ctx := context.Background()
 	cfg := testConfig()
@@ -155,7 +155,7 @@ func TestAllGetUsers(t *testing.T) {
 	s := testService(ctx, cfg, log, userRepo)
 
 	// Test
-	err = s.GetUsers(req, &res)
+	err = s.IndexUsers(req, &res)
 	if err != nil {
 		t.Errorf("get users error: %s", err.Error())
 	}
