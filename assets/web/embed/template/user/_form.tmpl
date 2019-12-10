@@ -10,43 +10,43 @@
 
             <div class="mb-4">
               <label class="block text-gray-700 text-sm font-bold mb-2" for="name">Username</label>
-              <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="username" name="username" placeholder="Min. 4 characters" value=""/>
+              <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="username" name="username" placeholder="Min. 4 characters" value="{{$user.Username}}"/>
             </div>
 
             <div class="mb-4">
-              <label class="block text-gray-700 text-sm font-bold mb-2" for="name">Password</label>
+              <label class="block text-gray-700 text-sm font-bold mb-2" for="password">Password</label>
               <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="password" name="password" type="password" placeholder="Min 8 characters" value=""/>
             </div>
 
             <div class="mb-4">
-              <label class="block text-gray-700 text-sm font-bold mb-2" for="name">Email</label>
-              <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="name" name="email" type="text" value="{{$user.Email}}"/>
+              <label class="block text-gray-700 text-sm font-bold mb-2" for="email">Email</label>
+              <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="email" name="email" type="text" value="{{$user.Email}}"/>
             </div>
 
             <div class="mb-4">
-              <label class="block text-gray-700 text-sm font-bold mb-2" for="name">Email confirmation</label>
-              <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="password-confirmation" name="password-confirmation" type="password" placeholder=""
+              <label class="block text-gray-700 text-sm font-bold mb-2" for="email-confirmation">Email confirmation</label>
+              <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="email-confirmation" name="email-confirmation" placeholder=""
                  value="{{$user.EmailConfirmation}}"/>
             </div>
 
             <div class="mb-4">
-              <label class="block text-gray-700 text-sm font-bold mb-2" for="name">Given Name</label>
+              <label class="block text-gray-700 text-sm font-bold mb-2" for="given-name">Given Name</label>
               <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="given-name" name="given-name" type="text" value="{{$user.GivenName}}"/>
             </div>
 
             <div class="mb-4">
-              <label class="block text-gray-700 text-sm font-bold mb-2" for="name">Middle Names</label>
+              <label class="block text-gray-700 text-sm font-bold mb-2" for="middle-names">Middle Names</label>
               <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="middle-names" name="middle-names" type="text" value="{{$user.MiddleNames}}"/>
             </div>
 
             <div class="mb-4">
-              <label class="block text-gray-700 text-sm font-bold mb-2" for="name">Family Name</label>
+              <label class="block text-gray-700 text-sm font-bold mb-2" for="family-name">Family Name</label>
               <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="family-name" name="family-name" type="text" value="{{$user.FamilyName}}"/>
             </div>
 
             <div class="">
               {{if not $user.IsNew}}
-              <!-- Update -->
+              <!-- Save -->
               <div class="mb-4">
                 <input class="bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-1 px-3 border border-blue-500 hover:border-transparent round" type="submit" value="Update">
               </div>
