@@ -7,16 +7,16 @@ import (
 type (
 	// User request and response data.
 	User struct {
-		Slug              string `json:"slug"`
-		Username          string `json:"username"`
-		Password          string `json:"password"`
-		Email             string `json:"email"`
-		EmailConfirmation string `json:"emailConfirmation"`
-		GivenName         string `json:"givenName"`
-		MiddleNames       string `json:"middleNames"`
-		FamilyName        string `json:"familyName"`
-		Lat               string `json:"lat"`
-		Lng               string `json:"lng"`
+		Slug              string `json:"slug" schema:"slug"`
+		Username          string `json:"username" schema:"username"`
+		Password          string `json:"password" schema:"password"`
+		Email             string `json:"email" schema:"email"`
+		EmailConfirmation string `json:"emailConfirmation" schema:"email-confirmation"`
+		GivenName         string `json:"givenName" schema:"given-name"`
+		MiddleNames       string `json:"middleNames" schema:"middle-names"`
+		FamilyName        string `json:"familyName" schema:"family-name"`
+		Lat               string `json:"lat" schema: "lat"`
+		Lng               string `json:"lng" schema: "lng"`
 		IsNew             bool
 	}
 
