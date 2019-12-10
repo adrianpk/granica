@@ -72,15 +72,17 @@ func (ep *Endpoint) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	// TODO: Form data validation
 
-	// Store form data if exists
-	ep.StoreUserForm(r, w, web.CreateUserStoreKey, req.User)
-
 	// Form to Req
 	err := ep.FormToModel(r, &req.User)
 	if err != nil {
 		ep.handleError(w, r, UserPath(), CannotProcErrID, err)
 		return
 	}
+
+	ep.Log().Info(spew.Sdump(&req.User))
+
+	// Store form data
+	ep.StoreUserForm(r, w, web.CreateUserStoreKey, req.User)
 
 	// Service
 	err = ep.service.CreateUser(req, &res)
