@@ -1,9 +1,7 @@
 {{define "form"}} {{$user := .Data.User}} {{$action := .Data.Action}} {{$csrf := .CSRF}}
-
     <div class="w-2/3 mx-auto">
-        <div class="bg-white shadow-md rounded my-6">
 
-          <form class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" accept-charset="UTF-8" action="{{$action.Target}}" method="POST">
+          <form class="bg-white shadow-md px-8 py-4 mb-4 rounded" accept-charset="UTF-8" action="{{$action.Target}}" method="POST">
             <input name="_method" type="hidden" value="{{$action.Method}}">
 
             {{$csrf.csrfField}}
@@ -47,49 +45,18 @@
             <div class="">
               {{if not $user.IsNew}}
               <!-- Save -->
-              <div class="mb-4">
-                <input class="bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-1 px-3 border border-blue-500 hover:border-transparent round" type="submit" value="Update">
+              <div class="mt-4 pt-4">
+                <input class="bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-1 px-3 border border-blue-500 hover:border-transparent rounded" type="submit" value="Update">
               </div>
               <!-- Update -->
               {{else}}
               <!-- Save -->
-              <div class="mb-4">
-                <input class="bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-1 px-3 border border-blue-500 hover:border-transparent round" type="submit" value="Save">
+              <div class="mt-4 pt-4">
+                <input class="bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-1 px-3 border border-blue-500 hover:border-transparent rounded" type="submit" value="Save">
               </div>
               <!-- Save -->
               {{end}}
             </div>
           </form>
-        </div>
       </div>
-
-      {{if not $user.IsNew}}
-      <div class="w-2/3 mx-auto">
-         <div class="bg-white shadow-md rounded my-6">
-            <div class="mb-4">
-
-              <!-- Delete -->
-              <div class="is-jsonly bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-                <form accept-charset="UTF-8" action="{{userPath}}" method="POST">
-                  {{$csrf.csrfField}}
-                  <input name="_method" type="hidden" value="DELETE">
-                  <input class="bg-transparent hover:bg-red-500 text-red-700 font-semibold hover:text-white py-1 px-3 border border-red-500 hover:border-transparent round" type="submit" value="Delete" onclick="return confirm('Are you sure?')">
-                </form>
-                <!--a class="bg-transparent hover:bg-red-500 text-red-700 font-semibold hover:text-white py-1 px-3 border border-red-500 hover:border-transparent round" data-confirm="Are you sure?" data-csrf="" data-method="delete" data-to="{{$user | userPathSlug}}"
-              href="#" rel="nofollow" onclick="return confirm('Are you sure?')">Delete</a-->
-              </div>
-              <!-- Delete -->
-             </div>
-          </div>
-
-          <!-- Init delete -->
-          <noscript>
-            <form class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" accept-charset="UTF-8" action="{{$user | userPathInitDelete}}" method="POST">
-              {{$csrf.csrfField}}
-              <input class="bg-transparent hover:bg-red-500 text-red-700 font-semibold hover:text-white py-1 px-3 border border-red-500 hover:border-transparent round" type="submit" value="Delete">
-            </form>
-         </noscript>
-          <!-- Init delete -->
-     </div>
-     {{end}}
 {{end}}

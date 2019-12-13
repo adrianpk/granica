@@ -2,7 +2,8 @@ package transport
 
 import (
 	"fmt"
-	"github.com/satori/go.uuid"
+
+	uuid "github.com/satori/go.uuid"
 	"gitlab.com/mikrowezel/backend/db"
 	m "gitlab.com/mikrowezel/backend/model"
 
@@ -23,6 +24,7 @@ func (req *CreateUserReq) ToModel() model.User {
 }
 
 func (res *CreateUserRes) FromModel(m *model.User, msg string, err error) {
+
 	if m != nil {
 		res.User = User{
 			Slug:        m.Slug.String,

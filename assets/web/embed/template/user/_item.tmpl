@@ -1,8 +1,6 @@
 {{define "item"}} {{$user := .Data.User}} {{$action := .Data.Action}} {{$csrf := .CSRF}}
-
     <div class="w-2/3 mx-auto">
-      <div class="bg-white shadow-md rounded my-6">
-        <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+      <div class="bg-white shadow-md px-8 py-4 mb-4 rounded">
 
             <div class="mb-4">
               <label class="block text-gray-700 text-sm font-bold mb-2" for="username">Username</label>
@@ -24,6 +22,19 @@
                 {{$user.GivenName}} {{$user.MiddleNames}} {{$user.FamilyName}}
               </label>
             </div>
-        </div>
+
+            {{if eq $action.Method "DELETE"}}
+            {{if not $user.IsNew}}
+                  <div class="mt-4 mb-4 py-2">
+                    <!-- Delete -->
+                    <form class="inline" accept-charset="UTF-8" action="{{$user | userPathSlug}}" method="POST">
+                      {{$csrf.csrfField}}
+                      <input name="_method" type="hidden" value="DELETE">
+                      <input class="bg-transparent hover:bg-red-500 text-red-700 font-semibold hover:text-white py-1 px-3 border border-red-500 hover:border-transparent rounded" type="submit" value="Are you sure you want to delete it?">
+                    </form>
+                    <!-- Delete -->
+           {{end}}
+           {{end}}
       </div>
+  </div>
 {{end}}

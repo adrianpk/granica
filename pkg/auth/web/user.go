@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	tp "gitlab.com/mikrowezel/backend/granica/pkg/auth/transport"
 	"gitlab.com/mikrowezel/backend/web"
@@ -78,7 +77,7 @@ func (ep *Endpoint) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ep.Log().Info(spew.Sdump(&req.User))
+	//ep.Log().Info(spew.Sdump(&req.User))
 
 	// Store form data
 	ep.StoreUserForm(r, w, web.CreateUserStoreKey, req.User)
@@ -250,7 +249,7 @@ func (ep *Endpoint) UpdateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 // InitDeleteUser web endpoint.
-func (ep *Endpoint) IniteDeleteUser(w http.ResponseWriter, r *http.Request) {
+func (ep *Endpoint) InitDeleteUser(w http.ResponseWriter, r *http.Request) {
 	var req tp.GetUserReq
 	var res tp.GetUserRes
 
@@ -269,6 +268,9 @@ func (ep *Endpoint) IniteDeleteUser(w http.ResponseWriter, r *http.Request) {
 		ep.handleError(w, r, UserPath(), GetUserErrID, err)
 		return
 	}
+
+	// Set action
+	res.Action = ep.userDeleteAction(userRes, res)
 
 	// Wrap response
 	wr := ep.OKRes(r, res, "")
@@ -296,7 +298,7 @@ func (ep *Endpoint) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	slug, ok := ctx.Value(UserCtxKey).(string)
 	if !ok {
-		err := errors.New("no username provided")
+		err := errors.New("no slug provided")
 		ep.handleError(w, r, UserPath(), GetUserErrID, err)
 		return
 	}
@@ -314,22 +316,8 @@ func (ep *Endpoint) DeleteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Wrap response
-	wr := ep.OKRes(r, res, "")
-
-	// Template
-	ts, err := ep.TemplateFor(userRes, web.ShowTmpl)
-	if err != nil {
-		ep.handleError(w, r, UserPath(), GetUserErrID, err)
-		return
-	}
-
-	// Write response
-	err = ts.Execute(w, wr)
-	if err != nil {
-		ep.handleError(w, r, UserPath(), GetUserErrID, err)
-		return
-	}
+	m := ep.localize(r, UserDeletedInfoID)
+	ep.RedirectWithFlash(w, r, UserPath(), m, web.InfoMT)
 }
 
 // Localization - I18N
@@ -378,7 +366,7 @@ func (ep *Endpoint) RestoreUserForm(r *http.Request, key string) tp.User {
 
 	user, ok := v.(tp.User)
 	if ok {
-		ep.Log().Debug("Stored form data", "value", spew.Sdump(user))
+		//ep.Log().Debug("Stored form data", "value", spew.Sdump(user))
 		return user
 	}
 
@@ -418,6 +406,11 @@ func (ep *Endpoint) userCreateAction() web.Action {
 // userUpdateAction
 func (ep *Endpoint) userUpdateAction(resource string, model web.Identifiable) web.Action {
 	return web.Action{Target: UserPathSlug(model), Method: "PUT"}
+}
+
+// userDeleteAction
+func (ep *Endpoint) userDeleteAction(resource string, model web.Identifiable) web.Action {
+	return web.Action{Target: UserPathSlug(model), Method: "DELETE"}
 }
 
 func (ep *Endpoint) handleError(w http.ResponseWriter, r *http.Request, redirPath, msgID string, err error) {

@@ -1,5 +1,10 @@
 # Changelog
 
+
+## <a name="20191213"></a>20191213 - RESTful actions completed
+
+RESTful actions completed.
+
 ## <a name="20191128"></a>20191128 - Page text localization
 
 Service web pages can now present a localized version of their texts depending on the regional configuration of the browser that accesses the service.
