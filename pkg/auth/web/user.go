@@ -44,6 +44,7 @@ func (ep *Endpoint) NewUser(w http.ResponseWriter, r *http.Request) {
 	// Req & Res
 	res := &tp.CreateUserRes{}
 	res.FromTransport(&userForm, "", nil)
+	res.IsNew = true
 	res.Action = ep.userCreateAction()
 
 	// Wrap response
@@ -55,8 +56,6 @@ func (ep *Endpoint) NewUser(w http.ResponseWriter, r *http.Request) {
 		ep.handleError(w, r, UserPath(), CannotProcErrID, err)
 		return
 	}
-
-	// Localizer
 
 	// Write response
 	err = ts.Execute(w, wr)
@@ -248,6 +247,45 @@ func (ep *Endpoint) UpdateUser(w http.ResponseWriter, r *http.Request) {
 
 	m := ep.localize(r, UserUpdatedInfoID)
 	ep.RedirectWithFlash(w, r, UserPath(), m, web.InfoMT)
+}
+
+// InitDeleteUser web endpoint.
+func (ep *Endpoint) IniteDeleteUser(w http.ResponseWriter, r *http.Request) {
+	var req tp.GetUserReq
+	var res tp.GetUserRes
+
+	// Identifier
+	id, err := ep.getIdentifier(r)
+	if err != nil {
+		ep.handleError(w, r, UserPath(), GetUserErrID, err)
+		return
+	}
+
+	req = tp.GetUserReq{id}
+
+	// Service
+	err = ep.service.GetUser(req, &res)
+	if err != nil {
+		ep.handleError(w, r, UserPath(), GetUserErrID, err)
+		return
+	}
+
+	// Wrap response
+	wr := ep.OKRes(r, res, "")
+
+	// Template
+	ts, err := ep.TemplateFor(userRes, web.InitDelTmpl)
+	if err != nil {
+		ep.handleError(w, r, UserPath(), GetUserErrID, err)
+		return
+	}
+
+	// Write response
+	err = ts.Execute(w, wr)
+	if err != nil {
+		ep.handleError(w, r, UserPath(), GetUserErrID, err)
+		return
+	}
 }
 
 // DeleteUser web endpoint.
