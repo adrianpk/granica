@@ -19,6 +19,7 @@ func (a *Auth) makeUserWebRouter(parent chi.Router) chi.Router {
 			uarid.Get("/edit", a.webep.EditUser)
 			uarid.Patch("/", a.webep.UpdateUser)
 			uarid.Put("/", a.webep.UpdateUser)
+			uarid.Post("/init-delete", a.webep.InitDeleteUser)
 			uarid.Delete("/", a.webep.DeleteUser)
 		})
 	})
