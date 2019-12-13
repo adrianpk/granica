@@ -22,8 +22,8 @@
 
 <img src="/docs/img/delete_user.png" width="480">
 
-**When javasript is enabled**
+**When javascript is enabled**
 
 <img src="/docs/img/delete_user_no_js.png" width="480">
 
-**When javasript is disabled**
+**When javascript is disabled**
