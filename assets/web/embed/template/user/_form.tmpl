@@ -70,19 +70,25 @@
 
               <!-- Delete -->
               <div class="is-jsonly bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-                <a class="bg-transparent hover:bg-red-500 text-red-700 font-semibold hover:text-white py-1 px-3 border border-red-500 hover:border-transparent round" data-confirm="Are you sure?" data-csrf="" data-method="delete" data-to="{{$user | userPathSlug}}"
-              href="#" rel="nofollow" onclick="return confirm('Are you sure?')">Delete</a>
+                <form accept-charset="UTF-8" action="{{userPath}}" method="POST">
+                  {{$csrf.csrfField}}
+                  <input name="_method" type="hidden" value="DELETE">
+                  <input class="bg-transparent hover:bg-red-500 text-red-700 font-semibold hover:text-white py-1 px-3 border border-red-500 hover:border-transparent round" type="submit" value="Delete" onclick="return confirm('Are you sure?')">
+                </form>
+                <!--a class="bg-transparent hover:bg-red-500 text-red-700 font-semibold hover:text-white py-1 px-3 border border-red-500 hover:border-transparent round" data-confirm="Are you sure?" data-csrf="" data-method="delete" data-to="{{$user | userPathSlug}}"
+              href="#" rel="nofollow" onclick="return confirm('Are you sure?')">Delete</a-->
               </div>
               <!-- Delete -->
-             <i/div>
+             </div>
           </div>
 
           <!-- Init delete -->
           <noscript>
             <form class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" accept-charset="UTF-8" action="{{$user | userPathInitDelete}}" method="POST">
+              {{$csrf.csrfField}}
               <input class="bg-transparent hover:bg-red-500 text-red-700 font-semibold hover:text-white py-1 px-3 border border-red-500 hover:border-transparent round" type="submit" value="Delete">
             </form>
-          </noscript>
+         </noscript>
           <!-- Init delete -->
      </div>
      {{end}}
