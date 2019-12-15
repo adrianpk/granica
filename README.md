@@ -17,6 +17,7 @@ But at the same time it is also a way to find a modular and systematized foundat
 
 ## Changelog
 
+* [20191215 - Form validations](/docs/changelog.md#20191215)
 * [20191213 - RESTful actions completed](/docs/changelog.md#20191213)
 * [20191128 - Page texts localization](/docs/changelog.md#20191128)
 * [20191127 - Simplified error handling](/docs/changelog.md#20191127)

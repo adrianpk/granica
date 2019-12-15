@@ -37,6 +37,7 @@ type (
 	CreateUserRes struct {
 		User
 		Action web.Action
+		Errors web.ErrorSet
 	}
 )
 
@@ -75,6 +76,7 @@ type (
 	UpdateUserRes struct {
 		User
 		Action web.Action
+		Errors web.ErrorSet
 	}
 )
 

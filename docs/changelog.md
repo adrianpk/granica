@@ -1,6 +1,12 @@
 # Changelog
 
 
+
+## <a name="20191215"></a>20191215 - Form validations
+
+Final intention is to move validations to the service layer or to another one that located at the "same depth".
+In that way they could be reused on JSON REST and gRPC endpoints.
+
 ## <a name="20191213"></a>20191213 - RESTful actions completed
 
 RESTful actions completed.

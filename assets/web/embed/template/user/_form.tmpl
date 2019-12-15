@@ -1,4 +1,4 @@
-{{define "form"}} {{$user := .Data.User}} {{$action := .Data.Action}} {{$csrf := .CSRF}}
+{{define "form"}} {{$user := .Data.User}} {{$action := .Data.Action}} {{$errors := .Data.Errors}} {{$loc := .Loc}} {{$csrf := .CSRF}}
     <div class="w-2/3 mx-auto">
 
           <form class="bg-white shadow-md px-8 py-4 mb-4 rounded" accept-charset="UTF-8" action="{{$action.Target}}" method="POST">
@@ -7,39 +7,74 @@
             {{$csrf.csrfField}}
 
             <div class="mb-4">
-              <label class="block text-gray-700 text-sm font-bold mb-2" for="name">Username</label>
+              <label class="block text-gray-700 text-sm font-bold mb-2" for="username">Username</label>
               <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="username" name="username" placeholder="Min. 4 characters" value="{{$user.Username}}"/>
+              {{with $errors.Username}}
+                {{range $errors.Username}}
+                  <label class='py-2 text-red-700 block'>{{. | $loc.Localize}}</label>
+                {{end}}
+              {{end}}
             </div>
 
             <div class="mb-4">
               <label class="block text-gray-700 text-sm font-bold mb-2" for="password">Password</label>
               <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="password" name="password" type="password" placeholder="Min 8 characters" value=""/>
+              {{with $errors.Password}}
+                {{range $errors.Password}}
+                  <label class='py-2 text-red-700 block'>{{. | $loc.Localize}}</label>
+                {{end}}
+              {{end}}
             </div>
 
             <div class="mb-4">
               <label class="block text-gray-700 text-sm font-bold mb-2" for="email">Email</label>
               <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="email" name="email" type="text" value="{{$user.Email}}"/>
+              {{with $errors.Email}}
+                {{range $errors.Email}}
+                  <label class='py-2 text-red-700 block'>{{. | $loc.Localize}}</label>
+                {{end}}
+              {{end}}
             </div>
 
             <div class="mb-4">
               <label class="block text-gray-700 text-sm font-bold mb-2" for="email-confirmation">Email confirmation</label>
               <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="email-confirmation" name="email-confirmation" placeholder=""
                  value="{{$user.EmailConfirmation}}"/>
+              {{with $errors.EmailConfirmation}}
+                {{range $errors.EmailConfirmation}}
+                  <label class='py-2 text-red-700 block'>{{. | $loc.Localize}}</label>
+                {{end}}
+              {{end}}
             </div>
 
             <div class="mb-4">
               <label class="block text-gray-700 text-sm font-bold mb-2" for="given-name">Given Name</label>
               <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="given-name" name="given-name" type="text" value="{{$user.GivenName}}"/>
+              {{with $errors.GivenName}}
+                {{range $errors.GivenName}}
+                  <label class='py-2 text-red-700'>{{. | $loc.Localize}}</label>
+                {{end}}
+              {{end}}
             </div>
 
             <div class="mb-4">
               <label class="block text-gray-700 text-sm font-bold mb-2" for="middle-names">Middle Names</label>
               <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="middle-names" name="middle-names" type="text" value="{{$user.MiddleNames}}"/>
+              {{with $errors.MiddleNames}}
+                {{range $errors.MiddleNames}}
+                  <label class='py-2 text-red-700'>{{. | $loc.Localize}}</label>
+                {{end}}
+              {{end}}
             </div>
 
             <div class="mb-4">
               <label class="block text-gray-700 text-sm font-bold mb-2" for="family-name">Family Name</label>
               <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="family-name" name="family-name" type="text" value="{{$user.FamilyName}}"/>
+              {{with $errors.FamilyName}}
+                {{range $errors.FamilyName}}
+                  <label class='py-2 text-red-700'>{{. | $loc.Localize}}</label>
+                {{end}}
+              {{end}}
             </div>
 
             <div class="">
