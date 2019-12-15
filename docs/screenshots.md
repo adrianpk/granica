@@ -27,3 +27,8 @@
 <img src="/docs/img/delete_user_no_js.png" width="480">
 
 **When javascript is disabled**
+
+
+### Form validations
+
+<img src="/docs/img/form_validation.png" width="480">

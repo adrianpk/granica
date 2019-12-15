@@ -20,6 +20,19 @@ type (
 	}
 )
 
+const (
+	// Generic
+	CannotProcErrID  = "cannot_proc_err_msg"
+	InputValuesErrID = "input_values_err_msg"
+	// Fields
+	RequiredErrID   = "required_err_msg"
+	MinLengthErrID  = "min_length_err_msg"
+	MaxLengthErrID  = "max_length_err_msg"
+	NotAllowedErrID = "not_allowed_err_msg"
+	NotEmailErrID   = "not_email_err_msg"
+	ConfMatchErrID  = "conf_match_err_msg"
+)
+
 func MakeEndpoint(ctx context.Context, cfg *config.Config, log *log.Logger, s *svc.Service) (*Endpoint, error) {
 	registerGobTypes()
 

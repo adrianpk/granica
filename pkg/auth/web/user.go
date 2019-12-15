@@ -27,7 +27,6 @@ const (
 	UserUpdatedInfoID = "user_updated_info_msg"
 	UserDeletedInfoID = "user_deleted_info_msg"
 	// Error
-	CannotProcErrID = "cannot_proc_err_msg"
 	CreateUserErrID = "create_user_err_msg"
 	IndexUsersErrID = "get_all_users_err_msg"
 	GetUserErrID    = "get_user_err_msg"
@@ -36,13 +35,8 @@ const (
 )
 
 func (ep *Endpoint) NewUser(w http.ResponseWriter, r *http.Request) {
-	// Retrieve stored form data if exists
-	// It avoids filling in the form again after submissions errors.
-	userForm := ep.RestoreUserForm(r, web.CreateUserStoreKey)
-
 	// Req & Res
 	res := &tp.CreateUserRes{}
-	res.FromTransport(&userForm, "", nil)
 	res.IsNew = true
 	res.Action = ep.userCreateAction()
 
@@ -68,19 +62,42 @@ func (ep *Endpoint) CreateUser(w http.ResponseWriter, r *http.Request) {
 	var req tp.CreateUserReq
 	var res tp.CreateUserRes
 
-	// TODO: Form data validation
+	// Put request values in a form
+	f := web.NewForm(r.Form)
 
-	// Form to Req
+	// Validate form values
+	// FIX: Validations should be enforced later by model
+	// Use form validations only for trivial non-business stuff.
+	ok := ep.validateForm(f)
+
+	// If errors render form again
+	if !ok {
+		res.FromForm(f)
+		wr := ep.ErrRes(r, res, "", nil)
+
+		// Template
+		ts, err := ep.TemplateFor(userRes, web.NewTmpl)
+		if err != nil {
+			ep.handleError(w, r, UserPath(), InputValuesErrID, err)
+			return
+		}
+
+		// Write response
+		err = ts.Execute(w, wr)
+		if err != nil {
+			ep.handleError(w, r, UserPath(), CannotProcErrID, err)
+			return
+		}
+
+		return
+	}
+
+	// Form to Req value
 	err := ep.FormToModel(r, &req.User)
 	if err != nil {
 		ep.handleError(w, r, UserPath(), CannotProcErrID, err)
 		return
 	}
-
-	//ep.Log().Info(spew.Sdump(&req.User))
-
-	// Store form data
-	ep.StoreUserForm(r, w, web.CreateUserStoreKey, req.User)
 
 	// Service
 	err = ep.service.CreateUser(req, &res)
@@ -88,9 +105,6 @@ func (ep *Endpoint) CreateUser(w http.ResponseWriter, r *http.Request) {
 		ep.handleError(w, r, UserPathNew(), CreateUserErrID, err)
 		return
 	}
-
-	// Operation succeded: form data can be cleared.
-	ep.ClearUserForm(r, w, web.CreateUserStoreKey)
 
 	m := ep.localize(r, UserCreatedInfoID)
 	ep.RedirectWithFlash(w, r, UserPath(), m, web.InfoMT)
@@ -122,48 +136,6 @@ func (ep *Endpoint) IndexUsers(w http.ResponseWriter, r *http.Request) {
 	err = ts.Execute(w, wr)
 	if err != nil {
 		ep.handleError(w, r, "/", IndexUsersErrID, err)
-		return
-	}
-}
-
-// EditUser web endpoint.
-func (ep *Endpoint) EditUser(w http.ResponseWriter, r *http.Request) {
-	var req tp.GetUserReq
-	var res tp.GetUserRes
-
-	// Identifier
-	id, err := ep.getIdentifier(r)
-	if err != nil {
-		ep.handleError(w, r, UserPath(), GetUserErrID, err)
-		return
-	}
-
-	req = tp.GetUserReq{id}
-
-	// Service
-	err = ep.service.GetUser(req, &res)
-	if err != nil {
-		ep.handleError(w, r, UserPath(), GetUserErrID, err)
-		return
-	}
-
-	// Set action
-	res.Action = ep.userUpdateAction(userRes, res)
-
-	// Wrap response
-	wr := ep.OKRes(r, res, "")
-
-	// Template
-	ts, err := ep.TemplateFor(userRes, web.EditTmpl)
-	if err != nil {
-		ep.handleError(w, r, UserPath(), GetUserErrID, err)
-		return
-	}
-
-	// Write response
-	err = ts.Execute(w, wr)
-	if err != nil {
-		ep.handleError(w, r, UserPath(), GetUserErrID, err)
 		return
 	}
 }
@@ -207,16 +179,84 @@ func (ep *Endpoint) ShowUser(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// EditUser web endpoint.
+func (ep *Endpoint) EditUser(w http.ResponseWriter, r *http.Request) {
+	// Req & Res
+	var req tp.GetUserReq
+	res := tp.GetUserRes{}
+
+	// Identifier
+	id, err := ep.getIdentifier(r)
+	if err != nil {
+		ep.handleError(w, r, UserPath(), GetUserErrID, err)
+		return
+	}
+
+	req = tp.GetUserReq{id}
+
+	// Service
+	err = ep.service.GetUser(req, &res)
+	if err != nil {
+		ep.handleError(w, r, UserPath(), GetUserErrID, err)
+		return
+	}
+
+	// Set additional values
+	res.IsNew = false
+	res.Action = ep.userUpdateAction(userRes, res)
+
+	// Wrap response
+	wr := ep.OKRes(r, res, "")
+
+	// Template
+	ts, err := ep.TemplateFor(userRes, web.EditTmpl)
+	if err != nil {
+		ep.handleError(w, r, UserPath(), GetUserErrID, err)
+		return
+	}
+
+	// Write response
+	err = ts.Execute(w, wr)
+	if err != nil {
+		ep.handleError(w, r, UserPath(), GetUserErrID, err)
+		return
+	}
+}
+
 // UpdateUser web endpoint.
 func (ep *Endpoint) UpdateUser(w http.ResponseWriter, r *http.Request) {
-	ep.Log().Info("Updating user...")
 	var req tp.UpdateUserReq
 	var res tp.UpdateUserRes
 
-	// TODO: Form data validation
+	// Put request values in a form
+	f := web.NewForm(r.Form)
 
-	// Store form data if exists
-	ep.StoreUserForm(r, w, web.UpdateUserStoreKey, req.User)
+	// Validate form values
+	// FIX: Validations should be enforced later by model
+	// Use form validations only for trivial non-business stuff.
+	ok := ep.validateForm(f)
+
+	// If errors render form again
+	if !ok {
+		res.FromForm(f)
+		wr := ep.ErrRes(r, res, "", nil)
+
+		// Template
+		ts, err := ep.TemplateFor(userRes, web.NewTmpl)
+		if err != nil {
+			ep.handleError(w, r, UserPath(), InputValuesErrID, err)
+			return
+		}
+
+		// Write response
+		err = ts.Execute(w, wr)
+		if err != nil {
+			ep.handleError(w, r, UserPath(), CannotProcErrID, err)
+			return
+		}
+
+		return
+	}
 
 	// Identifier
 	id, err := ep.getIdentifier(r)
@@ -240,9 +280,6 @@ func (ep *Endpoint) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		ep.handleError(w, r, UserPathNew(), CreateUserErrID, err)
 		return
 	}
-
-	// Operation succeded: form data can be cleared.
-	ep.ClearUserForm(r, w, web.UpdateUserStoreKey)
 
 	m := ep.localize(r, UserUpdatedInfoID)
 	ep.RedirectWithFlash(w, r, UserPath(), m, web.InfoMT)
@@ -269,7 +306,7 @@ func (ep *Endpoint) InitDeleteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Set action
+	// Set additional values
 	res.Action = ep.userDeleteAction(userRes, res)
 
 	// Wrap response
@@ -320,8 +357,24 @@ func (ep *Endpoint) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	ep.RedirectWithFlash(w, r, UserPath(), m, web.InfoMT)
 }
 
-// Localization - I18N
+// Form validation
+func (ep *Endpoint) validateForm(f *web.Form) (ok bool) {
+	required := []string{"Username", "Password", "Email"}
+	f.ValidateRequired(required, RequiredErrID)
+	f.ValidateMinLength("Username", 4, MinLengthErrID)
+	f.ValidateMaxLength("Username", 16, MaxLengthErrID)
+	f.ValidateEmail("Email", NotEmailErrID)
+	f.ValidateConfirmation("Email", "EmailConfirmation", ConfMatchErrID)
+	f.ValidateMinLength("Password", 8, MinLengthErrID)
+	f.ValidateMaxLength("Password", 32, MaxLengthErrID)
+	f.ValidateMinLength("GivenName", 1, MinLengthErrID)
+	f.ValidateMaxLength("GivenName", 32, MaxLengthErrID)
+	f.ValidateMinLength("FamilyName", 1, MinLengthErrID)
+	f.ValidateMaxLength("FamilyName", 64, MaxLengthErrID)
+	return f.IsValid()
+}
 
+// Localization - I18N
 func (ep *Endpoint) localize(r *http.Request, msgID string) string {
 	l := ep.Localizer(r)
 	if l == nil {

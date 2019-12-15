@@ -6,6 +6,7 @@ import (
 	uuid "github.com/satori/go.uuid"
 	"gitlab.com/mikrowezel/backend/db"
 	m "gitlab.com/mikrowezel/backend/model"
+	"gitlab.com/mikrowezel/backend/web"
 
 	"gitlab.com/mikrowezel/backend/granica/internal/model"
 )
@@ -41,17 +42,17 @@ func (res *CreateUserRes) FromModel(m *model.User, msg string, err error) {
 	}
 }
 
-func (res *CreateUserRes) FromTransport(t *User, msg string, err error) {
-	if t != nil {
-		res.User = User{
-			Username:    t.Username,
-			Password:    "",
-			Email:       t.Email,
-			GivenName:   t.GivenName,
-			MiddleNames: t.MiddleNames,
-			FamilyName:  t.FamilyName,
-		}
+func (res *CreateUserRes) FromForm(cs *web.Form) {
+	res.User = User{
+		Username:    cs.Get("username"),
+		Password:    cs.Get("password"),
+		Email:       cs.Get("email"),
+		GivenName:   cs.Get("given-name"),
+		MiddleNames: cs.Get("middle-names"),
+		FamilyName:  cs.Get("family-name"),
 	}
+
+	res.Errors = cs.Errors
 }
 
 func (res *IndexUsersRes) FromModel(ms []model.User, msg string, err error) {
@@ -132,6 +133,19 @@ func (res *UpdateUserRes) FromModel(m *model.User, msg string, err error) {
 			Lng:         fmt.Sprintf("%f", m.Geolocation.Point.Lng),
 		}
 	}
+}
+
+func (res *UpdateUserRes) FromForm(cs *web.Form) {
+	res.User = User{
+		Username:    cs.Get("username"),
+		Password:    cs.Get("password"),
+		Email:       cs.Get("email"),
+		GivenName:   cs.Get("given-name"),
+		MiddleNames: cs.Get("middle-names"),
+		FamilyName:  cs.Get("family-name"),
+	}
+
+	res.Errors = cs.Errors
 }
 
 func (res *DeleteUserRes) FromModel(m *model.User, msg string, err error) {
