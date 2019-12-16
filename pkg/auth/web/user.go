@@ -242,8 +242,6 @@ func (ep *Endpoint) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	err = ep.service.UpdateUser(req, &res)
 
 	// Form validations errors
-	ep.Log().Debug("Emptyyy?", "val", !res.Errors.IsEmpty())
-	ep.Log().Debug("Emptyyy?", "val", fmt.Sprintf("%+v", res.Errors))
 	if !res.Errors.IsEmpty() {
 		ep.Log().Debug("Size is", "val", len(res.Errors))
 		wr := ep.ErrRes(r, res, "", nil)
