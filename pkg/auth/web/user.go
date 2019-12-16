@@ -41,7 +41,7 @@ func (ep *Endpoint) NewUser(w http.ResponseWriter, r *http.Request) {
 	res.Action = ep.userCreateAction()
 
 	// Wrap response
-	wr := ep.OKRes(r, res, "")
+	wr := ep.OKRes(w, r, res, "")
 
 	// Template
 	ts, err := ep.TemplateFor(userRes, web.NewTmpl)
@@ -64,7 +64,7 @@ func (ep *Endpoint) CreateUser(w http.ResponseWriter, r *http.Request) {
 	res.IsNew = true
 	res.Action = ep.userCreateAction()
 
-	// Request form values to CreateReq
+	// Input data to request struct
 	err := ep.FormToModel(r, &req.User)
 	if err != nil {
 		ep.handleError(w, r, UserPath(), CannotProcErrID, err)
@@ -74,23 +74,9 @@ func (ep *Endpoint) CreateUser(w http.ResponseWriter, r *http.Request) {
 	// Service
 	err = ep.service.CreateUser(req, &res)
 
-	// Form validations errors
+	// Input validation errors
 	if !res.Errors.IsEmpty() {
-		wr := ep.ErrRes(r, res, "", nil)
-
-		ts, err := ep.TemplateFor(userRes, web.NewTmpl)
-		if err != nil {
-			ep.handleError(w, r, UserPath(), InputValuesErrID, err)
-			return
-		}
-
-		// Write response
-		err = ts.Execute(w, wr)
-		if err != nil {
-			ep.handleError(w, r, UserPath(), CannotProcErrID, err)
-			return
-		}
-
+		ep.rerenderUserForm(w, r, res, web.NewTmpl)
 		return
 	}
 
@@ -117,7 +103,7 @@ func (ep *Endpoint) IndexUsers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Wrap response
-	wr := ep.OKRes(r, res, "")
+	wr := ep.OKRes(w, r, res, "")
 
 	// Template
 	ts, err := ep.TemplateFor(userRes, web.IndexTmpl)
@@ -156,7 +142,7 @@ func (ep *Endpoint) ShowUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Wrap response
-	wr := ep.OKRes(r, res, "")
+	wr := ep.OKRes(w, r, res, "")
 
 	// Template
 	ts, err := ep.TemplateFor(userRes, web.ShowTmpl)
@@ -200,7 +186,7 @@ func (ep *Endpoint) EditUser(w http.ResponseWriter, r *http.Request) {
 	res.Action = ep.userUpdateAction(userRes, res)
 
 	// Wrap response
-	wr := ep.OKRes(r, res, "")
+	wr := ep.OKRes(w, r, res, "")
 
 	// Template
 	ts, err := ep.TemplateFor(userRes, web.EditTmpl)
@@ -231,7 +217,7 @@ func (ep *Endpoint) UpdateUser(w http.ResponseWriter, r *http.Request) {
 
 	req = tp.UpdateUserReq{id, tp.User{}}
 
-	// Form to Req
+	// Input data to request struct
 	err = ep.FormToModel(r, &req.User)
 	if err != nil {
 		ep.handleError(w, r, UserPath(), CannotProcErrID, err)
@@ -241,24 +227,9 @@ func (ep *Endpoint) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	// Service
 	err = ep.service.UpdateUser(req, &res)
 
-	// Form validations errors
+	// Input validation errors
 	if !res.Errors.IsEmpty() {
-		ep.Log().Debug("Size is", "val", len(res.Errors))
-		wr := ep.ErrRes(r, res, "", nil)
-
-		ts, err := ep.TemplateFor(userRes, web.EditTmpl)
-		if err != nil {
-			ep.handleError(w, r, UserPath(), InputValuesErrID, err)
-			return
-		}
-
-		// Write response
-		err = ts.Execute(w, wr)
-		if err != nil {
-			ep.handleError(w, r, UserPath(), CannotProcErrID, err)
-			return
-		}
-
+		ep.rerenderUserForm(w, r, res, web.NewTmpl)
 		return
 	}
 
@@ -297,7 +268,7 @@ func (ep *Endpoint) InitDeleteUser(w http.ResponseWriter, r *http.Request) {
 	res.Action = ep.userDeleteAction(userRes, res)
 
 	// Wrap response
-	wr := ep.OKRes(r, res, "")
+	wr := ep.OKRes(w, r, res, "")
 
 	// Template
 	ts, err := ep.TemplateFor(userRes, web.InitDelTmpl)
@@ -366,45 +337,29 @@ func (ep *Endpoint) localize(r *http.Request, msgID string) string {
 	return t
 }
 
+func (ep *Endpoint) rerenderUserForm(w http.ResponseWriter, r *http.Request, res interface{}, template string) {
+	wr := ep.ErrRes(w, r, res, InputValuesErrID, nil)
+
+	ts, err := ep.TemplateFor(userRes, template)
+	if err != nil {
+		ep.handleError(w, r, UserPath(), CannotProcErrID, err)
+		return
+	}
+
+	// Write response
+	err = ts.Execute(w, wr)
+	if err != nil {
+		ep.handleError(w, r, UserPath(), CannotProcErrID, err)
+		return
+	}
+
+	return
+}
+
 func (ep *Endpoint) localizeMessageID(l *i18n.Localizer, messageID string) (string, error) {
 	return l.Localize(&i18n.LocalizeConfig{
 		MessageID: messageID,
 	})
-}
-
-// Form data session helpers
-func (ep *Endpoint) StoreUserForm(r *http.Request, w http.ResponseWriter, key string, userForm tp.User) (ok bool) {
-	s := ep.GetSession(r)
-	s.Values[key] = userForm
-	err := s.Save(r, w)
-	if err != nil {
-		return true
-	}
-	return false
-}
-
-func (ep *Endpoint) RestoreUserForm(r *http.Request, key string) tp.User {
-	s := ep.GetSession(r)
-	v := s.Values[key]
-
-	user, ok := v.(tp.User)
-	if ok {
-		//ep.Log().Debug("Stored form data", "value", spew.Sdump(user))
-		return user
-	}
-
-	ep.Log().Info("No stored form data", "key", key)
-	return tp.User{}
-}
-
-func (ep *Endpoint) ClearUserForm(r *http.Request, w http.ResponseWriter, key string) (ok bool) {
-	s := ep.GetSession(r)
-	delete(s.Values, key)
-	err := s.Save(r, w)
-	if err != nil {
-		return true
-	}
-	return false
 }
 
 // Misc

@@ -17,7 +17,7 @@ But at the same time it is also a way to find a modular and systematized foundat
 
 ## Changelog
 
-* [20191216 - Model validations moved to service](/docs/changelog.md#20191216)
+* [20191216 - Model validation and flash messages](/docs/changelog.md#20191216)
 * [20191215 - Form validations](/docs/changelog.md#20191215)
 * [20191213 - RESTful actions completed](/docs/changelog.md#20191213)
 * [20191128 - Page texts localization](/docs/changelog.md#20191128)
