@@ -28,7 +28,10 @@
 
 **When javascript is disabled**
 
-
-### Form validations
+### <a name="model-validation"></a>Model validation
 
 <img src="/docs/img/form_validation.png" width="480">
+
+### <a name="flash-messages"></a>Flash messages
+
+<img src="/docs/img/flash_messages.png" width="480">
