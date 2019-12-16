@@ -61,21 +61,23 @@ func (ep *Endpoint) NewUser(w http.ResponseWriter, r *http.Request) {
 func (ep *Endpoint) CreateUser(w http.ResponseWriter, r *http.Request) {
 	var req tp.CreateUserReq
 	var res tp.CreateUserRes
+	res.IsNew = true
+	res.Action = ep.userCreateAction()
 
-	// Put request values in a form
-	f := web.NewForm(r.Form)
+	// Request form values to CreateReq
+	err := ep.FormToModel(r, &req.User)
+	if err != nil {
+		ep.handleError(w, r, UserPath(), CannotProcErrID, err)
+		return
+	}
 
-	// Validate form values
-	// FIX: Validations should be enforced later by model
-	// Use form validations only for trivial non-business stuff.
-	ok := ep.validateForm(f)
+	// Service
+	err = ep.service.CreateUser(req, &res)
 
-	// If errors render form again
-	if !ok {
-		res.FromForm(f)
+	// Form validations errors
+	if !res.Errors.IsEmpty() {
 		wr := ep.ErrRes(r, res, "", nil)
 
-		// Template
 		ts, err := ep.TemplateFor(userRes, web.NewTmpl)
 		if err != nil {
 			ep.handleError(w, r, UserPath(), InputValuesErrID, err)
@@ -92,17 +94,9 @@ func (ep *Endpoint) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Form to Req value
-	err := ep.FormToModel(r, &req.User)
+	// Non validation errors
 	if err != nil {
-		ep.handleError(w, r, UserPath(), CannotProcErrID, err)
-		return
-	}
-
-	// Service
-	err = ep.service.CreateUser(req, &res)
-	if err != nil {
-		ep.handleError(w, r, UserPathNew(), CreateUserErrID, err)
+		ep.handleError(w, r, UserPath(), CreateUserErrID, err)
 		return
 	}
 
@@ -228,36 +222,6 @@ func (ep *Endpoint) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	var req tp.UpdateUserReq
 	var res tp.UpdateUserRes
 
-	// Put request values in a form
-	f := web.NewForm(r.Form)
-
-	// Validate form values
-	// FIX: Validations should be enforced later by model
-	// Use form validations only for trivial non-business stuff.
-	ok := ep.validateForm(f)
-
-	// If errors render form again
-	if !ok {
-		res.FromForm(f)
-		wr := ep.ErrRes(r, res, "", nil)
-
-		// Template
-		ts, err := ep.TemplateFor(userRes, web.NewTmpl)
-		if err != nil {
-			ep.handleError(w, r, UserPath(), InputValuesErrID, err)
-			return
-		}
-
-		// Write response
-		err = ts.Execute(w, wr)
-		if err != nil {
-			ep.handleError(w, r, UserPath(), CannotProcErrID, err)
-			return
-		}
-
-		return
-	}
-
 	// Identifier
 	id, err := ep.getIdentifier(r)
 	if err != nil {
@@ -276,8 +240,33 @@ func (ep *Endpoint) UpdateUser(w http.ResponseWriter, r *http.Request) {
 
 	// Service
 	err = ep.service.UpdateUser(req, &res)
+
+	// Form validations errors
+	ep.Log().Debug("Emptyyy?", "val", !res.Errors.IsEmpty())
+	ep.Log().Debug("Emptyyy?", "val", fmt.Sprintf("%+v", res.Errors))
+	if !res.Errors.IsEmpty() {
+		ep.Log().Debug("Size is", "val", len(res.Errors))
+		wr := ep.ErrRes(r, res, "", nil)
+
+		ts, err := ep.TemplateFor(userRes, web.EditTmpl)
+		if err != nil {
+			ep.handleError(w, r, UserPath(), InputValuesErrID, err)
+			return
+		}
+
+		// Write response
+		err = ts.Execute(w, wr)
+		if err != nil {
+			ep.handleError(w, r, UserPath(), CannotProcErrID, err)
+			return
+		}
+
+		return
+	}
+
+	// Non validation errors
 	if err != nil {
-		ep.handleError(w, r, UserPathNew(), CreateUserErrID, err)
+		ep.handleError(w, r, UserPath(), UpdateUserErrID, err)
 		return
 	}
 
@@ -355,23 +344,6 @@ func (ep *Endpoint) DeleteUser(w http.ResponseWriter, r *http.Request) {
 
 	m := ep.localize(r, UserDeletedInfoID)
 	ep.RedirectWithFlash(w, r, UserPath(), m, web.InfoMT)
-}
-
-// Form validation
-func (ep *Endpoint) validateForm(f *web.Form) (ok bool) {
-	required := []string{"Username", "Password", "Email"}
-	f.ValidateRequired(required, RequiredErrID)
-	f.ValidateMinLength("Username", 4, MinLengthErrID)
-	f.ValidateMaxLength("Username", 16, MaxLengthErrID)
-	f.ValidateEmail("Email", NotEmailErrID)
-	f.ValidateConfirmation("Email", "EmailConfirmation", ConfMatchErrID)
-	f.ValidateMinLength("Password", 8, MinLengthErrID)
-	f.ValidateMaxLength("Password", 32, MaxLengthErrID)
-	f.ValidateMinLength("GivenName", 1, MinLengthErrID)
-	f.ValidateMaxLength("GivenName", 32, MaxLengthErrID)
-	f.ValidateMinLength("FamilyName", 1, MinLengthErrID)
-	f.ValidateMaxLength("FamilyName", 64, MaxLengthErrID)
-	return f.IsValid()
 }
 
 // Localization - I18N
