@@ -9,7 +9,7 @@ import (
 
 type (
 	UserValidator struct {
-		Model interface{}
+		Model model.User
 		service.Validator
 	}
 )
@@ -44,10 +44,7 @@ func (uv UserValidator) ValidateForUpdate() error {
 }
 
 func (uv UserValidator) ValidateMinUsername(min int, errMsg ...string) (ok bool) {
-	u, ok := uv.Model.(model.User)
-	if !ok {
-		return true
-	}
+	u := uv.Model
 
 	ok = uv.ValidateMinLength(u.Username.String, min)
 	if ok {
@@ -64,10 +61,7 @@ func (uv UserValidator) ValidateMinUsername(min int, errMsg ...string) (ok bool)
 }
 
 func (uv UserValidator) ValidateMaxUsername(max int, errMsg ...string) (ok bool) {
-	u, ok := uv.Model.(model.User)
-	if !ok {
-		return true
-	}
+	u := uv.Model
 
 	ok = uv.ValidateMaxLength(u.Username.String, max)
 	if ok {
