@@ -1,6 +1,7 @@
 package transport
 
 import (
+	"gitlab.com/mikrowezel/backend/service"
 	"gitlab.com/mikrowezel/backend/web"
 )
 
@@ -37,7 +38,7 @@ type (
 	CreateUserRes struct {
 		User
 		Action web.Action
-		Errors web.ErrorSet
+		Errors service.ErrorSet
 	}
 )
 
@@ -62,6 +63,7 @@ type (
 	GetUserRes struct {
 		User
 		Action web.Action
+		Errors service.ErrorSet
 	}
 )
 
@@ -76,7 +78,7 @@ type (
 	UpdateUserRes struct {
 		User
 		Action web.Action
-		Errors web.ErrorSet
+		Errors service.ErrorSet
 	}
 )
 

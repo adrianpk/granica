@@ -17,27 +17,37 @@ func (s *Service) CreateUser(req tp.CreateUserReq, res *tp.CreateUserRes) error 
 	// Model
 	u := req.ToModel()
 
+	// Validation
+	v := NewUserValidator(u)
+
+	err := v.ValidateForCreate()
+	if err != nil {
+		res.FromModel(&u)
+		res.Errors = v.Errors
+		return err
+	}
+
 	// Repo
 	repo, err := s.userRepo()
 	if err != nil {
-		res.FromModel(nil, createUserErr, err)
+		res.FromModel(nil)
 		return err
 	}
 
 	err = repo.Create(&u)
 	if err != nil {
-		res.FromModel(nil, createUserErr, err)
+		res.FromModel(nil)
 		return err
 	}
 
 	err = repo.Commit()
 	if err != nil {
-		res.FromModel(nil, createUserErr, err)
+		res.FromModel(nil)
 		return err
 	}
 
 	// Output
-	res.FromModel(&u, "", nil)
+	res.FromModel(&u)
 	return nil
 }
 
@@ -126,14 +136,14 @@ func (s *Service) UpdateUser(req tp.UpdateUserReq, res *tp.UpdateUserRes) error 
 	// Repo
 	repo, err := s.userRepo()
 	if err != nil {
-		res.FromModel(nil, updateUserErr, err)
+		res.FromModel(nil)
 		return err
 	}
 
 	// Get user
 	current, err := repo.GetBySlug(req.Identifier.Slug)
 	if err != nil {
-		res.FromModel(nil, updateUserErr, err)
+		res.FromModel(nil)
 		return err
 	}
 
@@ -147,21 +157,31 @@ func (s *Service) UpdateUser(req tp.UpdateUserReq, res *tp.UpdateUserRes) error 
 		u.Username = current.Username
 	}
 
+	// Validation
+	v := NewUserValidator(u)
+
+	err = v.ValidateForUpdate()
+	if err != nil {
+		res.FromModel(&u)
+		res.Errors = v.Errors
+		return err
+	}
+
 	// Update
 	err = repo.Update(&u)
 	if err != nil {
-		res.FromModel(nil, updateUserErr, err)
+		res.FromModel(&u)
 		return err
 	}
 
 	err = repo.Commit()
 	if err != nil {
-		res.FromModel(nil, updateUserErr, err)
+		res.FromModel(nil)
 		return err
 	}
 
 	// Output
-	res.FromModel(&u, "", nil)
+	res.FromModel(&u)
 	return nil
 }
 
@@ -173,7 +193,7 @@ func (s *Service) DeleteUser(req tp.DeleteUserReq, res *tp.DeleteUserRes) error 
 		return err
 	}
 
-	err = repo.DeleteByUsername(req.Slug)
+	err = repo.DeleteBySlug(req.Slug)
 	if err != nil {
 		res.FromModel(nil, updateUserErr, err)
 		return err

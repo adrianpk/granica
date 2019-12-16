@@ -2,6 +2,7 @@ package repo
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -140,6 +141,10 @@ func (ur *UserRepo) Update(user *model.User) error {
 	st.WriteString(";")
 
 	//fmt.Println(st.String())
+
+	if pcu == false {
+		return errors.New("no fields to update")
+	}
 
 	_, err = ur.Tx.NamedExec(st.String(), user)
 
