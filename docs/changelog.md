@@ -1,6 +1,9 @@
 # Changelog
 
 
+## <a name="20191216"></a>20191216 - Model validations moved to service
+
+Model validations moved to service layer.
 
 ## <a name="20191215"></a>20191215 - Form validations
 
