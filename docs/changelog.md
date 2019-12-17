@@ -6,6 +6,7 @@
 Model validations moved to service layer.
 
 [Model validation](screenshots.md#model-validation)
+
 [Flash messages](screenshots.md#flash-messages)
 
 ## <a name="20191215"></a>20191215 - Form validations
