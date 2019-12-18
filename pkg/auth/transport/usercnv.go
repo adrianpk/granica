@@ -19,6 +19,8 @@ func (req *CreateUserReq) ToModel() model.User {
 		GivenName:         db.ToNullString(req.GivenName),
 		MiddleNames:       db.ToNullString(req.MiddleNames),
 		FamilyName:        db.ToNullString(req.FamilyName),
+		VerifyToken:       db.ToNullString(req.VerifyToken),
+		IsVerified:        db.ToNullBool(req.IsVerified),
 		// Geolocation:    db.ToNullGeometry(req.Lat, req.Lng)
 	}
 }
@@ -51,6 +53,8 @@ func (res *IndexUsersRes) FromModel(ms []model.User, msg string, err error) {
 			GivenName:   m.GivenName.String,
 			MiddleNames: m.MiddleNames.String,
 			FamilyName:  m.FamilyName.String,
+			VerifyToken: m.VerifyToken.String,
+			IsVerified:  m.IsVerified.Bool,
 			Lat:         fmt.Sprintf("%f", m.Geolocation.Point.Lat),
 			Lng:         fmt.Sprintf("%f", m.Geolocation.Point.Lng),
 		}
@@ -79,6 +83,8 @@ func (res *GetUserRes) FromModel(m *model.User, msg string, err error) {
 			GivenName:   m.GivenName.String,
 			MiddleNames: m.MiddleNames.String,
 			FamilyName:  m.FamilyName.String,
+			VerifyToken: m.VerifyToken.String,
+			IsVerified:  m.IsVerified.Bool,
 			Lat:         fmt.Sprintf("%f", m.Geolocation.Point.Lat),
 			Lng:         fmt.Sprintf("%f", m.Geolocation.Point.Lng),
 		}
@@ -100,6 +106,8 @@ func (req *UpdateUserReq) ToModel() model.User {
 		GivenName:         db.ToNullString(req.GivenName),
 		MiddleNames:       db.ToNullString(req.MiddleNames),
 		FamilyName:        db.ToNullString(req.FamilyName),
+		VerifyToken:       db.ToNullString(req.VerifyToken),
+		IsVerified:        db.ToNullBool(req.IsVerified),
 		// Geolocation:    db.ToNullGeometry(req.Lat, req.Lng)
 	}
 }
@@ -114,6 +122,8 @@ func (res *UpdateUserRes) FromModel(m *model.User) {
 			GivenName:   m.GivenName.String,
 			MiddleNames: m.MiddleNames.String,
 			FamilyName:  m.FamilyName.String,
+			VerifyToken: m.VerifyToken.String,
+			IsVerified:  m.IsVerified.Bool,
 			Lat:         fmt.Sprintf("%f", m.Geolocation.Point.Lat),
 			Lng:         fmt.Sprintf("%f", m.Geolocation.Point.Lng),
 		}
@@ -123,14 +133,38 @@ func (res *UpdateUserRes) FromModel(m *model.User) {
 func (res *DeleteUserRes) FromModel(m *model.User, msg string, err error) {
 }
 
-func (req *SigninUserReq) ToModel() model.User {
+func (req *SignUpUserReq) ToModel() model.User {
+	return model.User{
+		Username:          db.ToNullString(req.Username),
+		Password:          req.Password,
+		Email:             db.ToNullString(req.Email),
+		EmailConfirmation: db.ToNullString(req.EmailConfirmation),
+		// Geolocation:    db.ToNullGeometry(req.Lat, req.Lng)
+	}
+}
+
+func (res *SignUpUserRes) FromModel(m *model.User) {
+	if m != nil {
+		res.User = User{
+			Slug:     m.Slug.String,
+			Username: m.Username.String,
+			Password: "",
+			Email:    m.Email.String,
+			Lat:      fmt.Sprintf("%f", m.Geolocation.Point.Lat),
+			Lng:      fmt.Sprintf("%f", m.Geolocation.Point.Lng),
+			IsNew:    m.IsNew(),
+		}
+	}
+}
+
+func (req *SignInUserReq) ToModel() model.User {
 	return model.User{
 		Username: db.ToNullString(req.Username),
 		Password: req.Password,
 	}
 }
 
-func (res *SigninUserRes) FromModel(m *model.User) {
+func (res *SignInUserRes) FromModel(m *model.User) {
 	if m != nil {
 		res.User = User{
 			Slug:        m.Slug.String,

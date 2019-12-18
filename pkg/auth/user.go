@@ -13,6 +13,8 @@ func (a *Auth) makeUserWebRouter(parent chi.Router) chi.Router {
 		uar.Get("/", a.webep.IndexUsers)
 		uar.Get("/new", a.webep.NewUser)
 		uar.Post("/", a.webep.CreateUser)
+		uar.Get("/signup", a.webep.InitSignUpUser)
+		uar.Post("/signup", a.webep.SignUpUser)
 		uar.Get("/signin", a.webep.InitSignInUser)
 		uar.Post("/signin", a.webep.SignInUser)
 		uar.Route("/{slug}", func(uarid chi.Router) {
@@ -23,6 +25,9 @@ func (a *Auth) makeUserWebRouter(parent chi.Router) chi.Router {
 			uarid.Put("/", a.webep.UpdateUser)
 			uarid.Post("/init-delete", a.webep.InitDeleteUser)
 			uarid.Delete("/", a.webep.DeleteUser)
+			uarid.Route("/{token}", func(uartkn chi.Router) {
+				uartkn.Get("/verify", a.webep.InitSignInUser)
+			})
 		})
 	})
 }

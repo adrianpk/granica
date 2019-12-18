@@ -22,6 +22,8 @@ type (
 		MiddleNames       sql.NullString `db:"middle_names" json:"middleNames"`
 		FamilyName        sql.NullString `db:"family_name" json:"familyName"`
 		LastIP            sql.NullString `db:"last_ip" json:"lastIP"`
+		VerifyToken       sql.NullString `db:"verify_token" json:"verifyToken"`
+		IsVerified        sql.NullBool   `db:"is_verified" json:"isVerified"`
 		Geolocation       db.NullPoint   `db:"geolocation" json:"geolocation"`
 		Locale            sql.NullString `db:"locale" json:"locale"`
 		BaseTZ            sql.NullString `db:"base_tz" json:"baseTZ"`
@@ -73,6 +75,8 @@ func (user *User) Match(tc *User) bool {
 		user.GivenName == tc.GivenName &&
 		user.MiddleNames == tc.MiddleNames &&
 		user.FamilyName == tc.FamilyName &&
+		user.VerifyToken == tc.VerifyToken &&
+		user.IsVerified == tc.IsVerified &&
 		user.Geolocation == tc.Geolocation &&
 		user.BaseTZ == tc.BaseTZ &&
 		user.CurrentTZ == tc.CurrentTZ &&
