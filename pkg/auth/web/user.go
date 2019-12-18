@@ -26,6 +26,7 @@ const (
 	UserCreatedInfoID = "user_created_info_msg"
 	UserUpdatedInfoID = "user_updated_info_msg"
 	UserDeletedInfoID = "user_deleted_info_msg"
+	SignedUpInfoID    = "signed_up_info_msg"
 	LoggedInInfoID    = "logged_in_info_msg"
 	// Error
 	CreateUserErrID  = "create_user_err_msg"
@@ -317,16 +318,72 @@ func (ep *Endpoint) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	ep.RedirectWithFlash(w, r, UserPath(), m, web.InfoMT)
 }
 
-func (ep *Endpoint) InitSignInUser(w http.ResponseWriter, r *http.Request) {
+func (ep *Endpoint) InitSignUpUser(w http.ResponseWriter, r *http.Request) {
 	// Req & Res
-	res := &tp.SigninUserRes{}
-	res.Action = ep.userSigninAction()
+	res := &tp.SignUpUserRes{}
+	res.Action = ep.userSignUpAction()
 
 	// Wrap response
 	wr := ep.OKRes(w, r, res, "")
 
 	// Template
-	ts, err := ep.TemplateFor(userRes, web.SigninTmpl)
+	ts, err := ep.TemplateFor(userRes, web.SignUpTmpl)
+	if err != nil {
+		ep.handleError(w, r, UserPath(), CannotProcErrID, err)
+		return
+	}
+
+	// Write response
+	err = ts.Execute(w, wr)
+	if err != nil {
+		ep.handleError(w, r, UserPath(), CannotProcErrID, err)
+		return
+	}
+}
+
+// SignUpUser web endpoint.
+func (ep *Endpoint) SignUpUser(w http.ResponseWriter, r *http.Request) {
+	var req tp.SignUpUserReq
+	var res tp.SignUpUserRes
+	res.IsNew = true
+	res.Action = ep.userSignUpAction()
+
+	// Input data to request struct
+	err := ep.FormToModel(r, &req.User)
+	if err != nil {
+		ep.handleError(w, r, UserPath(), CannotProcErrID, err)
+		return
+	}
+
+	// Service
+	err = ep.service.SignUpUser(req, &res)
+
+	// Input validation errors
+	if !res.Errors.IsEmpty() {
+		ep.rerenderUserForm(w, r, res, web.SignUpTmpl)
+		return
+	}
+
+	// Non validation errors
+	if err != nil {
+		ep.handleError(w, r, UserPath(), CreateUserErrID, err)
+		return
+	}
+
+	m := ep.localize(r, SignedUpInfoID)
+	ep.RedirectWithFlash(w, r, UserPath(), m, web.InfoMT)
+}
+
+func (ep *Endpoint) InitSignInUser(w http.ResponseWriter, r *http.Request) {
+	// Req & Res
+	res := &tp.SignInUserRes{}
+	res.Action = ep.userSignInAction()
+
+	// Wrap response
+	wr := ep.OKRes(w, r, res, "")
+
+	// Template
+	ts, err := ep.TemplateFor(userRes, web.SignInTmpl)
 	if err != nil {
 		ep.handleError(w, r, UserPath(), CannotProcErrID, err)
 		return
@@ -342,11 +399,11 @@ func (ep *Endpoint) InitSignInUser(w http.ResponseWriter, r *http.Request) {
 
 // SignInUser web endpoint.
 func (ep *Endpoint) SignInUser(w http.ResponseWriter, r *http.Request) {
-	var req tp.SigninUserReq
-	var res tp.SigninUserRes
+	var req tp.SignInUserReq
+	var res tp.SignInUserRes
 
 	// Input data to request struct
-	err := ep.FormToModel(r, &req.Signin)
+	err := ep.FormToModel(r, &req.SignIn)
 	if err != nil {
 		ep.handleError(w, r, UserPath(), CannotProcErrID, err)
 		return
@@ -355,7 +412,7 @@ func (ep *Endpoint) SignInUser(w http.ResponseWriter, r *http.Request) {
 	// Service
 	err = ep.service.SignInUser(req, &res)
 	if err != nil {
-		ep.handleError(w, r, UserPathSignin(), CredentialsErrID, err)
+		ep.handleError(w, r, UserPathSignIn(), CredentialsErrID, err)
 		return
 	}
 
@@ -439,14 +496,14 @@ func (ep *Endpoint) userDeleteAction(model web.Identifiable) web.Action {
 	return web.Action{Target: UserPathSlug(model), Method: "DELETE"}
 }
 
-// userSignupAction
-func (ep *Endpoint) userSignupAction() web.Action {
-	return web.Action{Target: UserPathSignup(), Method: "POST"}
+// userSignUpAction
+func (ep *Endpoint) userSignUpAction() web.Action {
+	return web.Action{Target: UserPathSignUp(), Method: "POST"}
 }
 
-// userSigninAction
-func (ep *Endpoint) userSigninAction() web.Action {
-	return web.Action{Target: UserPathSignin(), Method: "POST"}
+// userSignInAction
+func (ep *Endpoint) userSignInAction() web.Action {
+	return web.Action{Target: UserPathSignIn(), Method: "POST"}
 }
 
 func (ep *Endpoint) handleError(w http.ResponseWriter, r *http.Request, redirPath, msgID string, err error) {

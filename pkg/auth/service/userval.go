@@ -71,6 +71,26 @@ func (uv UserValidator) ValidateForUpdate() error {
 	return errors.New("user has errors")
 }
 
+func (uv UserValidator) ValidateForSignUp() error {
+	// Username
+	ok0 := uv.ValidateRequiredUsername()
+	ok1 := uv.ValidateMinLengthUsername(4)
+	ok2 := uv.ValidateMaxLengthUsername(16)
+	// Email
+	ok3 := uv.ValidateEmailEmail()
+	ok4 := uv.ValidateEmailConfirmation()
+	// Password
+	ok5 := uv.ValidateRequiredPassword()
+	ok6 := uv.ValidateMinLengthPassword(8)
+	ok7 := uv.ValidateMaxLengthPassword(32)
+
+	if ok0 && ok1 && ok2 && ok3 && ok4 && ok5 && ok6 && ok7 {
+		return nil
+	}
+
+	return errors.New("user has errors")
+}
+
 func (uv UserValidator) ValidateRequiredUsername(errMsg ...string) (ok bool) {
 	u := uv.Model
 

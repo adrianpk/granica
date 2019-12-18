@@ -1,5 +1,10 @@
 # Changelog
 
+
+## <a name="2019128"></a>20191217 - User signup
+
+Confirmation email and verification link processing still pending.
+
 ## <a name="20191217"></a>20191217 - User signin
 
 [User signin](screenshots.md#user-signin)

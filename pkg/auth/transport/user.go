@@ -17,13 +17,15 @@ type (
 		MiddleNames       string `json:"middleNames" schema:"middle-names"`
 		FamilyName        string `json:"familyName" schema:"family-name"`
 		LastIP            string `json:"lastIP" schema:"last-ip"`
+		VerifyToken       string `json:"verifyToken" schema:"verify-token"`
+		IsVerified        bool   `json:"isVerified" schema:"is-verified"`
 		Lat               string `json:"lat" schema: "lat"`
 		Lng               string `json:"lng" schema: "lng"`
 		IsNew             bool
 	}
 
-	// Signin
-	Signin struct {
+	// SignIn
+	SignIn struct {
 		Username string `json:"username" schema:"username"`
 		Password string `json:"password" schema:"password"`
 	}
@@ -101,13 +103,27 @@ type (
 )
 
 type (
-	// SigninUserReq input data.
-	SigninUserReq struct {
-		Signin
+	// SignUpUserReq input data.
+	SignUpUserReq struct {
+		User
 	}
 
-	// SigninUserRes output data.
-	SigninUserRes struct {
+	// SignUpUserRes output data.
+	SignUpUserRes struct {
+		User
+		Action web.Action
+		Errors service.ErrorSet
+	}
+)
+
+type (
+	// SignInUserReq input data.
+	SignInUserReq struct {
+		SignIn
+	}
+
+	// SignInUserRes output data.
+	SignInUserRes struct {
 		User
 		Action web.Action
 		Errors service.ErrorSet

@@ -3,12 +3,14 @@
 "new_user": "Nowy użytkownik",
 "edit_user": "Edytuj użytkownika",
 "show_user": "Pokaż użytkownika",
-"user_signin": "User Signin",
+"sign_in": "Sign In",
+"sign_up": "Sign Up",
 
 "user_created_info_msg": "Utworzony przez użytkownika",
 "user_updated_info_msg": "Użytkownik zaktualizowany",
 "user_deleted_info_msg": "Użytkownik usunięty",
 
+"signed_up_info_msg": "Signed up completed",
 "logged_in_info_msg": "Successfully logged in",
 
 "get_all_err_msg": "Nie można uzyskać listy użytkowników",

@@ -27,6 +27,8 @@ func (m *mig) CreateUsersTable() error {
 
 	st = `
 		ALTER TABLE users
+		ADD COLUMN verify_token VARCHAR(36),
+		ADD COLUMN is_verified BOOLEAN,
 		ADD COLUMN geolocation geography (Point,4326),
 		ADD COLUMN locale VARCHAR(32),
 		ADD COLUMN base_tz VARCHAR(2),

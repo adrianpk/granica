@@ -37,12 +37,12 @@ func UserPathSlug(res web.Identifiable) string {
 	return web.ResPathSlug(UserRoot, res)
 }
 
-// UserPathSignup
-func UserPathSignup() string {
+// UserPathSignUp
+func UserPathSignUp() string {
 	return web.ResPath(UserRoot) + "/signup"
 }
 
-// UserPathSignin
-func UserPathSignin() string {
+// UserPathSignIn
+func UserPathSignIn() string {
 	return web.ResPath(UserRoot) + "/signin"
 }

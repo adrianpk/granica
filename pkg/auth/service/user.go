@@ -210,7 +210,59 @@ func (s *Service) DeleteUser(req tp.DeleteUserReq, res *tp.DeleteUserRes) error 
 	return nil
 }
 
-func (s *Service) SignInUser(req tp.SigninUserReq, res *tp.SigninUserRes) error {
+func (s *Service) SignUpUser(req tp.SignUpUserReq, res *tp.SignUpUserRes) error {
+	// Model
+	u := req.ToModel()
+
+	// Validation
+	v := NewUserValidator(u)
+
+	err := v.ValidateForSignUp()
+	if err != nil {
+		res.FromModel(&u)
+		res.Errors = v.Errors
+		return err
+	}
+
+	// Repo
+	repo, err := s.userRepo()
+	if err != nil {
+		res.FromModel(nil)
+		return err
+	}
+
+	err = repo.Create(&u)
+	if err != nil {
+		res.FromModel(nil)
+		return err
+	}
+
+	err = repo.Commit()
+	if err != nil {
+		res.FromModel(nil)
+		return err
+	}
+
+	// TODO: Confirmation email builder
+	//mail, err := somewhere.BuildEmail(u)
+	//if err != nil {
+	//res.FromModel(u)
+	//return err
+	//}
+
+	// TODO: Confirmation email builder
+	//err = somewhere.SendEmail(u)
+	//if err != nil {
+	//res.FromModel(u)
+	//return err
+	//}
+
+	// Output
+	res.FromModel(&u)
+	return nil
+}
+
+func (s *Service) SignInUser(req tp.SignInUserReq, res *tp.SignInUserRes) error {
 	// Model
 	u := req.ToModel()
 
