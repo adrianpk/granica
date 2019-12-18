@@ -10,6 +10,7 @@ import (
 	"gitlab.com/mikrowezel/backend/config"
 	"gitlab.com/mikrowezel/backend/granica/internal/model"
 	logger "gitlab.com/mikrowezel/backend/log"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type (
@@ -34,8 +35,8 @@ func makeUserRepo(ctx context.Context, cfg *config.Config, log *logger.Logger, t
 func (ur *UserRepo) Create(user *model.User) error {
 	user.SetCreateValues()
 
-	st := `INSERT INTO users (id, tenant_id, slug, username, password_digest, email, given_name, middle_names, family_name, geolocation, locale, base_tz, current_tz, starts_at, ends_at, is_active, is_deleted, created_by_id, updated_by_id, created_at, updated_at)
-VALUES (:id, :tenant_id, :slug, :username, :password_digest, :email, :given_name, :middle_names, :family_name, :geolocation, :locale, :base_tz, :current_tz, :starts_at, :ends_at, :is_active, :is_deleted, :created_by_id, :updated_by_id, :created_at, :updated_at)`
+	st := `INSERT INTO users (id, slug, username, password_digest, email, given_name, middle_names, family_name, last_ip, geolocation, locale, base_tz, current_tz, starts_at, ends_at, is_active, is_deleted, created_by_id, updated_by_id, created_at, updated_at)
+VALUES (:id, :slug, :username, :password_digest, :email, :given_name, :middle_names, :family_name, :last_ip, :geolocation, :locale, :base_tz, :current_tz, :starts_at, :ends_at, :is_active, :is_deleted, :created_by_id, :updated_by_id, :created_at, :updated_at)`
 
 	_, err := ur.Tx.NamedExec(st, user)
 
@@ -136,6 +137,12 @@ func (ur *UserRepo) Update(user *model.User) error {
 		pcu = true
 	}
 
+	if user.LastIP.String != ref.LastIP.String {
+		st.WriteString(preDelimiter(pcu))
+		st.WriteString(strUpd("last_ip", "last_ip"))
+		pcu = true
+	}
+
 	st.WriteString(" ")
 	st.WriteString(whereID(ref.ID.String()))
 	st.WriteString(";")
@@ -179,6 +186,25 @@ func (ur *UserRepo) DeleteByUsername(username string) error {
 	_, err := ur.Tx.Exec(st)
 
 	return err
+}
+
+// SignIn user
+func (ur *UserRepo) SignIn(username, password string) (model.User, error) {
+	var u model.User
+
+	st := `SELECT * FROM users WHERE username = '%s' OR email = '%s' LIMIT 1;`
+
+	st = fmt.Sprintf(st, username, username)
+
+	err := ur.Tx.Get(&u, st)
+
+	// Validate password
+	err = bcrypt.CompareHashAndPassword([]byte(u.PasswordDigest.String), []byte(password))
+	if err != nil {
+		return u, err
+	}
+
+	return u, nil
 }
 
 // preDelimiter selects a comma or space

@@ -50,6 +50,7 @@ func (res *IndexUsersRes) FromModel(ms []model.User, msg string, err error) {
 			Email:       m.Email.String,
 			GivenName:   m.GivenName.String,
 			MiddleNames: m.MiddleNames.String,
+			FamilyName:  m.FamilyName.String,
 			Lat:         fmt.Sprintf("%f", m.Geolocation.Point.Lat),
 			Lng:         fmt.Sprintf("%f", m.Geolocation.Point.Lng),
 		}
@@ -120,4 +121,28 @@ func (res *UpdateUserRes) FromModel(m *model.User) {
 }
 
 func (res *DeleteUserRes) FromModel(m *model.User, msg string, err error) {
+}
+
+func (req *SigninUserReq) ToModel() model.User {
+	return model.User{
+		Username: db.ToNullString(req.Username),
+		Password: req.Password,
+	}
+}
+
+func (res *SigninUserRes) FromModel(m *model.User) {
+	if m != nil {
+		res.User = User{
+			Slug:        m.Slug.String,
+			Username:    m.Username.String,
+			Password:    "",
+			Email:       m.Email.String,
+			GivenName:   m.GivenName.String,
+			MiddleNames: m.MiddleNames.String,
+			FamilyName:  m.FamilyName.String,
+			Lat:         fmt.Sprintf("%f", m.Geolocation.Point.Lat),
+			Lng:         fmt.Sprintf("%f", m.Geolocation.Point.Lng),
+			IsNew:       m.IsNew(),
+		}
+	}
 }

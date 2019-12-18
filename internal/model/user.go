@@ -21,6 +21,7 @@ type (
 		GivenName         sql.NullString `db:"given_name" json:"givenName"`
 		MiddleNames       sql.NullString `db:"middle_names" json:"middleNames"`
 		FamilyName        sql.NullString `db:"family_name" json:"familyName"`
+		LastIP            sql.NullString `db:"last_ip" json:"lastIP"`
 		Geolocation       db.NullPoint   `db:"geolocation" json:"geolocation"`
 		Locale            sql.NullString `db:"locale" json:"locale"`
 		BaseTZ            sql.NullString `db:"base_tz" json:"baseTZ"`
@@ -43,7 +44,7 @@ func (user *User) UpdatePasswordDigest() (digest string, err error) {
 	if err != nil {
 		return user.PasswordDigest.String, err
 	}
-	user.PasswordDigest.String = string(hpass)
+	user.PasswordDigest = db.ToNullString(string(hpass))
 	return user.PasswordDigest.String, nil
 }
 
@@ -52,12 +53,14 @@ func (user *User) SetCreateValues() error {
 	pfx := user.Username.String
 	user.Identification.SetCreateValues(pfx)
 	user.Audit.SetCreateValues()
+	user.UpdatePasswordDigest()
 	return nil
 }
 
 // SetUpdateValues
 func (user *User) SetUpdateValues() error {
 	user.Audit.SetUpdateValues()
+	user.UpdatePasswordDigest()
 	return nil
 }
 

@@ -1,13 +1,15 @@
 {
-
 "user_index": "Indeks użytkownikówi",
 "new_user": "Nowy użytkownik",
 "edit_user": "Edytuj użytkownika",
 "show_user": "Pokaż użytkownika",
+"user_signin": "User Signin",
 
 "user_created_info_msg": "Utworzony przez użytkownika",
 "user_updated_info_msg": "Użytkownik zaktualizowany",
 "user_deleted_info_msg": "Użytkownik usunięty",
+
+"logged_in_info_msg": "Successfully logged in",
 
 "get_all_err_msg": "Nie można uzyskać listy użytkowników",
 "create_err_msg": "Nie można uzyskać użytkownikai",
@@ -15,6 +17,8 @@
 "update_err_msg": "Nie można zaktualizować użytkownika",
 "delete_err_msg": "Nie można usunąć użytkownikai",
 "input_values_err_msg": "Sprawdź wprowadzone wartości",
+
+"credentials_err_msg": "Verify username and password",
 
 "cannot_proc_err_msg": "Obecnie nie można przetworzyć żądania",
 

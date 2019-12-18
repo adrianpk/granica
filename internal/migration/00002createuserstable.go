@@ -16,7 +16,8 @@ func (m *mig) CreateUsersTable() error {
 		email VARCHAR(255) UNIQUE,
 		given_name VARCHAR(32),
 		middle_names VARCHAR(32) NULL,
-		family_name VARCHAR(64)
+		family_name VARCHAR(64),
+		last_ip INET
 	);`
 
 	_, err := tx.Exec(st)
