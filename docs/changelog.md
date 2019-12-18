@@ -1,5 +1,8 @@
 # Changelog
 
+## <a name="20191217"></a>20191217 - User signin
+
+[User signin](screenshots.md#user-signin)
 
 ## <a name="20191216"></a>20191216 - Model validation and flash messages
 

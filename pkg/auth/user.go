@@ -13,6 +13,8 @@ func (a *Auth) makeUserWebRouter(parent chi.Router) chi.Router {
 		uar.Get("/", a.webep.IndexUsers)
 		uar.Get("/new", a.webep.NewUser)
 		uar.Post("/", a.webep.CreateUser)
+		uar.Get("/signin", a.webep.InitSignInUser)
+		uar.Post("/signin", a.webep.SignInUser)
 		uar.Route("/{slug}", func(uarid chi.Router) {
 			uarid.Use(userCtx)
 			uarid.Get("/", a.webep.ShowUser)
@@ -25,10 +27,6 @@ func (a *Auth) makeUserWebRouter(parent chi.Router) chi.Router {
 	})
 }
 
-// We usually use slug to avoid exposing database ID to the world.
-// But because but as this value is immutable and includes the
-// username selected when the user was created/registered we
-// prefer to use username as the external main identifier.
 func (a *Auth) makeUserJSONRESTRouter(parent chi.Router) chi.Router {
 	return parent.Route("/users", func(uar chi.Router) {
 		uar.Post("/", a.jsonep.CreateUser)

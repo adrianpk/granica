@@ -26,13 +26,45 @@ const (
 	UserCreatedInfoID = "user_created_info_msg"
 	UserUpdatedInfoID = "user_updated_info_msg"
 	UserDeletedInfoID = "user_deleted_info_msg"
+	LoggedInInfoID    = "logged_in_info_msg"
 	// Error
-	CreateUserErrID = "create_user_err_msg"
-	IndexUsersErrID = "get_all_users_err_msg"
-	GetUserErrID    = "get_user_err_msg"
-	UpdateUserErrID = "update_user_err_msg"
-	DeleteUserErrID = "delete_user_err_msg"
+	CreateUserErrID  = "create_user_err_msg"
+	IndexUsersErrID  = "get_all_users_err_msg"
+	GetUserErrID     = "get_user_err_msg"
+	UpdateUserErrID  = "update_user_err_msg"
+	DeleteUserErrID  = "delete_user_err_msg"
+	CredentialsErrID = "credentials_err_msg"
 )
+
+// IndexUsers web endpoint.
+func (ep *Endpoint) IndexUsers(w http.ResponseWriter, r *http.Request) {
+	var req tp.IndexUsersReq
+	var res tp.IndexUsersRes
+
+	// Service
+	err := ep.service.IndexUsers(req, &res)
+	if err != nil {
+		ep.handleError(w, r, "/", IndexUsersErrID, err)
+		return
+	}
+
+	// Wrap response
+	wr := ep.OKRes(w, r, res, "")
+
+	// Template
+	ts, err := ep.TemplateFor(userRes, web.IndexTmpl)
+	if err != nil {
+		ep.handleError(w, r, "/", IndexUsersErrID, err)
+		return
+	}
+
+	// Write response
+	err = ts.Execute(w, wr)
+	if err != nil {
+		ep.handleError(w, r, "/", IndexUsersErrID, err)
+		return
+	}
+}
 
 func (ep *Endpoint) NewUser(w http.ResponseWriter, r *http.Request) {
 	// Req & Res
@@ -88,36 +120,6 @@ func (ep *Endpoint) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	m := ep.localize(r, UserCreatedInfoID)
 	ep.RedirectWithFlash(w, r, UserPath(), m, web.InfoMT)
-}
-
-// IndexUsers web endpoint.
-func (ep *Endpoint) IndexUsers(w http.ResponseWriter, r *http.Request) {
-	var req tp.IndexUsersReq
-	var res tp.IndexUsersRes
-
-	// Service
-	err := ep.service.IndexUsers(req, &res)
-	if err != nil {
-		ep.handleError(w, r, "/", IndexUsersErrID, err)
-		return
-	}
-
-	// Wrap response
-	wr := ep.OKRes(w, r, res, "")
-
-	// Template
-	ts, err := ep.TemplateFor(userRes, web.IndexTmpl)
-	if err != nil {
-		ep.handleError(w, r, "/", IndexUsersErrID, err)
-		return
-	}
-
-	// Write response
-	err = ts.Execute(w, wr)
-	if err != nil {
-		ep.handleError(w, r, "/", IndexUsersErrID, err)
-		return
-	}
 }
 
 // ShowUser web endpoint.
@@ -183,7 +185,7 @@ func (ep *Endpoint) EditUser(w http.ResponseWriter, r *http.Request) {
 
 	// Set additional values
 	res.IsNew = false
-	res.Action = ep.userUpdateAction(userRes, res)
+	res.Action = ep.userUpdateAction(res)
 
 	// Wrap response
 	wr := ep.OKRes(w, r, res, "")
@@ -265,7 +267,7 @@ func (ep *Endpoint) InitDeleteUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Set additional values
-	res.Action = ep.userDeleteAction(userRes, res)
+	res.Action = ep.userDeleteAction(res)
 
 	// Wrap response
 	wr := ep.OKRes(w, r, res, "")
@@ -315,32 +317,16 @@ func (ep *Endpoint) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	ep.RedirectWithFlash(w, r, UserPath(), m, web.InfoMT)
 }
 
-// Localization - I18N
-func (ep *Endpoint) localize(r *http.Request, msgID string) string {
-	l := ep.Localizer(r)
-	if l == nil {
-		ep.Log().Warn("No localizer available")
-		return msgID
-	}
+func (ep *Endpoint) InitSignInUser(w http.ResponseWriter, r *http.Request) {
+	// Req & Res
+	res := &tp.SigninUserRes{}
+	res.Action = ep.userSigninAction()
 
-	t, lang, err := l.LocalizeWithTag(&i18n.LocalizeConfig{
-		MessageID: msgID,
-	})
+	// Wrap response
+	wr := ep.OKRes(w, r, res, "")
 
-	if err != nil {
-		ep.Log().Error(err)
-		return msgID
-	}
-
-	ep.Log().Debug("Localized message", "value", t, "lang", lang)
-
-	return t
-}
-
-func (ep *Endpoint) rerenderUserForm(w http.ResponseWriter, r *http.Request, res interface{}, template string) {
-	wr := ep.ErrRes(w, r, res, InputValuesErrID, nil)
-
-	ts, err := ep.TemplateFor(userRes, template)
+	// Template
+	ts, err := ep.TemplateFor(userRes, web.SigninTmpl)
 	if err != nil {
 		ep.handleError(w, r, UserPath(), CannotProcErrID, err)
 		return
@@ -352,8 +338,70 @@ func (ep *Endpoint) rerenderUserForm(w http.ResponseWriter, r *http.Request, res
 		ep.handleError(w, r, UserPath(), CannotProcErrID, err)
 		return
 	}
+}
+
+// SignInUser web endpoint.
+func (ep *Endpoint) SignInUser(w http.ResponseWriter, r *http.Request) {
+	var req tp.SigninUserReq
+	var res tp.SigninUserRes
+
+	// Input data to request struct
+	err := ep.FormToModel(r, &req.Signin)
+	if err != nil {
+		ep.handleError(w, r, UserPath(), CannotProcErrID, err)
+		return
+	}
+
+	// Service
+	err = ep.service.SignInUser(req, &res)
+	if err != nil {
+		ep.handleError(w, r, UserPathSignin(), CredentialsErrID, err)
+		return
+	}
+
+	m := ep.localize(r, LoggedInInfoID)
+	ep.RedirectWithFlash(w, r, UserPath(), m, web.InfoMT)
+}
+
+func (ep *Endpoint) rerenderUserForm(w http.ResponseWriter, r *http.Request, res interface{}, template string) {
+	wr := ep.ErrRes(w, r, res, InputValuesErrID, nil)
+
+	ts, err := ep.TemplateFor(userRes, template)
+	if err != nil {
+		ep.handleError(w, r, UserPath(), InputValuesErrID, err)
+		return
+	}
+
+	// Write response
+	err = ts.Execute(w, wr)
+	if err != nil {
+		ep.handleError(w, r, UserPath(), CannotProcErrID, err)
+		return
+	}
 
 	return
+}
+
+// Localization - I18N
+func (ep *Endpoint) localize(r *http.Request, msgID string) string {
+	l := ep.Localizer(r)
+	if l == nil {
+		ep.Log().Warn("No localizer available")
+		return msgID
+	}
+
+	t, _, err := l.LocalizeWithTag(&i18n.LocalizeConfig{
+		MessageID: msgID,
+	})
+
+	if err != nil {
+		ep.Log().Error(err)
+		return msgID
+	}
+
+	//ep.Log().Debug("Localized message", "value", t, "lang", lang)
+
+	return t
 }
 
 func (ep *Endpoint) localizeMessageID(l *i18n.Localizer, messageID string) (string, error) {
@@ -382,13 +430,23 @@ func (ep *Endpoint) userCreateAction() web.Action {
 }
 
 // userUpdateAction
-func (ep *Endpoint) userUpdateAction(resource string, model web.Identifiable) web.Action {
+func (ep *Endpoint) userUpdateAction(model web.Identifiable) web.Action {
 	return web.Action{Target: UserPathSlug(model), Method: "PUT"}
 }
 
 // userDeleteAction
-func (ep *Endpoint) userDeleteAction(resource string, model web.Identifiable) web.Action {
+func (ep *Endpoint) userDeleteAction(model web.Identifiable) web.Action {
 	return web.Action{Target: UserPathSlug(model), Method: "DELETE"}
+}
+
+// userSignupAction
+func (ep *Endpoint) userSignupAction() web.Action {
+	return web.Action{Target: UserPathSignup(), Method: "POST"}
+}
+
+// userSigninAction
+func (ep *Endpoint) userSigninAction() web.Action {
+	return web.Action{Target: UserPathSignin(), Method: "POST"}
 }
 
 func (ep *Endpoint) handleError(w http.ResponseWriter, r *http.Request, redirPath, msgID string, err error) {

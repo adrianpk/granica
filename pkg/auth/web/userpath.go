@@ -36,3 +36,13 @@ func UserPathInitDelete(res web.Identifiable) string {
 func UserPathSlug(res web.Identifiable) string {
 	return web.ResPathSlug(UserRoot, res)
 }
+
+// UserPathSignup
+func UserPathSignup() string {
+	return web.ResPath(UserRoot) + "/signup"
+}
+
+// UserPathSignin
+func UserPathSignin() string {
+	return web.ResPath(UserRoot) + "/signin"
+}

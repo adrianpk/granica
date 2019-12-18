@@ -16,9 +16,16 @@ type (
 		GivenName         string `json:"givenName" schema:"given-name"`
 		MiddleNames       string `json:"middleNames" schema:"middle-names"`
 		FamilyName        string `json:"familyName" schema:"family-name"`
+		LastIP            string `json:"lastIP" schema:"last-ip"`
 		Lat               string `json:"lat" schema: "lat"`
 		Lng               string `json:"lng" schema: "lng"`
 		IsNew             bool
+	}
+
+	// Signin
+	Signin struct {
+		Username string `json:"username" schema:"username"`
+		Password string `json:"password" schema:"password"`
 	}
 
 	Users []User
@@ -90,5 +97,19 @@ type (
 
 	// DeleteUserRes output data.
 	DeleteUserRes struct {
+	}
+)
+
+type (
+	// SigninUserReq input data.
+	SigninUserReq struct {
+		Signin
+	}
+
+	// SigninUserRes output data.
+	SigninUserRes struct {
+		User
+		Action web.Action
+		Errors service.ErrorSet
 	}
 )

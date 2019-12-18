@@ -3,10 +3,13 @@
 "new_user": "New User",
 "edit_user": "Edit User",
 "show_user": "Show User",
+"user_signin": "User Signin",
 
 "user_created_info_msg": "User created",
 "user_updated_info_msg": "User updated",
 "user_deleted_info_msg": "User deleted",
+
+"logged_in_info_msg": "Successfully logged in",
 
 "get_all_users_err_msg": "Cannot get user list'",
 "create_user_err_msg": "Cannot create user",
@@ -14,6 +17,8 @@
 "update_user_err_msg": "Cannot update user",
 "delete_user_err_msg": "Cannot delete user ",
 "input_values_err_msg": "Verify entered values",
+
+"credentials_err_msg": "Verify username and password",
 
 "cannot_proc_err_msg": "It is not possible to process the request at this time",
 
@@ -23,6 +28,7 @@
 "not_allowed_err_msg": "Not in allowed list",
 "not_email_err_msg": "Not an email address",
 "conf_match_err_msg": "Does not match with confirmation",
+
 
 "sample_message": "Sample message",
 "sample_count_message": {

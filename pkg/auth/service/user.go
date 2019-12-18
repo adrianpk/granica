@@ -17,15 +17,15 @@ func (s *Service) CreateUser(req tp.CreateUserReq, res *tp.CreateUserRes) error 
 	// Model
 	u := req.ToModel()
 
-	// Validation
-	v := NewUserValidator(u)
+	//// Validation
+	//v := NewUserValidator(u)
 
-	err := v.ValidateForCreate()
-	if err != nil {
-		res.FromModel(&u)
-		res.Errors = v.Errors
-		return err
-	}
+	//err := v.ValidateForCreate()
+	//if err != nil {
+	//res.FromModel(&u)
+	//res.Errors = v.Errors
+	//return err
+	//}
 
 	// Repo
 	repo, err := s.userRepo()
@@ -207,6 +207,34 @@ func (s *Service) DeleteUser(req tp.DeleteUserReq, res *tp.DeleteUserRes) error 
 
 	// Output
 	res.FromModel(nil, "", nil)
+	return nil
+}
+
+func (s *Service) SignInUser(req tp.SigninUserReq, res *tp.SigninUserRes) error {
+	// Model
+	u := req.ToModel()
+
+	// Repo
+	repo, err := s.userRepo()
+	if err != nil {
+		res.FromModel(nil)
+		return err
+	}
+
+	u, err = repo.SignIn(u.Username.String, u.Password)
+	if err != nil {
+		res.FromModel(nil)
+		return err
+	}
+
+	err = repo.Commit()
+	if err != nil {
+		res.FromModel(nil)
+		return err
+	}
+
+	// Output
+	res.FromModel(&u)
 	return nil
 }
 

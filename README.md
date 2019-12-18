@@ -17,14 +17,15 @@ But at the same time it is also a way to find a modular and systematized foundat
 
 ## Changelog
 
-* [20191216 - Model validation and flash messages](/docs/changelog.md#20191216)
-* [20191215 - Form validations](/docs/changelog.md#20191215)
-* [20191213 - RESTful actions completed](/docs/changelog.md#20191213)
-* [20191128 - Page texts localization](/docs/changelog.md#20191128)
-* [20191127 - Simplified error handling](/docs/changelog.md#20191127)
-* [20191126 - Simplified flash messages handling](/docs/changelog.md#20191126)
-* [20191124 - Embedded translations and form data session store](/docs/changelog.md#20191124)
-* [20191123 - Internationalization](/docs/changelog.md#20191123)
+- [20191217 - User signin](/docs/changelog.md#20191217)
+- [20191216 - Model validation and flash messages](/docs/changelog.md#20191216)
+- [20191215 - Form validations](/docs/changelog.md#20191215)
+- [20191213 - RESTful actions completed](/docs/changelog.md#20191213)
+- [20191128 - Page texts localization](/docs/changelog.md#20191128)
+- [20191127 - Simplified error handling](/docs/changelog.md#20191127)
+- [20191126 - Simplified flash messages handling](/docs/changelog.md#20191126)
+- [20191124 - Embedded translations and form data session store](/docs/changelog.md#20191124)
+- [20191123 - Internationalization](/docs/changelog.md#20191123)
 
 ## Installation
 

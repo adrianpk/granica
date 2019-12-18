@@ -3,10 +3,13 @@
 "new_user": "Nuevo usuario",
 "edit_user": "Editar usuario",
 "show_user": "Mostrar usuario",
+"user_signin": "User Signin",
 
 "user_created_info_msg": "Usuario ha sido creado",
 "user_updated_info_msg": "Usuario ha sido actualizado",
 "user_deleted_info_msg": "Usuario ha sido borrado",
+
+"logged_in_info_msg": "Successfully logged in",
 
 "get_all_err_msg": "No se puede obtener la lista de usuarioso",
 "create_err_msg": "No es posible crear el usuario",
@@ -14,6 +17,8 @@
 "update_err_msg": "No es posible actualizar el usuario",
 "delete_err_msg": "No es posible borrar usuario",
 "input_values_err_msg": "Verificar los valores ingresados",
+
+"credentials_err_msg": "Verify username and password",
 
 "cannot_proc_err_msg": "No es posible procesar el request en este momento",
 
