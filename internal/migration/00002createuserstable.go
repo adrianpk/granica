@@ -10,13 +10,13 @@ func (m *mig) CreateUsersTable() error {
 	(
 		id UUID PRIMARY KEY,
 		slug VARCHAR(36) UNIQUE,
-		tenant_id VARCHAR(128),
 		username VARCHAR(32) UNIQUE,
 		password_digest CHAR(128),
 		email VARCHAR(255) UNIQUE,
 		given_name VARCHAR(32),
 		middle_names VARCHAR(32) NULL,
 		family_name VARCHAR(64),
+		role VARCHAR(16),
 		last_ip INET
 	);`
 
@@ -27,8 +27,8 @@ func (m *mig) CreateUsersTable() error {
 
 	st = `
 		ALTER TABLE users
-		ADD COLUMN verify_token VARCHAR(36),
-		ADD COLUMN is_verified BOOLEAN,
+		ADD COLUMN confirmation_token VARCHAR(36),
+		ADD COLUMN is_confirmed BOOLEAN,
 		ADD COLUMN geolocation geography (Point,4326),
 		ADD COLUMN locale VARCHAR(32),
 		ADD COLUMN base_tz VARCHAR(2),

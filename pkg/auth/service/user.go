@@ -18,14 +18,14 @@ func (s *Service) CreateUser(req tp.CreateUserReq, res *tp.CreateUserRes) error 
 	u := req.ToModel()
 
 	//// Validation
-	//v := NewUserValidator(u)
+	v := NewUserValidator(u)
 
-	//err := v.ValidateForCreate()
-	//if err != nil {
-	//res.FromModel(&u)
-	//res.Errors = v.Errors
-	//return err
-	//}
+	err := v.ValidateForCreate()
+	if err != nil {
+		res.FromModel(&u)
+		res.Errors = v.Errors
+		return err
+	}
 
 	// Repo
 	repo, err := s.userRepo()
@@ -243,8 +243,9 @@ func (s *Service) SignUpUser(req tp.SignUpUserReq, res *tp.SignUpUserRes) error 
 		return err
 	}
 
-	// TODO: Confirmation email builder
-	//mail, err := somewhere.BuildEmail(u)
+	// TODO: Confirmatiion email builder
+	u.GenConfirmationToken()
+	s.MakeConfirmationEmail(&u)
 	//if err != nil {
 	//res.FromModel(u)
 	//return err

@@ -17,8 +17,8 @@ type (
 		MiddleNames       string `json:"middleNames" schema:"middle-names"`
 		FamilyName        string `json:"familyName" schema:"family-name"`
 		LastIP            string `json:"lastIP" schema:"last-ip"`
-		VerifyToken       string `json:"verifyToken" schema:"verify-token"`
-		IsVerified        bool   `json:"isVerified" schema:"is-verified"`
+		ConfirmationToken string `json:"confirmationToken" schema:"is-confirmed"`
+		IsConfirmed       bool   `json:"isConfirmed" schema:"is-confirmed"`
 		Lat               string `json:"lat" schema: "lat"`
 		Lng               string `json:"lng" schema: "lng"`
 		IsNew             bool
