@@ -6,6 +6,7 @@ import (
 	"gitlab.com/mikrowezel/backend/log"
 
 	"gitlab.com/mikrowezel/backend/config"
+	"gitlab.com/mikrowezel/backend/granica/internal/mailer"
 	"gitlab.com/mikrowezel/backend/granica/internal/repo"
 )
 
@@ -14,6 +15,7 @@ type Service struct {
 	cfg  *config.Config
 	log  *log.Logger
 	repo *repo.Repo
+	mailer *mailer.SESMailer
 }
 
 func MakeService(ctx context.Context, cfg *config.Config, log *log.Logger) *Service {
@@ -39,4 +41,9 @@ func (s *Service) Log() *log.Logger {
 // Repo
 func (s *Service) SetRepo(repo *repo.Repo) {
 	s.repo = repo
+}
+
+// Mailer
+func (s *Service) SetMailer(mailer *mailer.SESMailer) {
+	s.mailer = mailer
 }

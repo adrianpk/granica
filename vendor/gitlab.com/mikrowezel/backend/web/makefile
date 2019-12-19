@@ -10,10 +10,10 @@ BINARY_UNIX=$(BINARY_NAME)_unix
 all: test build
 
 build:
-	go  build -o ./bin/$(BINARY_NAME) ./$(BINARY_NAME).go
+	go  build -o ./bin/$(BINARY_NAME) $(BINARY_NAME).go form.go
 
 build-linux:
-	CGOENABLED=0 GOOS=linux GOARCH=amd64; go build -o ./bin/$(BINARY_UNIX) ./cmd/$(BINARY_NAME).go
+	CGOENABLED=0 GOOS=linux GOARCH=amd64; go build -o ./bin/$(BINARY_UNIX) $(BINARY_NAME).go form.go
 
 test:
 	make -f makefile.test test-selected

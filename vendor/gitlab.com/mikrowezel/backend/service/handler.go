@@ -21,7 +21,6 @@ type (
 
 // NewBaseHandler creates a new base handler.
 func NewBaseHandler(ctx context.Context, cfg *config.Config, log *logger.Logger, name string) *BaseHandler {
-
 	return &BaseHandler{
 		ctx:   ctx,
 		cfg:   cfg,

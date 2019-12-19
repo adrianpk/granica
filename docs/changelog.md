@@ -1,5 +1,8 @@
 # Changelog
 
+## <a name="2019128"></a>20191219 - Mailer implemented
+
+Amazon SES mailer.
 
 ## <a name="2019128"></a>20191217 - User signup
 

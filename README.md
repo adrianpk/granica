@@ -17,6 +17,7 @@ But at the same time it is also a way to find a modular and systematized foundat
 
 ## Changelog
 
+- [20191219 - Mailer](/docs/changelog.md#20191219)
 - [20191218 - User signup](/docs/changelog.md#20191218)
 - [20191217 - User signin](/docs/changelog.md#20191217)
 - [20191216 - Model validation and flash messages](/docs/changelog.md#20191216)
