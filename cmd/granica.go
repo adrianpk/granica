@@ -12,6 +12,7 @@ import (
 	"gitlab.com/mikrowezel/backend/granica/pkg/auth"
 	"gitlab.com/mikrowezel/backend/log"
 	svc "gitlab.com/mikrowezel/backend/service"
+	"gitlab.com/mikrowezel/backend/granica/internal/mailer"
 )
 
 type contextKey string
@@ -31,12 +32,16 @@ func main() {
 	s = newService(ctx, cfg, log, cancel)
 
 	// Add Migration handler
-	mh, err := migration.NewHandler(ctx, cfg, log, "migration-handler")
-	s.AddHandler(mh)
+	mgh, err := migration.NewHandler(ctx, cfg, log, "migration-handler")
+	s.AddHandler(mgh)
 
 	// Add Repo handler
-	rh, err := repo.NewHandler(ctx, cfg, log, "repo-handler")
-	s.AddHandler(rh)
+	rph, err := repo.NewHandler(ctx, cfg, log, "repo-handler")
+	s.AddHandler(rph)
+
+	// Add Mailer handler
+	mlh, err := mailer.NewHandler(ctx, cfg, log, "mailer-handler")
+	s.AddHandler(mlh)
 
 	// Set service worker
 	auth, err := auth.NewWorker(ctx, cfg, log, "auth-worker")

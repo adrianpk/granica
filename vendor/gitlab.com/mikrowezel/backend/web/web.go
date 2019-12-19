@@ -14,6 +14,8 @@ import (
 	"strings"
 	"time"
 
+	// "github.com/davecgh/go-spew/spew"
+
 	"github.com/gorilla/csrf"
 	"github.com/gorilla/schema"
 	"github.com/gorilla/sessions"
@@ -21,7 +23,6 @@ import (
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"gitlab.com/mikrowezel/backend/config"
 	"gitlab.com/mikrowezel/backend/log"
-	"golang.org/x/text/message"
 )
 
 type (
@@ -49,18 +50,27 @@ type (
 )
 
 type (
+	Localizer struct {
+		*i18n.Localizer
+	}
+)
+
+type (
 	// WrappedRes stands for wrapped response
 	WrappedRes struct {
 		Data  interface{}
-		Flash []FlashData
+		Loc   *Localizer
+		Flash FlashSet
 		CSRF  map[string]interface{}
 		Err   error
 	}
 
+	FlashSet []FlashItem
+
 	// Flash data to present in page
-	FlashData struct {
-		Type MsgType
+	FlashItem struct {
 		Msg  string
+		Type MsgType
 	}
 
 	// MsgType stands for message type
@@ -90,11 +100,13 @@ const (
 )
 
 const (
+	NewTmpl     = "new.tmpl"
 	IndexTmpl   = "index.tmpl"
-	CreateTmpl  = "create.tmpl"
-	UpdateTmpl  = "update.tmpl"
+	EditTmpl    = "edit.tmpl"
 	ShowTmpl    = "show.tmpl"
 	InitDelTmpl = "initdel.tmpl"
+	SignUpTmpl  = "signup.tmpl"
+	SignInTmpl  = "signin.tmpl"
 )
 
 const (
@@ -104,16 +116,20 @@ const (
 	DebugMT MsgType = "debug"
 )
 
-const (
-	I18NorCtxKey ContextKey = "i18n"
+var (
+	InfoMTColor    = []string{"green-800", "white", "green-500", "green-800"}
+	WarnMTColor    = []string{"yellow-800", "white", "yellow-500", "yellow-800"}
+	ErrorMTColor   = []string{"red-800", "white", "red-500", "red-800"}
+	DebugMTColor   = []string{"blue-800", "white", "blue-500", "blue-800"}
+	DefaultMTColor = []string{"white", "white", "white", "white"}
 )
 
 const (
-	GetErrFmt    = "Cannot create %s."
-	GetAllErrFmt = "Cannot get list of %s."
-	CreateErrFmt = "Cannot get %s."
-	UpdateErrFmt = "Cannot update %s."
-	DeleteErrFmt = "Cannot delete %s."
+	FlashStoreKey = "flash"
+)
+
+const (
+	I18NorCtxKey ContextKey = "i18n"
 )
 
 func MakeEndpoint(ctx context.Context, cfg *config.Config, log *log.Logger, templateFx template.FuncMap) (*Endpoint, error) {
@@ -172,6 +188,32 @@ func (wr *WrappedRes) addCSRF(r *http.Request) {
 	}
 }
 
+func (wr *WrappedRes) AllFlashes() FlashSet {
+	fs := MakeFlashSet()
+
+	for _, fi := range wr.Flash {
+		fs = append(fs, fi)
+	}
+
+	return fs
+}
+
+func (l *Localizer) Localize(textID string) string {
+	if l.Localizer != nil {
+		t, _, err := l.LocalizeWithTag(&i18n.LocalizeConfig{
+			MessageID: textID,
+		})
+
+		if err != nil {
+			return fmt.Sprintf("%s", textID) // "'%s' [untransalted]", textID
+		}
+
+		return t
+	}
+
+	return fmt.Sprintf("%s", textID) // "'%s' [untransalted]", textID
+}
+
 // loadTemplates from embedded filesystem (pkger)
 // under '/assets/web/embed/template'
 func (ep *Endpoint) loadTemplates() (TemplateSet, error) {
@@ -195,7 +237,7 @@ func (ep *Endpoint) loadTemplates() (TemplateSet, error) {
 				return nil
 			}
 
-			//e.Log().Warn("Not a valid template", "path", path)
+			// ep.Log().Warn("Not a valid template", "path", path)
 
 			return nil
 		})
@@ -365,7 +407,7 @@ func formatRequest(r *http.Request) string {
 	return strings.Join(request, "\n")
 }
 
-// Cookie store
+// Sessions
 func (ep *Endpoint) makeCookieStore() {
 	k := ep.Cfg().ValOrDef("web.cookiestore.key", "")
 	if k == "" {
@@ -377,7 +419,8 @@ func (ep *Endpoint) makeCookieStore() {
 
 	ep.storeKey = k
 	ep.Log().Debug("Cookie store key", "value", k)
-	sessions.NewCookieStore([]byte(k))
+
+	ep.store = sessions.NewCookieStore([]byte(k))
 }
 
 func (ep *Endpoint) genAES256Key() string {
@@ -406,6 +449,18 @@ func (ep *Endpoint) genAES256Key() string {
 	return sb.String()
 }
 
+func (ep *Endpoint) GetSession(r *http.Request, name ...string) *sessions.Session {
+	session := "session"
+	if len(name) > 0 {
+		session = name[0]
+	}
+	s, err := ep.Store().Get(r, session)
+	if err != nil {
+		ep.Log().Warn("Cannot get sesssion from store", "reqID", "n/a")
+	}
+	return s
+}
+
 // Templates
 
 func (ep *Endpoint) TemplateFor(res, name string) (*template.Template, error) {
@@ -425,103 +480,73 @@ func (ep *Endpoint) template(resource, template string) (tmplKey string) {
 	return fmt.Sprintf(".%s/%s/%s", templateDir, resource, template)
 }
 
-// I18N
-func I18NGetAllErrMsg(r *http.Request, resource string) string {
-	return I18NErrMsg(r, resource, GetAllErrFmt)
-}
-
-func I18NGetErrMsg(r *http.Request, resource string) string {
-	return I18NErrMsg(r, resource, GetErrFmt)
-}
-
-func I18NCreateErrMsg(r *http.Request, resource string) string {
-	return I18NErrMsg(r, resource, CreateErrFmt)
-}
-
-func I18NUpdateErrMsg(r *http.Request, resource string) string {
-	return I18NErrMsg(r, resource, UpdateErrFmt)
-}
-
-func I18NDeleteErrMsg(r *http.Request, resource string) string {
-	return I18NErrMsg(r, resource, DeleteErrFmt)
-}
-
-func I18NErrMsg(r *http.Request, resource, errFmt string) string {
-	return fmt.Sprintf(errFmt, resource)
-	mp, ok := GetI18NorDeprecated(r)
-	if ok {
-		return mp.Sprintf(errFmt, resource)
-	}
-
-	return fmt.Sprintf(errFmt, resource)
-}
-
-func GetI18NLocalizer(r *http.Request) (localizer *i18n.Localizer, ok bool) {
+func getI18NLocalizer(r *http.Request) (localizer *i18n.Localizer, ok bool) {
 	localizer, ok = r.Context().Value(I18NorCtxKey).(*i18n.Localizer)
 	return localizer, ok
 }
 
-func GetI18NorDeprecated(r *http.Request) (mp *message.Printer, ok bool) {
-	mp, ok = r.Context().Value(I18NorCtxKey).(*message.Printer)
-	return mp, ok
-}
-
 // Wrapped responses
+// StdRes builds a multiType response including data, and info message and zero or more warning messages.
+// If there are pending flash messages to show stored by previous action before redirecting
+// they are also appended to the wrapped response.
+func (ep *Endpoint) OKRes(w http.ResponseWriter, r *http.Request, data interface{}, infoMsg string, warnMsgs ...string) WrappedRes {
+	f := MakeFlashSet()
 
-// OkRes builds an OK response including data and cero, one  or more messages.
-// All messages are assumed of type info therefore flashes will be also of this type.
-func (ep *Endpoint) OKRes(r *http.Request, data interface{}, msgs ...string) WrappedRes {
-	fls := []FlashData{}
-	for _, m := range msgs {
-		fls = append(fls, ep.MakeFlash(m, InfoMT))
+	// Add info message
+	m := strings.Trim(infoMsg, " ")
+	if m != "" {
+		f = f.AddItem(ep.MakeFlashItem(m, InfoMT))
 	}
+
+	// Add warnings
+	if len(warnMsgs) > 0 {
+		for _, m := range warnMsgs {
+			f = f.AddItem(ep.MakeFlashItem(m, WarnMT))
+		}
+	}
+
+	// Add pending messages
+	f = f.AddItems(ep.RestoreFlash(r))
 
 	wr := WrappedRes{
 		Data:  data,
-		Flash: fls,
+		Loc:   ep.Localizer(r),
+		Flash: f,
 		Err:   nil,
 	}
 
 	wr.AddCSRF(r)
+
+	ep.ClearFlash(w, r)
 
 	return wr
 }
 
-// MultiRes builds a multiType response including data and cero, one  or more messages.
-// Generated flash messages will be created according to the values passed in the parameter map.
-// i.e.: map[string]MsgType{"Action processed": InfoMT, "Remember to update profile": WarnMT}
-func (ep *Endpoint) MultiRes(r *http.Request, data interface{}, msgs map[string]MsgType) WrappedRes {
-	fls := []FlashData{}
-	for m, t := range msgs {
-		fls = append(fls, ep.MakeFlash(m, t))
+// ErrRes builds an error response including data and one error message.
+// If there are pending flash messages to show stored by previous action before redirecting
+// they are also appended to the wrapped response.
+func (ep *Endpoint) ErrRes(w http.ResponseWriter, r *http.Request, data interface{}, errorMsg string, err error) WrappedRes {
+	f := MakeFlashSet()
+
+	// Add error message
+	m := strings.Trim(errorMsg, " ")
+	if m != "" {
+		f = f.AddItem(ep.MakeFlashItem(m, ErrorMT))
 	}
+
+	// Add pending messages
+	f = f.AddItems(ep.RestoreFlash(r))
 
 	wr := WrappedRes{
 		Data:  data,
-		Flash: fls,
-		Err:   nil,
+		Loc:   ep.Localizer(r),
+		Flash: f,
+		Err:   err,
 	}
 
 	wr.AddCSRF(r)
 
-	return wr
-}
-
-// ErrRes builds an error response including data and cero, one  or more messages.
-// All messages are assumed of type error therefore flashes will be also of this type.
-func (ep *Endpoint) ErrRes(r *http.Request, data interface{}, msgs ...string) WrappedRes {
-	fls := []FlashData{}
-	for _, m := range msgs {
-		fls = append(fls, ep.MakeFlash(m, ErrorMT))
-	}
-
-	wr := WrappedRes{
-		Data:  data,
-		Flash: fls,
-		Err:   nil,
-	}
-
-	wr.AddCSRF(r)
+	ep.ClearFlash(w, r)
 
 	return wr
 }
@@ -530,7 +555,8 @@ func (ep *Endpoint) ErrRes(r *http.Request, data interface{}, msgs ...string) Wr
 func (ep *Endpoint) Wrap(r *http.Request, data interface{}, msg string, msgType MsgType, err error) WrappedRes {
 	wr := WrappedRes{
 		Data:  data,
-		Flash: []FlashData{ep.MakeFlash(msg, msgType)},
+		Loc:   ep.Localizer(r),
+		Flash: FlashSet{ep.MakeFlashItem(msg, msgType)},
 		Err:   err,
 	}
 
@@ -539,17 +565,78 @@ func (ep *Endpoint) Wrap(r *http.Request, data interface{}, msg string, msgType 
 	return wr
 }
 
+// Flash
+
 // MakeFlash message.
-func (ep *Endpoint) MakeFlash(msg string, msgType MsgType) FlashData {
-	return FlashData{
-		Type: msgType,
+func (ep *Endpoint) MakeFlashItem(msg string, msgType MsgType) FlashItem {
+	return FlashItem{
 		Msg:  msg,
+		Type: msgType,
 	}
+}
+
+func (ep *Endpoint) StoreFlash(w http.ResponseWriter, r *http.Request, message string, mt MsgType) (ok bool) {
+	s := ep.GetSession(r)
+
+	// Append to current ones
+	f := ep.RestoreFlash(r)
+	f = append(f, ep.MakeFlashItem(message, mt))
+
+	s.Values[FlashStoreKey] = f
+	err := s.Save(r, w)
+	if err != nil {
+		ep.Log().Error(err)
+		return true
+	}
+
+	return false
+}
+
+func (ep *Endpoint) RestoreFlash(r *http.Request) FlashSet {
+	s := ep.GetSession(r)
+	v := s.Values[FlashStoreKey]
+
+	f, ok := v.(FlashSet)
+	if ok {
+		//ep.Log().Debug("Stored flash", "value", spew.Sdump(f))
+		return f
+	}
+
+	ep.Log().Info("No stored flash", "key", FlashStoreKey)
+	return MakeFlashSet()
+}
+
+func (ep *Endpoint) ClearFlash(w http.ResponseWriter, r *http.Request) (ok bool) {
+	s := ep.GetSession(r)
+	delete(s.Values, FlashStoreKey)
+	err := s.Save(r, w)
+	if err != nil {
+		return true
+	}
+	return false
 }
 
 // Redirect to url.
 func (ep *Endpoint) Redirect(w http.ResponseWriter, r *http.Request, url string) {
 	http.Redirect(w, r, url, 302)
+}
+
+func (ep *Endpoint) RedirectWithFlash(w http.ResponseWriter, r *http.Request, url string, msg string, msgType MsgType) {
+	ep.StoreFlash(w, r, msg, msgType)
+	http.Redirect(w, r, url, 302)
+}
+
+func (ep *Endpoint) Localizer(r *http.Request) *Localizer {
+	l, ok := getI18NLocalizer(r)
+	if !ok {
+		return nil
+	}
+
+	return &Localizer{l}
+}
+
+func (wr *WrappedRes) AddLocalizer(l *Localizer) {
+	wr.Loc = l
 }
 
 func (wr *WrappedRes) AddCSRF(r *http.Request) {
@@ -558,8 +645,25 @@ func (wr *WrappedRes) AddCSRF(r *http.Request) {
 	}
 }
 
+func (fi *FlashItem) Color() []string {
+	if fi.Type == InfoMT {
+		return InfoMTColor
+
+	} else if fi.Type == WarnMT {
+		return WarnMTColor
+
+	} else if fi.Type == ErrorMT {
+		return ErrorMTColor
+
+	} else if fi.Type == DebugMT {
+		return DebugMTColor
+
+	}
+	return DefaultMTColor
+}
+
 // Forms
-func FormToModel(r *http.Request, model interface{}) error {
+func (ep *Endpoint) FormToModel(r *http.Request, model interface{}) error {
 	return NewDecoder().Decode(model, r.Form)
 }
 
@@ -569,6 +673,27 @@ func NewDecoder() *schema.Decoder {
 	d := schema.NewDecoder()
 	d.IgnoreUnknownKeys(true)
 	return d
+}
+
+// Flash
+func MakeFlashSet() FlashSet {
+	return make(FlashSet, 0)
+}
+
+func (f FlashSet) IsEmpty() bool {
+	return len(f) == 0
+}
+
+func (f FlashSet) AddItem(fi FlashItem) FlashSet {
+	return append(f, fi)
+}
+
+func (f FlashSet) AddItems(fis []FlashItem) FlashSet {
+	return append(f, fis...)
+}
+
+func (fi FlashItem) IsEmpty() bool {
+	return fi == FlashItem{}
 }
 
 // Resource paths

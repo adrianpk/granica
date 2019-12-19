@@ -11,16 +11,16 @@ import (
 	svc "gitlab.com/mikrowezel/backend/service"
 )
 
-var (
-	// Repo is a package level repo handler instance.
-	Handler *Repo
-)
-
 type (
 	// Repo is a repo handler.
 	Repo struct {
 		*postgres.DbHandler
 	}
+)
+
+var (
+	// Repo is a package level repo handler instance.
+	Handler *Repo
 )
 
 // NewHandler creates and returns a new repo handler.

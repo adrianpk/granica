@@ -55,6 +55,12 @@ func (a *Auth) Init() bool {
 		return false
 	}
 	a.service.SetRepo(rh)
+
+	mlh, err := a.mailerHandler()
+	if err != nil {
+		return false
+	}
+	a.service.SetMailer(mlh)
 	return true
 }
 

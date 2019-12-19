@@ -23,6 +23,11 @@ export GRN_PG_PORT="5432"
 export GRN_PG_USER="granica"
 export GRN_PG_PASSWORD="granica"
 export GRN_PG_BACKOFF_MAXTRIES="3"
+# Amazon SES MAiler
+  # These are sample not usable keys
+export AWS_ACCESS_KEY_ID=EIIAHI5FF3A2OG3MJEX5
+export AWS_SECRET_KEY=8BiWmd5Hdgmk2rR4pwG332bHwvLGiJOoxLLtDy12
+
 # Switches
 export GRN_APP_USERNAME_UPDATABLE=false
 
