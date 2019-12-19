@@ -19,8 +19,8 @@ func (req *CreateUserReq) ToModel() model.User {
 		GivenName:         db.ToNullString(req.GivenName),
 		MiddleNames:       db.ToNullString(req.MiddleNames),
 		FamilyName:        db.ToNullString(req.FamilyName),
-		VerifyToken:       db.ToNullString(req.VerifyToken),
-		IsVerified:        db.ToNullBool(req.IsVerified),
+		ConfirmationToken: db.ToNullString(req.ConfirmationToken),
+		IsConfirmed:       db.ToNullBool(req.IsConfirmed),
 		// Geolocation:    db.ToNullGeometry(req.Lat, req.Lng)
 	}
 }
@@ -46,17 +46,17 @@ func (res *IndexUsersRes) FromModel(ms []model.User, msg string, err error) {
 	resUsers := []User{}
 	for _, m := range ms {
 		res := User{
-			Slug:        m.Slug.String,
-			Username:    m.Username.String,
-			Password:    "",
-			Email:       m.Email.String,
-			GivenName:   m.GivenName.String,
-			MiddleNames: m.MiddleNames.String,
-			FamilyName:  m.FamilyName.String,
-			VerifyToken: m.VerifyToken.String,
-			IsVerified:  m.IsVerified.Bool,
-			Lat:         fmt.Sprintf("%f", m.Geolocation.Point.Lat),
-			Lng:         fmt.Sprintf("%f", m.Geolocation.Point.Lng),
+			Slug:              m.Slug.String,
+			Username:          m.Username.String,
+			Password:          "",
+			Email:             m.Email.String,
+			GivenName:         m.GivenName.String,
+			MiddleNames:       m.MiddleNames.String,
+			FamilyName:        m.FamilyName.String,
+			ConfirmationToken: m.ConfirmationToken.String,
+			IsConfirmed:       m.IsConfirmed.Bool,
+			Lat:               fmt.Sprintf("%f", m.Geolocation.Point.Lat),
+			Lng:               fmt.Sprintf("%f", m.Geolocation.Point.Lng),
 		}
 		resUsers = append(resUsers, res)
 	}
@@ -76,17 +76,17 @@ func (req *GetUserReq) ToModel() model.User {
 func (res *GetUserRes) FromModel(m *model.User, msg string, err error) {
 	if m != nil {
 		res.User = User{
-			Slug:        m.Slug.String,
-			Username:    m.Username.String,
-			Password:    "",
-			Email:       m.Email.String,
-			GivenName:   m.GivenName.String,
-			MiddleNames: m.MiddleNames.String,
-			FamilyName:  m.FamilyName.String,
-			VerifyToken: m.VerifyToken.String,
-			IsVerified:  m.IsVerified.Bool,
-			Lat:         fmt.Sprintf("%f", m.Geolocation.Point.Lat),
-			Lng:         fmt.Sprintf("%f", m.Geolocation.Point.Lng),
+			Slug:              m.Slug.String,
+			Username:          m.Username.String,
+			Password:          "",
+			Email:             m.Email.String,
+			GivenName:         m.GivenName.String,
+			MiddleNames:       m.MiddleNames.String,
+			FamilyName:        m.FamilyName.String,
+			ConfirmationToken: m.ConfirmationToken.String,
+			IsConfirmed:       m.IsConfirmed.Bool,
+			Lat:               fmt.Sprintf("%f", m.Geolocation.Point.Lat),
+			Lng:               fmt.Sprintf("%f", m.Geolocation.Point.Lng),
 		}
 	}
 }
@@ -106,8 +106,8 @@ func (req *UpdateUserReq) ToModel() model.User {
 		GivenName:         db.ToNullString(req.GivenName),
 		MiddleNames:       db.ToNullString(req.MiddleNames),
 		FamilyName:        db.ToNullString(req.FamilyName),
-		VerifyToken:       db.ToNullString(req.VerifyToken),
-		IsVerified:        db.ToNullBool(req.IsVerified),
+		ConfirmationToken: db.ToNullString(req.ConfirmationToken),
+		IsConfirmed:       db.ToNullBool(req.IsConfirmed),
 		// Geolocation:    db.ToNullGeometry(req.Lat, req.Lng)
 	}
 }
@@ -115,17 +115,17 @@ func (req *UpdateUserReq) ToModel() model.User {
 func (res *UpdateUserRes) FromModel(m *model.User) {
 	if m != nil {
 		res.User = User{
-			Slug:        m.Slug.String,
-			Username:    m.Username.String,
-			Password:    "",
-			Email:       m.Email.String,
-			GivenName:   m.GivenName.String,
-			MiddleNames: m.MiddleNames.String,
-			FamilyName:  m.FamilyName.String,
-			VerifyToken: m.VerifyToken.String,
-			IsVerified:  m.IsVerified.Bool,
-			Lat:         fmt.Sprintf("%f", m.Geolocation.Point.Lat),
-			Lng:         fmt.Sprintf("%f", m.Geolocation.Point.Lng),
+			Slug:              m.Slug.String,
+			Username:          m.Username.String,
+			Password:          "",
+			Email:             m.Email.String,
+			GivenName:         m.GivenName.String,
+			MiddleNames:       m.MiddleNames.String,
+			FamilyName:        m.FamilyName.String,
+			ConfirmationToken: m.ConfirmationToken.String,
+			IsConfirmed:       m.IsConfirmed.Bool,
+			Lat:               fmt.Sprintf("%f", m.Geolocation.Point.Lat),
+			Lng:               fmt.Sprintf("%f", m.Geolocation.Point.Lng),
 		}
 	}
 }

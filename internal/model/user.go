@@ -4,6 +4,7 @@ import (
 	"database/sql"
 
 	"github.com/lib/pq"
+	uuid "github.com/satori/go.uuid"
 	"gitlab.com/mikrowezel/backend/db"
 	m "gitlab.com/mikrowezel/backend/model"
 	"golang.org/x/crypto/bcrypt"
@@ -14,16 +15,16 @@ type (
 	User struct {
 		m.Identification
 		Username          sql.NullString `db:"username" json:"username"`
-		Password          string         `db:"password" json:"password"`
+		Password          string         `db:"-" json:"password"`
 		PasswordDigest    sql.NullString `db:"password_digest" json:"-"`
 		Email             sql.NullString `db:"email" json:"email"`
-		EmailConfirmation sql.NullString `db:"emailConfirmation" json:"emailConfirmation"`
+		EmailConfirmation sql.NullString `db:"-" json:"emailConfirmation"`
 		GivenName         sql.NullString `db:"given_name" json:"givenName"`
 		MiddleNames       sql.NullString `db:"middle_names" json:"middleNames"`
 		FamilyName        sql.NullString `db:"family_name" json:"familyName"`
 		LastIP            sql.NullString `db:"last_ip" json:"lastIP"`
-		VerifyToken       sql.NullString `db:"verify_token" json:"verifyToken"`
-		IsVerified        sql.NullBool   `db:"is_verified" json:"isVerified"`
+		ConfirmationToken sql.NullString `db:"confirmation_token" json:"confirmationToken"`
+		IsConfirmed       sql.NullBool   `db:"is_confirmed" json:"isConfirmed"`
 		Geolocation       db.NullPoint   `db:"geolocation" json:"geolocation"`
 		Locale            sql.NullString `db:"locale" json:"locale"`
 		BaseTZ            sql.NullString `db:"base_tz" json:"baseTZ"`
@@ -66,6 +67,12 @@ func (user *User) SetUpdateValues() error {
 	return nil
 }
 
+// GenConfirmationToken
+func (user *User) GenConfirmationToken() {
+	user.ConfirmationToken = db.ToNullString(uuid.NewV4().String())
+	user.IsConfirmed = db.ToNullBool(false)
+}
+
 // Match condition for model.
 func (user *User) Match(tc *User) bool {
 	r := user.Identification.Match(tc.Identification) &&
@@ -75,8 +82,8 @@ func (user *User) Match(tc *User) bool {
 		user.GivenName == tc.GivenName &&
 		user.MiddleNames == tc.MiddleNames &&
 		user.FamilyName == tc.FamilyName &&
-		user.VerifyToken == tc.VerifyToken &&
-		user.IsVerified == tc.IsVerified &&
+		user.ConfirmationToken == tc.ConfirmationToken &&
+		user.IsConfirmed == tc.IsConfirmed &&
 		user.Geolocation == tc.Geolocation &&
 		user.BaseTZ == tc.BaseTZ &&
 		user.CurrentTZ == tc.CurrentTZ &&
