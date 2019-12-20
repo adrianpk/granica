@@ -66,7 +66,7 @@ func (h *SESMailer) Init(s svc.Service) chan bool {
 }
 
 // Send an email.
-func (h *SESMailer) Send(em *model.Email) (resend bool, err error) {
+func (h *SESMailer) Send(em model.Email) (resend bool, err error) {
 	email := newSESEmail(em.From, em.To, em.CC, em.BCC, em.Subject, em.Body, em.Charset)
 	result, err := h.client.SendEmail(email)
 

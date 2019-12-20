@@ -243,20 +243,9 @@ func (s *Service) SignUpUser(req tp.SignUpUserReq, res *tp.SignUpUserRes) error 
 		return err
 	}
 
-	// TODO: Confirmatiion email builder
+// Mail confirmation
 	u.GenConfirmationToken()
-	s.MakeConfirmationEmail(&u)
-	//if err != nil {
-	//res.FromModel(u)
-	//return err
-	//}
-
-	// TODO: Confirmation email builder
-	//err = somewhere.SendEmail(u)
-	//if err != nil {
-	//res.FromModel(u)
-	//return err
-	//}
+	s.sendConfirmationEmail(&u)
 
 	// Output
 	res.FromModel(&u)
