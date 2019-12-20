@@ -25,6 +25,10 @@ export GRN_PG_PORT="5432"
 export GRN_PG_USER="granica"
 export GRN_PG_PASSWORD="granica"
 export GRN_PG_BACKOFF_MAXTRIES="3"
+# Sign up confirmation
+export GRN_USER_CONFIRMATION_PATH="users/%s/verify/%s"
+export GRN_USER_CONFIRMATION_SEND="false"
+export GRN_USER_CONFIRMATION_DEBUG="true"
 # Amazon SES MAiler
   # These are sample not usable keys
 export AWS_ACCESS_KEY_ID=EIIAHI5FF3A2OG3MJEX5

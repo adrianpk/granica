@@ -4,6 +4,8 @@
 
 Amazon SES mailer.
 
+Confirmation email can be disabled by configuration but still email can be generated for debugging purposes.
+
 ## <a name="2019128"></a>20191217 - User signup
 
 Confirmation email and verification link processing still pending.
