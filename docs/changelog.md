@@ -1,12 +1,16 @@
 # Changelog
 
-## <a name="2019128"></a>20191219 - Mailer implemented
+
+## <a name="2019121"></a>20191221 - User signup confirmation processing
+
+
+## <a name="20191219"></a>20191219 - Mailer implemented
 
 Amazon SES mailer.
 
 Confirmation email can be disabled by configuration but still email can be generated for debugging purposes.
 
-## <a name="2019128"></a>20191217 - User signup
+## <a name="20191218"></a>20191218 - User signup
 
 Confirmation email and verification link processing still pending.
 

@@ -16,6 +16,7 @@ const (
 
 const (
 	UserCtxKey web.ContextKey = "user"
+	ConfCtxKey web.ContextKey = "conf"
 )
 
 const (
@@ -397,6 +398,57 @@ func (ep *Endpoint) InitSignInUser(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// ConfirmUser web endpoint.
+func (ep *Endpoint) ConfirmUser(w http.ResponseWriter, r *http.Request) {
+	var req tp.GetUserReq
+	var res tp.GetUserRes
+
+	// Identifier
+	slug, err := ep.getUserSlug(r)
+	if err != nil {
+		ep.handleError(w, r, UserPath(), GetUserErrID, err)
+		return
+	}
+
+	// Token
+	token, err := ep.getToken(r)
+	if err != nil {
+		ep.handleError(w, r, UserPath(), GetUserErrID, err)
+		return
+	}
+
+	req = tp.GetUserReq{
+		tp.Identifier{
+			Slug:  slug,
+			Token: token,
+		},
+	}
+
+	// Service
+	err = ep.service.ConfirmUser(req, &res)
+	if err != nil {
+		ep.handleError(w, r, UserPath(), GetUserErrID, err)
+		return
+	}
+
+	// Wrap response
+	wr := ep.OKRes(w, r, res, "")
+
+	// Template
+	ts, err := ep.TemplateFor(userRes, web.ShowTmpl)
+	if err != nil {
+		ep.handleError(w, r, UserPath(), GetUserErrID, err)
+		return
+	}
+
+	// Write response
+	err = ts.Execute(w, wr)
+	if err != nil {
+		ep.handleError(w, r, UserPath(), GetUserErrID, err)
+		return
+	}
+}
+
 // SignInUser web endpoint.
 func (ep *Endpoint) SignInUser(w http.ResponseWriter, r *http.Request) {
 	var req tp.SignInUserReq
@@ -469,16 +521,36 @@ func (ep *Endpoint) localizeMessageID(l *i18n.Localizer, messageID string) (stri
 
 // Misc
 func (ep *Endpoint) getIdentifier(r *http.Request) (identifier tp.Identifier, err error) {
-	ctx := r.Context()
-	slug, ok := ctx.Value(UserCtxKey).(string)
-	if !ok {
-		err := errors.New("no slug provided")
+	slug, err := ep.getUserSlug(r)
+	if err != nil {
 		return tp.Identifier{}, err
 	}
 
 	return tp.Identifier{
 		Slug: slug,
 	}, nil
+}
+
+func (ep *Endpoint) getUserSlug(r *http.Request) (slug string, err error) {
+	ctx := r.Context()
+	slug, ok := ctx.Value(UserCtxKey).(string)
+	if !ok {
+		err := errors.New("no slug  provided")
+		return "", err
+	}
+
+	return slug, nil
+}
+
+func (ep *Endpoint) getToken(r *http.Request) (token string, err error) {
+	ctx := r.Context()
+	token, ok := ctx.Value(ConfCtxKey).(string)
+	if !ok {
+		err := errors.New("no token provided")
+		return "", err
+	}
+
+	return token, nil
 }
 
 // userCreateAction

@@ -69,10 +69,12 @@ func (req *GetUserReq) ToModel() model.User {
 			ID:       uuid.UUID{},
 			TenantID: db.ToNullString(""),
 			Slug:     db.ToNullString(req.Identifier.Slug),
+			//Token:    db.ToNullString(req.Identifier.Token),
 		},
+
+		ConfirmationToken: db.ToNullString(req.Identifier.Token),
 	}
 }
-
 func (res *GetUserRes) FromModel(m *model.User, msg string, err error) {
 	if m != nil {
 		res.User = User{

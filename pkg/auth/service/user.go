@@ -6,11 +6,13 @@ import (
 )
 
 const (
-	createUserErr = "cannot create resource"
-	getAllUserErr = "cannot get resource list"
-	getUserErr    = "cannot get resource"
-	updateUserErr = "cannot update resource"
-	deleteUserErr = "cannot delete resource"
+	createUserErr       = "cannot create user"
+	getAllUserErr       = "cannot get users list"
+	getUserErr          = "cannot get user"
+	updateUserErr       = "cannot update user"
+	deleteUserErr       = "cannot delete user"
+	confirmationErr     = "cannot confirm user"
+	alreadyConfirmedErr = "already confirm user"
 )
 
 func (s *Service) CreateUser(req tp.CreateUserReq, res *tp.CreateUserRes) error {
@@ -26,6 +28,10 @@ func (s *Service) CreateUser(req tp.CreateUserReq, res *tp.CreateUserRes) error 
 		res.Errors = v.Errors
 		return err
 	}
+
+
+	// Generate confirmation token
+	u.GenAutoConfirmationToken()
 
 	// Repo
 	repo, err := s.userRepo()
@@ -243,12 +249,95 @@ func (s *Service) SignUpUser(req tp.SignUpUserReq, res *tp.SignUpUserRes) error 
 		return err
 	}
 
-// Mail confirmation
+	// Mail confirmation
 	u.GenConfirmationToken()
 	s.sendConfirmationEmail(&u)
 
 	// Output
 	res.FromModel(&u)
+	return nil
+}func (s *Service) SignUpUser(req tp.SignUpUserReq, res *tp.SignUpUserRes) error {
+	// Model
+	u := req.ToModel()
+
+	// Validation
+	v := NewUserValidator(u)
+
+	err := v.ValidateForSignUp()
+	if err != nil {
+		res.FromModel(&u)
+		res.Errors = v.Errors
+		return err
+	}
+
+	// Generate confirmation token
+	u.GenConfirmationToken()
+
+	// Repo
+	repo, err := s.userRepo()
+	if err != nil {
+		res.FromModel(nil)
+		return err
+	}
+
+	err = repo.Create(&u)
+	if err != nil {
+		res.FromModel(nil)
+		return err
+	}
+
+	err = repo.Commit()
+	if err != nil {
+		res.FromModel(nil)
+		return err
+	}
+
+	// Mail confirmation
+	s.sendConfirmationEmail(&u)
+
+	// Output
+	res.FromModel(&u)
+	return nil
+}
+
+func (s *Service) ConfirmUser(req tp.GetUserReq, res *tp.GetUserRes) error {
+	// Model
+	u := req.ToModel()
+
+	// Repo
+	repo, err := s.userRepo()
+	if err != nil {
+		res.FromModel(nil, getUserErr, err)
+		return err
+	}
+
+	s.Log().Debug("Values", "slug", u.Slug.String, "token", u.ConfirmationToken.String)
+
+	u, err = repo.GetBySlugAndToken(u.Slug.String, u.ConfirmationToken.String)
+	if err != nil {
+		res.FromModel(nil, confirmationErr, err)
+		return err
+	}
+
+	if u.IsConfirmed.Bool {
+		res.FromModel(nil, alreadyConfirmedErr, err)
+		return err
+	}
+
+	u, err = repo.ConfirmUser(u.Slug.String, u.ConfirmationToken.String)
+	if err != nil {
+		res.FromModel(nil, confirmationErr, err)
+		return err
+	}
+
+	err = repo.Commit()
+	if err != nil {
+		res.FromModel(nil, confirmationErr, err)
+		return err
+	}
+
+	// Output
+	res.FromModel(&u, "", nil)
 	return nil
 }
 

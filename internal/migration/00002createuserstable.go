@@ -16,7 +16,6 @@ func (m *mig) CreateUsersTable() error {
 		given_name VARCHAR(32),
 		middle_names VARCHAR(32) NULL,
 		family_name VARCHAR(64),
-		role VARCHAR(16),
 		last_ip INET
 	);`
 

@@ -73,6 +73,12 @@ func (user *User) GenConfirmationToken() {
 	user.IsConfirmed = db.ToNullBool(false)
 }
 
+// GenAutoConfirmationToken
+func (user *User) GenAutoConfirmationToken() {
+	user.ConfirmationToken = db.ToNullString(uuid.NewV4().String())
+	user.IsConfirmed = db.ToNullBool(true)
+}
+
 // Match condition for model.
 func (user *User) Match(tc *User) bool {
 	r := user.Identification.Match(tc.Identification) &&

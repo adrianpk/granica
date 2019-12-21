@@ -15,8 +15,7 @@ export GRN_SVC_PINGPORT=8090
 export GRN_WEB_SERVER_PORT=8080
 export GRN_JSONREST_SERVER_PORT=8081
 export GRN_WEB_COOKIESTORE_KEY="pVuOO7ZPNBnqTb5o13JsBMOPcPAe4pxY"
-export GRN_SITE_URL="localhost"
-export GRN_USER_CONFIRMATION_PATH="users/%s/verify/%s"
+export GRN_SITE_URL="localhost:8080"
 # Postgres
 export GRN_PG_SCHEMA="public"
 export GRN_PG_DATABASE="granica"
@@ -25,8 +24,9 @@ export GRN_PG_PORT="5432"
 export GRN_PG_USER="granica"
 export GRN_PG_PASSWORD="granica"
 export GRN_PG_BACKOFF_MAXTRIES="3"
-# Sign up confirmation
-export GRN_USER_CONFIRMATION_PATH="users/%s/verify/%s"
+# Confirmation
+## users/{slug}/{token}/confirm
+export GRN_USER_CONFIRMATION_PATH="users/%s/%s/confirm"
 export GRN_USER_CONFIRMATION_SEND="false"
 export GRN_USER_CONFIRMATION_DEBUG="true"
 # Amazon SES MAiler
