@@ -35,8 +35,8 @@ func makeUserRepo(ctx context.Context, cfg *config.Config, log *logger.Logger, t
 func (ur *UserRepo) Create(user *model.User) error {
 	user.SetCreateValues()
 
-	st := `INSERT INTO users (id, slug, username, password_digest, email, given_name, middle_names, family_name, last_ip, geolocation, confirmation_token, is_confirmed, locale, base_tz, current_tz, starts_at, ends_at, is_active, is_deleted, created_by_id, updated_by_id, created_at, updated_at)
-VALUES (:id, :slug, :username, :password_digest, :email, :given_name, :middle_names, :family_name, :last_ip, :geolocation, :confirmation_token, :is_confirmed, :locale, :base_tz, :current_tz, :starts_at, :ends_at, :is_active, :is_deleted, :created_by_id, :updated_by_id, :created_at, :updated_at)`
+	st := `INSERT INTO users (id, slug, username, password_digest, email, given_name, middle_names, family_name, last_ip,  confirmation_token, is_confirmed, geolocation, locale, base_tz, current_tz, starts_at, ends_at, is_active, is_deleted, created_by_id, updated_by_id, created_at, updated_at)
+VALUES (:id, :slug, :username, :password_digest, :email, :given_name, :middle_names, :family_name, :last_ip, :confirmation_token, :is_confirmed, :geolocation, :locale, :base_tz, :current_tz, :starts_at, :ends_at, :is_active, :is_deleted, :created_by_id, :updated_by_id, :created_at, :updated_at)`
 
 	_, err := ur.Tx.NamedExec(st, user)
 
@@ -198,6 +198,30 @@ func (ur *UserRepo) DeleteByUsername(username string) error {
 	_, err := ur.Tx.Exec(st)
 
 	return err
+}
+
+// GetBySlug user from repo by slug token.
+func (ur *UserRepo) GetBySlugAndToken(slug, token string) (model.User, error) {
+	var user model.User
+
+	st := `SELECT * FROM USERS WHERE slug = '%s' AND confirmation_token = '%s' LIMIT 1;`
+	st = fmt.Sprintf(st, slug, token)
+
+	err := ur.Tx.Get(&user, st)
+
+	return user, err
+}
+
+// Confirm user from repo by slug.
+func (ur *UserRepo) ConfirmUser(slug, token string) (model.User, error) {
+	var user model.User
+
+	st := `UPDATE USERS SET is_confirmed = TRUE WHERE slug = '%s' AND confirmation_token = '%s';`
+	st = fmt.Sprintf(st, slug, token)
+
+	_, err := ur.Tx.NamedExec(st, user)
+
+	return user, err
 }
 
 // SignIn user

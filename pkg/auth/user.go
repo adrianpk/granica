@@ -26,7 +26,8 @@ func (a *Auth) makeUserWebRouter(parent chi.Router) chi.Router {
 			uarid.Post("/init-delete", a.webep.InitDeleteUser)
 			uarid.Delete("/", a.webep.DeleteUser)
 			uarid.Route("/{token}", func(uartkn chi.Router) {
-				uartkn.Get("/verify", a.webep.InitSignInUser)
+				uartkn.Use(confCtx)
+				uartkn.Get("/confirm", a.webep.ConfirmUser)
 			})
 		})
 	})
@@ -50,6 +51,14 @@ func userCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		slug := chi.URLParam(r, "slug")
 		ctx := context.WithValue(r.Context(), web.UserCtxKey, slug)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+func confCtx(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		slug := chi.URLParam(r, "token")
+		ctx := context.WithValue(r.Context(), web.ConfCtxKey, slug)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
