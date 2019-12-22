@@ -11,6 +11,7 @@
 "user_deleted_info_msg": "Benutzer gelöscht",
 
 "signed_up_info_msg": "Signed up completed",
+"confirmed_info_msg": "User email account confirmed",
 "logged_in_info_msg": "Successfully logged in",
 
 "get_all_err_msg": "Benutzerliste kann nicht abgerufen werden",

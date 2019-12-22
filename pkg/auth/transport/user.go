@@ -17,7 +17,7 @@ type (
 		MiddleNames       string `json:"middleNames" schema:"middle-names"`
 		FamilyName        string `json:"familyName" schema:"family-name"`
 		LastIP            string `json:"lastIP" schema:"last-ip"`
-		ConfirmationToken string `json:"confirmationToken" schema:"is-confirmed"`
+		ConfirmationToken string `json:"confirmationToken" schema:"verify-token"`
 		IsConfirmed       bool   `json:"isConfirmed" schema:"is-confirmed"`
 		Lat               string `json:"lat" schema: "lat"`
 		Lng               string `json:"lng" schema: "lng"`
@@ -46,8 +46,16 @@ type (
 	// CreateUserRes output data.
 	CreateUserRes struct {
 		User
+		// Action can be used to reuse form templates letting change target and method from controller.
 		Action web.Action
+		// Errors stores localizable errors message IDs for model properties.
+		// Mainly used to show messages on fields with errors after validation.
 		Errors service.ErrorSet
+		// Msg stores localizable message ID for the whole model.
+		// Mainly used to show a message related to current state of the model.
+		MsgID string
+		// Mainly used for debugging porpouses and/or to show relevant info to admin users.
+		err error
 	}
 )
 
@@ -59,6 +67,16 @@ type (
 	// IndexUsersRes output data.
 	IndexUsersRes struct {
 		Users
+		// Action can be used to reuse form templates letting change target and method from controller.
+		Action web.Action
+		// Errors stores localizable errors message IDs for model properties.
+		// Mainly used to show messages on fields with errors after validation.
+		Errors service.ErrorSet
+		// Msg stores localizable message ID for the whole model.
+		// Mainly used to show a message related to current state of the model.
+		MsgID string
+		// Mainly used for debugging porpouses and/or to show relevant info to admin users.
+		err error
 	}
 )
 
@@ -71,8 +89,16 @@ type (
 	// GetUserRes output data.
 	GetUserRes struct {
 		User
+		// Action can be used to reuse form templates letting change target and method from controller.
 		Action web.Action
+		// Errors stores localizable errors message IDs for model properties.
+		// Mainly used to show messages on fields with errors after validation.
 		Errors service.ErrorSet
+		// Msg stores localizable message ID for the whole model.
+		// Mainly used to show a message related to current state of the model.
+		MsgID string
+		// Mainly used for debugging porpouses and/or to show relevant info to admin users.
+		err error
 	}
 )
 
@@ -86,8 +112,16 @@ type (
 	// UpdateUserRes output data.
 	UpdateUserRes struct {
 		User
+		// Action can be used to reuse form templates letting change target and method from controller.
 		Action web.Action
+		// Errors stores localizable errors message IDs for model properties.
+		// Mainly used to show messages on fields with errors after validation.
 		Errors service.ErrorSet
+		// MsgID stores localizable message ID for the whole model.
+		// Mainly used to show a message related to current state of the model.
+		MsgID string
+		// Mainly used for debugging porpouses and/or to show relevant info to admin users.
+		err error
 	}
 )
 
@@ -99,6 +133,11 @@ type (
 
 	// DeleteUserRes output data.
 	DeleteUserRes struct {
+		// MsgID stores localizable message ID for the whole model.
+		// Mainly used to show a message related to current state of the model.
+		MsgID string
+		// Mainly used for debugging porpouses and/or to show relevant info to admin users.
+		err error
 	}
 )
 
@@ -111,8 +150,16 @@ type (
 	// SignUpUserRes output data.
 	SignUpUserRes struct {
 		User
+		// Action can be used to reuse form templates letting change target and method from controller.
 		Action web.Action
+		// Errors stores localizable errors message IDs for model properties.
+		// Mainly used to show messages on fields with errors after validation.
 		Errors service.ErrorSet
+		// MsgID stores localizable message ID for the whole model.
+		// Mainly used to show a message related to current state of the model.
+		MsgID string
+		// Mainly used for debugging porpouses and/or to show relevant info to admin users.
+		err error
 	}
 )
 
@@ -125,7 +172,15 @@ type (
 	// SignInUserRes output data.
 	SignInUserRes struct {
 		User
+		// Action can be used to reuse form templates letting change target and method from controller.
 		Action web.Action
+		// Errors stores localizable errors message IDs for model properties.
+		// Mainly used to show messages on fields with errors after validation.
 		Errors service.ErrorSet
+		// MsgID stores localizable message ID for the whole model.
+		// Mainly used to show a message related to current state of the model.
+		MsgID string
+		// Mainly used for debugging porpouses and/or to show relevant info to admin users.
+		err error
 	}
 )

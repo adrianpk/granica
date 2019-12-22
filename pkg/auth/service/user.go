@@ -1,59 +1,70 @@
 package service
 
 import (
+	"errors"
+
 	"gitlab.com/mikrowezel/backend/granica/internal/repo"
 	tp "gitlab.com/mikrowezel/backend/granica/pkg/auth/transport"
 )
 
 const (
-	createUserErr       = "cannot create user"
-	getAllUserErr       = "cannot get users list"
-	getUserErr          = "cannot get user"
-	updateUserErr       = "cannot update user"
-	deleteUserErr       = "cannot delete user"
-	confirmationErr     = "cannot confirm user"
-	alreadyConfirmedErr = "already confirm user"
+	// Info
+	okResultInfo      = "ok_result"
+	userCreatedInfo   = "user_created_info"
+	userUpdatedInfo   = "user_updated_info"
+	userDeletedInfo   = "user_deleted_info"
+	userConfirmedInfo = "user_confirmed_info"
+	// Error
+	cannotProcErr       = "cannot_process_err"
+	createUserErr       = "cannot_create_user_err"
+	getAllUserErr       = "cannot_get_users_list_err"
+	getUserErr          = "cannot_get_user_err"
+	updateUserErr       = "cannot_update_user_err"
+	deleteUserErr       = "cannot_delete_user_err"
+	validationErr       = "validation_error_err"
+	signupErr           = "cannot_sign_up_user_err"
+	confirmationErr     = "cannot_confirm_user_err"
+	signinErr           = "cannot_sign_in_user_err"
+	alreadyConfirmedErr = "already_confirm_user_err"
 )
 
 func (s *Service) CreateUser(req tp.CreateUserReq, res *tp.CreateUserRes) error {
 	// Model
 	u := req.ToModel()
 
-	//// Validation
+	// Validation
 	v := NewUserValidator(u)
 
 	err := v.ValidateForCreate()
 	if err != nil {
-		res.FromModel(&u)
-		res.Errors = v.Errors
+		res.FromModel(&u, validationErr, err)
 		return err
 	}
 
-
-	// Generate confirmation token
+	// Confirmation
 	u.GenAutoConfirmationToken()
 
 	// Repo
 	repo, err := s.userRepo()
 	if err != nil {
-		res.FromModel(nil)
+		res.FromModel(&u, cannotProcErr, err)
 		return err
 	}
 
 	err = repo.Create(&u)
 	if err != nil {
-		res.FromModel(nil)
+		res.FromModel(&u, createUserErr, err)
 		return err
 	}
 
 	err = repo.Commit()
 	if err != nil {
-		res.FromModel(nil)
+		res.FromModel(&u, createUserErr, err)
 		return err
 	}
 
 	// Output
-	res.FromModel(&u)
+	res.FromModel(&u, userCreatedInfo, nil)
 	return nil
 }
 
@@ -61,7 +72,7 @@ func (s *Service) IndexUsers(req tp.IndexUsersReq, res *tp.IndexUsersRes) error 
 	// Repo
 	repo, err := s.userRepo()
 	if err != nil {
-		res.FromModel(nil, getAllUserErr, err)
+		res.FromModel(nil, cannotProcErr, err)
 		return err
 	}
 
@@ -78,7 +89,7 @@ func (s *Service) IndexUsers(req tp.IndexUsersReq, res *tp.IndexUsersRes) error 
 	}
 
 	// Output
-	res.FromModel(us, "", nil)
+	res.FromModel(us, okResultInfo, nil)
 	return nil
 }
 
@@ -89,7 +100,7 @@ func (s *Service) GetUser(req tp.GetUserReq, res *tp.GetUserRes) error {
 	// Repo
 	repo, err := s.userRepo()
 	if err != nil {
-		res.FromModel(nil, getUserErr, err)
+		res.FromModel(nil, cannotProcErr, err)
 		return err
 	}
 
@@ -106,7 +117,7 @@ func (s *Service) GetUser(req tp.GetUserReq, res *tp.GetUserRes) error {
 	}
 
 	// Output
-	res.FromModel(&u, "", nil)
+	res.FromModel(&u, okResultInfo, nil)
 	return nil
 }
 
@@ -117,7 +128,7 @@ func (s *Service) GetUserByUsername(req tp.GetUserReq, res *tp.GetUserRes) error
 	// Repo
 	repo, err := s.userRepo()
 	if err != nil {
-		res.FromModel(nil, getUserErr, err)
+		res.FromModel(nil, cannotProcErr, err)
 		return err
 	}
 
@@ -134,7 +145,7 @@ func (s *Service) GetUserByUsername(req tp.GetUserReq, res *tp.GetUserRes) error
 	}
 
 	// Output
-	res.FromModel(&u, "", nil)
+	res.FromModel(&u, okResultInfo, nil)
 	return nil
 }
 
@@ -142,14 +153,14 @@ func (s *Service) UpdateUser(req tp.UpdateUserReq, res *tp.UpdateUserRes) error 
 	// Repo
 	repo, err := s.userRepo()
 	if err != nil {
-		res.FromModel(nil)
+		res.FromModel(nil, cannotProcErr, err)
 		return err
 	}
 
 	// Get user
 	current, err := repo.GetBySlug(req.Identifier.Slug)
 	if err != nil {
-		res.FromModel(nil)
+		res.FromModel(nil, getUserErr, err)
 		return err
 	}
 
@@ -168,26 +179,25 @@ func (s *Service) UpdateUser(req tp.UpdateUserReq, res *tp.UpdateUserRes) error 
 
 	err = v.ValidateForUpdate()
 	if err != nil {
-		res.FromModel(&u)
-		res.Errors = v.Errors
+		res.FromModel(nil, validationErr, err)
 		return err
 	}
 
 	// Update
 	err = repo.Update(&u)
 	if err != nil {
-		res.FromModel(&u)
+		res.FromModel(&u, updateUserErr, err)
 		return err
 	}
 
 	err = repo.Commit()
 	if err != nil {
-		res.FromModel(nil)
+		res.FromModel(&u, updateUserErr, err)
 		return err
 	}
 
 	// Output
-	res.FromModel(&u)
+	res.FromModel(&u, okResultInfo, nil)
 	return nil
 }
 
@@ -195,24 +205,24 @@ func (s *Service) DeleteUser(req tp.DeleteUserReq, res *tp.DeleteUserRes) error 
 	// Repo
 	repo, err := s.userRepo()
 	if err != nil {
-		res.FromModel(nil, updateUserErr, err)
+		res.FromModel(cannotProcErr, err)
 		return err
 	}
 
 	err = repo.DeleteBySlug(req.Slug)
 	if err != nil {
-		res.FromModel(nil, updateUserErr, err)
+		res.FromModel(deleteUserErr, err)
 		return err
 	}
 
 	err = repo.Commit()
 	if err != nil {
-		res.FromModel(nil, updateUserErr, err)
+		res.FromModel(deleteUserErr, err)
 		return err
 	}
 
 	// Output
-	res.FromModel(nil, "", nil)
+	res.FromModel(okResultInfo, nil)
 	return nil
 }
 
@@ -225,49 +235,7 @@ func (s *Service) SignUpUser(req tp.SignUpUserReq, res *tp.SignUpUserRes) error 
 
 	err := v.ValidateForSignUp()
 	if err != nil {
-		res.FromModel(&u)
-		res.Errors = v.Errors
-		return err
-	}
-
-	// Repo
-	repo, err := s.userRepo()
-	if err != nil {
-		res.FromModel(nil)
-		return err
-	}
-
-	err = repo.Create(&u)
-	if err != nil {
-		res.FromModel(nil)
-		return err
-	}
-
-	err = repo.Commit()
-	if err != nil {
-		res.FromModel(nil)
-		return err
-	}
-
-	// Mail confirmation
-	u.GenConfirmationToken()
-	s.sendConfirmationEmail(&u)
-
-	// Output
-	res.FromModel(&u)
-	return nil
-}func (s *Service) SignUpUser(req tp.SignUpUserReq, res *tp.SignUpUserRes) error {
-	// Model
-	u := req.ToModel()
-
-	// Validation
-	v := NewUserValidator(u)
-
-	err := v.ValidateForSignUp()
-	if err != nil {
-		res.FromModel(&u)
-		res.Errors = v.Errors
-		return err
+		res.FromModel(&u, validationErr, err)
 	}
 
 	// Generate confirmation token
@@ -276,19 +244,19 @@ func (s *Service) SignUpUser(req tp.SignUpUserReq, res *tp.SignUpUserRes) error 
 	// Repo
 	repo, err := s.userRepo()
 	if err != nil {
-		res.FromModel(nil)
+		res.FromModel(&u, cannotProcErr, err)
 		return err
 	}
 
 	err = repo.Create(&u)
 	if err != nil {
-		res.FromModel(nil)
+		res.FromModel(&u, cannotProcErr, err)
 		return err
 	}
 
 	err = repo.Commit()
 	if err != nil {
-		res.FromModel(nil)
+		res.FromModel(&u, createUserErr, err)
 		return err
 	}
 
@@ -296,7 +264,7 @@ func (s *Service) SignUpUser(req tp.SignUpUserReq, res *tp.SignUpUserRes) error 
 	s.sendConfirmationEmail(&u)
 
 	// Output
-	res.FromModel(&u)
+	res.FromModel(&u, okResultInfo, nil)
 	return nil
 }
 
@@ -307,7 +275,7 @@ func (s *Service) ConfirmUser(req tp.GetUserReq, res *tp.GetUserRes) error {
 	// Repo
 	repo, err := s.userRepo()
 	if err != nil {
-		res.FromModel(nil, getUserErr, err)
+		res.FromModel(nil, cannotProcErr, err)
 		return err
 	}
 
@@ -315,29 +283,29 @@ func (s *Service) ConfirmUser(req tp.GetUserReq, res *tp.GetUserRes) error {
 
 	u, err = repo.GetBySlugAndToken(u.Slug.String, u.ConfirmationToken.String)
 	if err != nil {
-		res.FromModel(nil, confirmationErr, err)
+		res.FromModel(&u, confirmationErr, err)
 		return err
 	}
 
 	if u.IsConfirmed.Bool {
-		res.FromModel(nil, alreadyConfirmedErr, err)
-		return err
+		res.FromModel(&u, alreadyConfirmedErr, err)
+		return errors.New("already confirmed")
 	}
 
 	u, err = repo.ConfirmUser(u.Slug.String, u.ConfirmationToken.String)
 	if err != nil {
-		res.FromModel(nil, confirmationErr, err)
+		res.FromModel(&u, confirmationErr, err)
 		return err
 	}
 
 	err = repo.Commit()
 	if err != nil {
-		res.FromModel(nil, confirmationErr, err)
+		res.FromModel(&u, confirmationErr, err)
 		return err
 	}
 
 	// Output
-	res.FromModel(&u, "", nil)
+	res.FromModel(&u, okResultInfo, nil)
 	return nil
 }
 
@@ -348,24 +316,24 @@ func (s *Service) SignInUser(req tp.SignInUserReq, res *tp.SignInUserRes) error 
 	// Repo
 	repo, err := s.userRepo()
 	if err != nil {
-		res.FromModel(nil)
+		res.FromModel(nil, cannotProcErr, err)
 		return err
 	}
 
 	u, err = repo.SignIn(u.Username.String, u.Password)
 	if err != nil {
-		res.FromModel(nil)
+		res.FromModel(&u, signinErr, err)
 		return err
 	}
 
 	err = repo.Commit()
 	if err != nil {
-		res.FromModel(nil)
+		res.FromModel(&u, signinErr, err)
 		return err
 	}
 
 	// Output
-	res.FromModel(&u)
+	res.FromModel(&u, okResultInfo, nil)
 	return nil
 }
 
