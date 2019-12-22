@@ -17,7 +17,7 @@ func (s *Service) MakeConfirmationEmail(u *model.User) model.Email {
 	site := cfg.ValOrDef("site.url", "localhost")
 	path := cfg.ValOrDef("user.confirmation.path", "users/%s/verify/%s")
 	confPath := fmt.Sprintf(path, u.Slug.String, u.ConfirmationToken.String)
-	link := fmt.Sprintf("htts://%s/%s", site, confPath)
+	link := fmt.Sprintf("https://%s/%s", site, confPath)
 
 	body := "<p>Hi %s, follow this link to confirm your account: <br/><br/>"
 	body = body + "<a href=\"%s\">%s</a><br/<br/>"
@@ -41,7 +41,7 @@ func (s *Service) makeConfirmationEmail(u *model.User) model.Email {
 	site := cfg.ValOrDef("site.url", "localhost")
 	path := cfg.ValOrDef("user.confirmation.path", "users/%s/verify/%s")
 	confPath := fmt.Sprintf(path, u.Slug.String, u.ConfirmationToken.String)
-	link := fmt.Sprintf("htts://%s/%s", site, confPath)
+	link := fmt.Sprintf("https://%s/%s", site, confPath)
 
 	body := "<p>Hi %s, follow this link to confirm your account: <br/><br/>"
 	body = body + "<a href=\"%s\">%s</a><br/<br/>"

@@ -25,24 +25,26 @@ func (req *CreateUserReq) ToModel() model.User {
 	}
 }
 
-func (res *CreateUserRes) FromModel(m *model.User) {
+func (res *CreateUserRes) FromModel(m *model.User, msgID string, err error) {
 	if m != nil {
 		res.User = User{
-			Slug:        m.Slug.String,
-			Username:    m.Username.String,
-			Password:    "",
-			Email:       m.Email.String,
-			GivenName:   m.GivenName.String,
-			MiddleNames: m.MiddleNames.String,
-			FamilyName:  m.FamilyName.String,
-			Lat:         fmt.Sprintf("%f", m.Geolocation.Point.Lat),
-			Lng:         fmt.Sprintf("%f", m.Geolocation.Point.Lng),
-			IsNew:       m.IsNew(),
+			Slug:              m.Slug.String,
+			Username:          m.Username.String,
+			Password:          "",
+			Email:             m.Email.String,
+			GivenName:         m.GivenName.String,
+			MiddleNames:       m.MiddleNames.String,
+			FamilyName:        m.FamilyName.String,
+			ConfirmationToken: m.ConfirmationToken.String,
+			IsConfirmed:       m.IsConfirmed.Bool,
+			Lat:               fmt.Sprintf("%f", m.Geolocation.Point.Lat),
+			Lng:               fmt.Sprintf("%f", m.Geolocation.Point.Lng),
+			IsNew:             m.IsNew(),
 		}
 	}
 }
 
-func (res *IndexUsersRes) FromModel(ms []model.User, msg string, err error) {
+func (res *IndexUsersRes) FromModel(ms []model.User, msgID string, err error) {
 	resUsers := []User{}
 	for _, m := range ms {
 		res := User{
@@ -61,6 +63,8 @@ func (res *IndexUsersRes) FromModel(ms []model.User, msg string, err error) {
 		resUsers = append(resUsers, res)
 	}
 	res.Users = resUsers
+	res.MsgID = msgID
+	res.err = err
 }
 
 func (req *GetUserReq) ToModel() model.User {
@@ -75,7 +79,8 @@ func (req *GetUserReq) ToModel() model.User {
 		ConfirmationToken: db.ToNullString(req.Identifier.Token),
 	}
 }
-func (res *GetUserRes) FromModel(m *model.User, msg string, err error) {
+
+func (res *GetUserRes) FromModel(m *model.User, msgID string, err error) {
 	if m != nil {
 		res.User = User{
 			Slug:              m.Slug.String,
@@ -91,6 +96,8 @@ func (res *GetUserRes) FromModel(m *model.User, msg string, err error) {
 			Lng:               fmt.Sprintf("%f", m.Geolocation.Point.Lng),
 		}
 	}
+	res.MsgID = msgID
+	res.err = err
 }
 
 // ToModel creates a User model from transport values.
@@ -114,7 +121,7 @@ func (req *UpdateUserReq) ToModel() model.User {
 	}
 }
 
-func (res *UpdateUserRes) FromModel(m *model.User) {
+func (res *UpdateUserRes) FromModel(m *model.User, msgID string, err error) {
 	if m != nil {
 		res.User = User{
 			Slug:              m.Slug.String,
@@ -130,9 +137,13 @@ func (res *UpdateUserRes) FromModel(m *model.User) {
 			Lng:               fmt.Sprintf("%f", m.Geolocation.Point.Lng),
 		}
 	}
+	res.MsgID = msgID
+	res.err = err
 }
 
-func (res *DeleteUserRes) FromModel(m *model.User, msg string, err error) {
+func (res *DeleteUserRes) FromModel(msgID string, err error) {
+	res.MsgID = msgID
+	res.err = err
 }
 
 func (req *SignUpUserReq) ToModel() model.User {
@@ -145,7 +156,7 @@ func (req *SignUpUserReq) ToModel() model.User {
 	}
 }
 
-func (res *SignUpUserRes) FromModel(m *model.User) {
+func (res *SignUpUserRes) FromModel(m *model.User, msgID string, err error) {
 	if m != nil {
 		res.User = User{
 			Slug:     m.Slug.String,
@@ -157,6 +168,8 @@ func (res *SignUpUserRes) FromModel(m *model.User) {
 			IsNew:    m.IsNew(),
 		}
 	}
+	res.MsgID = msgID
+	res.err = err
 }
 
 func (req *SignInUserReq) ToModel() model.User {
@@ -166,7 +179,7 @@ func (req *SignInUserReq) ToModel() model.User {
 	}
 }
 
-func (res *SignInUserRes) FromModel(m *model.User) {
+func (res *SignInUserRes) FromModel(m *model.User, msgID string, err error) {
 	if m != nil {
 		res.User = User{
 			Slug:        m.Slug.String,
@@ -181,4 +194,6 @@ func (res *SignInUserRes) FromModel(m *model.User) {
 			IsNew:       m.IsNew(),
 		}
 	}
+	res.MsgID = msgID
+	res.err = err
 }

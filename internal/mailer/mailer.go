@@ -15,6 +15,56 @@ import (
 	svc "gitlab.com/mikrowezel/backend/service"
 )
 
+type SESMailer struct {
+	*svc.BaseHandler
+	client *ses.SES
+}
+
+const (
+	// TODO: This value should be configurable
+	region = "eu-west-1"
+)
+
+var (
+	// Repo is a package level repo handler instance.
+	Handler *SESMailer
+)
+
+// NewHandler creates and returns a new repo handler.
+func NewHandler(ctx context.Context, cfg *config.Config, log *log.Logger, name string) (*SESMailer, error) {
+	if name == "" {
+		name = fmt.Sprintf("mailer-handler-%s", svc.NameSufix())
+	}
+
+	h, err := newSESMailer(ctx, cfg, log, name)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Info("New handler", "name", name)
+
+	return h, nil
+}
+
+// Init a new repo handler.
+// it also stores it as the package default handler.
+func (h *SESMailer) Init(s svc.Service) chan bool {
+	// Set package default handler.
+	// TODO: See if this could be avoided.
+	Handler = h
+
+	ok := make(chan bool)
+	go func() {
+		defer close(ok)
+		s.Lock()
+		s.AddHandler(h)
+		s.Unlock()
+		h.Log().Info("Mailer initializated", "name", h.Name())
+		ok <- true
+	}()
+	return ok
+}
+
 // Send an email.
 func (h *SESMailer) Send(em model.Email) (resend bool, err error) {
 	email := newSESEmail(em.From, em.To, em.CC, em.BCC, em.Subject, em.Body, em.Charset)

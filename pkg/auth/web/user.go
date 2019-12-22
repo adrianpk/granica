@@ -21,13 +21,11 @@ const (
 
 const (
 	// Defined in 'assets/web/embed/i18n/xx.json'
-	// Where xx is: de, en, es, pl.
-	// TODO: Make it possible to use all locales.
-	// Info
 	UserCreatedInfoID = "user_created_info_msg"
 	UserUpdatedInfoID = "user_updated_info_msg"
 	UserDeletedInfoID = "user_deleted_info_msg"
 	SignedUpInfoID    = "signed_up_info_msg"
+	ConfirmedInfoID   = "confirmed_info_msg"
 	LoggedInInfoID    = "logged_in_info_msg"
 	// Error
 	CreateUserErrID  = "create_user_err_msg"
@@ -46,6 +44,8 @@ func (ep *Endpoint) IndexUsers(w http.ResponseWriter, r *http.Request) {
 	// Service
 	err := ep.service.IndexUsers(req, &res)
 	if err != nil {
+		// Insted of custom IndexUsersErrID you could use
+		// a more specific res.MsgID updated by service
 		ep.handleError(w, r, "/", IndexUsersErrID, err)
 		return
 	}
@@ -431,22 +431,8 @@ func (ep *Endpoint) ConfirmUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Wrap response
-	wr := ep.OKRes(w, r, res, "")
-
-	// Template
-	ts, err := ep.TemplateFor(userRes, web.ShowTmpl)
-	if err != nil {
-		ep.handleError(w, r, UserPath(), GetUserErrID, err)
-		return
-	}
-
-	// Write response
-	err = ts.Execute(w, wr)
-	if err != nil {
-		ep.handleError(w, r, UserPath(), GetUserErrID, err)
-		return
-	}
+	m := ep.localize(r, UserCreatedInfoID)
+	ep.RedirectWithFlash(w, r, UserPath(), m, web.InfoMT)
 }
 
 // SignInUser web endpoint.
