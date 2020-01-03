@@ -9,7 +9,7 @@ require (
 	github.com/go-chi/chi v4.0.2+incompatible
 	github.com/gorilla/csrf v1.6.1
 	github.com/jmoiron/sqlx v1.2.0
-	github.com/lib/pq v1.2.0
+	github.com/lib/pq v1.3.0
 	github.com/markbates/pkger v0.12.2
 	github.com/nicksnyder/go-i18n/v2 v2.0.3
 	github.com/satori/go.uuid v1.2.0
@@ -19,7 +19,7 @@ require (
 	gitlab.com/mikrowezel/backend/log v0.0.0
 	gitlab.com/mikrowezel/backend/migration v0.0.0-00010101000000-000000000000
 	gitlab.com/mikrowezel/backend/model v0.0.0-00010101000000-000000000000
-	gitlab.com/mikrowezel/backend/service v0.0.0-20191010214153-59d2b6b8cb27
+	gitlab.com/mikrowezel/backend/service v0.0.0-20191216010017-5636164a79bf
 	gitlab.com/mikrowezel/backend/web v0.0.0-00010101000000-000000000000
 	golang.org/x/crypto v0.0.0-20191002192127-34f69633bfdc
 	golang.org/x/net v0.0.0-20190923162816-aa69164e4478 // indirect
