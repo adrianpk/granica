@@ -10,6 +10,10 @@ But at the same time it is also a way to find a modular and systematized foundat
 
 [Screenshots](docs/screenshots.md)
 
+## Notes
+
+[Exploring a lighter approach for now](https://gitlab.com/kabestan/repo/baseapp)
+
 ## Dev branch
 
 - [new/wip at GitLab](https://gitlab.com/mikrowezel/backend/granica/tree/new/wip)
